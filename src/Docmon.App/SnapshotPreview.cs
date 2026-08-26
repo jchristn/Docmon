@@ -35,8 +35,8 @@ namespace Docmon.App
             MetricsScreen metricsScreen = new MetricsScreen();
             metricsScreen.SetData(history, containers[0].Id, containers[0].Name);
 
-            Console.WriteLine("== Header ==");
-            Console.WriteLine(Snapshot.RenderWidget(header, 100, Math.Max(3, logo.Length)));
+            Console.WriteLine("== Header (trailing blank row separates it from the tabs) ==");
+            Console.WriteLine(Snapshot.RenderWidget(header, 100, Math.Max(3, logo.Length) + 1));
             Console.WriteLine();
             Console.WriteLine("== Tabs ==");
             Console.WriteLine(Snapshot.RenderWidget(tabs, 100, 1));

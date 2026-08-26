@@ -144,7 +144,9 @@ namespace Docmon.App
             _Status = new StatusBar();
             _Status.Hints = _ContainersScreen.KeyHints;
 
-            int headerHeight = Math.Max(3, logoRows.Length);
+            // One extra row below the wordmark: HeaderBanner only draws its logo and text rows, so this
+            // trailing row stays blank and separates the header from the tab bar beneath it.
+            int headerHeight = Math.Max(3, logoRows.Length) + 1;
             app.Layout = Layout.Create()
                 .DockTop("header", headerHeight)
                 .DockTop("tabs", 1)
