@@ -10,7 +10,6 @@ Docmon is a keyboard-driven, multi-pane TUI that puts your containers, their
 live metrics, image freshness, and day-to-day operations one screen away — on
 Windows, Linux, and macOS.
 
-[![NuGet](https://img.shields.io/nuget/v/Docmon.svg?style=flat)](https://www.nuget.org/packages/Docmon/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE.md)
 
 **v0.1.0 — Alpha.** This is an early release under active development; features,
@@ -166,8 +165,6 @@ services, the registry abstraction) and a `Docmon.App` executable that hosts the
 [TUIKit](https://www.nuget.org/packages/TUIKit/) interface. Update checks go
 through an `IRegistryProvider` interface; Docker Hub ships first, and other
 registries slot in behind the same interface.
-
-The full design and roadmap live in [DOCMON.md](DOCMON.md).
 
 ## Building
 
