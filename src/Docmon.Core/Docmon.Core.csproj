@@ -1,12 +1,36 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+  <!-- ============================ Build ============================ -->
   <PropertyGroup>
     <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <AssemblyName>Docmon.Core</AssemblyName>
     <RootNamespace>Docmon.Core</RootNamespace>
-    <Description>Docmon core: Docker services, models, and the registry-provider abstraction that power the Docmon TUI.</Description>
+    <NeutralLanguage>en-US</NeutralLanguage>
+  </PropertyGroup>
+
+  <!-- ========================== Versioning ========================= -->
+  <PropertyGroup>
+    <Version>0.1.0</Version>
+    <AssemblyVersion>0.1.0.0</AssemblyVersion>
+    <FileVersion>0.1.0.0</FileVersion>
+    <InformationalVersion>0.1.0-alpha</InformationalVersion>
+  </PropertyGroup>
+
+  <!-- ==================== Metadata (not published) ================= -->
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+    <Authors>Joel Christner</Authors>
+    <Company>Joel Christner</Company>
+    <Product>Docmon</Product>
+    <Copyright>Copyright (c) 2026 Joel Christner</Copyright>
+    <Description>Docmon core library: Docker Engine services (list, inspect, lifecycle, streaming stats, events, exec, archive transfer, compose discovery), an extensible registry-provider abstraction with a Docker Hub provider, and the shared models and helpers that power the Docmon TUI.</Description>
+    <RepositoryUrl>https://github.com/jchristn/Docmon</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
   </PropertyGroup>
 
   <ItemGroup>

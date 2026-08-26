@@ -1,26 +1,52 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+  <!-- ============================ Build ============================ -->
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <AssemblyName>docmon</AssemblyName>
     <RootNamespace>Docmon.App</RootNamespace>
+    <NeutralLanguage>en-US</NeutralLanguage>
+    <ApplicationIcon>$(MSBuildThisFileDirectory)..\..\assets\logo.ico</ApplicationIcon>
+  </PropertyGroup>
 
-    <!-- Global tool packaging -->
+  <!-- ========================== Versioning ========================= -->
+  <PropertyGroup>
+    <Version>0.1.0</Version>
+    <AssemblyVersion>0.1.0.0</AssemblyVersion>
+    <FileVersion>0.1.0.0</FileVersion>
+    <InformationalVersion>0.1.0-alpha</InformationalVersion>
+  </PropertyGroup>
+
+  <!-- =================== Global tool / NuGet package =============== -->
+  <PropertyGroup>
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>docmon</ToolCommandName>
+    <RollForward>Major</RollForward>
+
     <PackageId>Docmon</PackageId>
-    <PackageOutputPath>$(MSBuildThisFileDirectory)../../nupkg</PackageOutputPath>
-    <PackageReadmeFile>DOCKERHUB_README.md</PackageReadmeFile>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Title>Docmon</Title>
+    <Authors>Joel Christner</Authors>
+    <Company>Joel Christner</Company>
+    <Product>Docmon</Product>
+    <Copyright>Copyright (c) 2026 Joel Christner</Copyright>
+    <Description>Docmon is a keyboard-driven, multi-pane terminal UI for managing and monitoring a local Docker stack: containers, live metrics, image-update checks, lifecycle control, exec, file transfer, and an interactive shell. Runs on Windows, Linux, and macOS. This is a v0.1.0 alpha release and is subject to change.</Description>
+    <PackageTags>docker;tui;terminal;monitoring;containers;devops;cli;dashboard;compose</PackageTags>
     <PackageProjectUrl>https://github.com/jchristn/Docmon</PackageProjectUrl>
     <RepositoryUrl>https://github.com/jchristn/Docmon</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <PackageTags>docker;tui;terminal;monitoring;containers;devops;cli</PackageTags>
-    <Description>Docmon is a keyboard-driven, multi-pane terminal UI for managing and monitoring a local Docker stack: containers, live metrics, image-update checks, lifecycle control, exec, file transfer, and an interactive shell. Runs on Windows, Linux, and macOS.</Description>
-    <RollForward>Major</RollForward>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>DOCKERHUB_README.md</PackageReadmeFile>
+    <PackageIcon>logo.png</PackageIcon>
+    <PackageReleaseNotes>v0.1.0 alpha - initial release. Early and under active development; features, behavior, and APIs are subject to change.</PackageReleaseNotes>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <PackageOutputPath>$(MSBuildThisFileDirectory)..\..\nupkg</PackageOutputPath>
   </PropertyGroup>
 
   <ItemGroup>
@@ -31,8 +57,10 @@
     <ProjectReference Include="..\Docmon.Core\Docmon.Core.csproj" />
   </ItemGroup>
 
+  <!-- Files bundled into the NuGet package. -->
   <ItemGroup>
-    <None Include="$(MSBuildThisFileDirectory)../../DOCKERHUB_README.md" Pack="true" PackagePath="\" />
+    <None Include="$(MSBuildThisFileDirectory)..\..\DOCKERHUB_README.md" Pack="true" PackagePath="\" />
+    <None Include="$(MSBuildThisFileDirectory)..\..\assets\logo.png" Pack="true" PackagePath="\" />
   </ItemGroup>
 
 </Project>

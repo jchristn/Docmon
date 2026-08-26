@@ -6,7 +6,10 @@ Docmon is a keyboard-driven, multi-pane TUI for your containers: live metrics,
 image-update checks, lifecycle control, exec, file transfer, and an interactive
 shell — on Windows, Linux, and macOS.
 
-![Docmon](https://raw.githubusercontent.com/jchristn/Docmon/main/assets/docmon.svg)
+![Docmon](https://raw.githubusercontent.com/jchristn/Docmon/main/assets/logo.png)
+
+**v0.1.0 — Alpha.** Early and under active development; features, behavior, and
+APIs are subject to change.
 
 ## Use cases
 

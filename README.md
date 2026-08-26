@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="assets/logo.png" alt="Docmon" width="192" height="192" />
+
 # Docmon
 
 **A terminal UI for managing and monitoring your Docker stack.**
@@ -8,10 +10,11 @@ Docmon is a keyboard-driven, multi-pane TUI that puts your containers, their
 live metrics, image freshness, and day-to-day operations one screen away — on
 Windows, Linux, and macOS.
 
-![Docmon](assets/docmon.svg)
-
 [![NuGet](https://img.shields.io/nuget/v/Docmon.svg?style=flat)](https://www.nuget.org/packages/Docmon/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE.md)
+
+**v0.1.0 — Alpha.** This is an early release under active development; features,
+behavior, and APIs are subject to change.
 
 </div>
 
@@ -50,7 +53,8 @@ the number keys `1`–`6`:
 
 ## Requirements
 
-- The **.NET 10 SDK** (or the .NET 10 runtime, if you install the packaged tool).
+- The **.NET 8 or .NET 10 SDK** (or the matching runtime, if you install the
+  packaged tool). See [Installing the .NET SDK](#installing-the-net-sdk) below.
 - A reachable **Docker daemon** on the same host:
   - Windows: the `npipe://./pipe/docker_engine` named pipe (Docker Desktop).
   - Linux/macOS: the `unix:///var/run/docker.sock` socket. Set `DOCKER_HOST` to
@@ -63,6 +67,36 @@ Terminal, iTerm2, most Linux terminals).
 
 ## Install
 
+### Installing the .NET SDK
+
+Docmon needs the **.NET 8 or .NET 10 SDK**. Download it from Microsoft:
+
+- All versions: <https://dotnet.microsoft.com/download>
+- .NET 10 SDK: <https://dotnet.microsoft.com/download/dotnet/10.0>
+- .NET 8 SDK: <https://dotnet.microsoft.com/download/dotnet/8.0>
+- Linux, per-distro instructions: <https://learn.microsoft.com/dotnet/core/install/linux>
+
+Quick install by platform:
+
+```bash
+# Windows (winget)
+winget install Microsoft.DotNet.SDK.10
+
+# macOS (Homebrew)
+brew install --cask dotnet-sdk
+
+# Linux (Microsoft install script; installs into ~/.dotnet)
+curl -sSL https://dot.net/v1/dotnet-install.sh | bash -s -- --channel 10.0
+```
+
+Confirm it is on your `PATH`:
+
+```bash
+dotnet --version
+```
+
+### Installing Docmon
+
 Docmon ships as a **.NET global tool** named `docmon`. Once installed you can run
 `docmon` from any directory.
 
@@ -70,6 +104,9 @@ Docmon ships as a **.NET global tool** named `docmon`. Once installed you can ru
 dotnet tool install --global Docmon
 docmon
 ```
+
+Global tools install under `~/.dotnet/tools`; if `docmon` is not found, add that
+directory to your `PATH` (the tool installer prints the exact path to use).
 
 Building and installing from source:
 
