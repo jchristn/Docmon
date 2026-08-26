@@ -32,8 +32,10 @@ Initial alpha.
 - Live Docker daemon event stream.
 - Cross-platform Docker endpoint detection (named pipe on Windows, Unix socket
   elsewhere, `DOCKER_HOST` override).
-- Packaged as the `docmon` .NET global tool, with `install-tool.bat`,
-  `reinstall-tool.bat`, and `remove-tool.bat` helper scripts.
+- Packaged as the `docmon` .NET global tool, multi-targeted for net8.0 and
+  net10.0, with `install-tool.bat`, `reinstall-tool.bat`, and `remove-tool.bat`
+  helper scripts; the install and reinstall scripts accept an optional target
+  framework argument (net8.0 or net10.0).
 
 [Unreleased]: https://github.com/jchristn/Docmon/compare/v0.1.0...HEAD
 [0.1.0]: https://github.com/jchristn/Docmon/releases/tag/v0.1.0

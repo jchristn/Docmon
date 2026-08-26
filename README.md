@@ -73,20 +73,25 @@ docmon
 
 Building and installing from source:
 
-```bash
+```bat
 git clone https://github.com/jchristn/Docmon.git
 cd Docmon
-# Windows convenience scripts (pack + install the 'docmon' command):
-./install-tool.bat      # first install
-./reinstall-tool.bat    # rebuild and replace an existing install
-./remove-tool.bat       # uninstall
+REM Windows convenience scripts (pack + install the 'docmon' command).
+REM Both accept an optional target framework: net8.0 or net10.0.
+install-tool.bat                 REM auto-selects net10.0 if a .NET 10 SDK is present, else net8.0
+install-tool.bat net8.0          REM force .NET 8
+reinstall-tool.bat net10.0       REM rebuild and replace an existing install
+remove-tool.bat                  REM uninstall
 ```
 
-On Linux/macOS the same thing by hand:
+The application is multi-targeted for **net8.0** and **net10.0**; the framework
+argument selects which runtime the global tool is installed against.
+
+On Linux/macOS the same thing by hand (pick a framework you have installed):
 
 ```bash
-dotnet pack src/Docmon.App/Docmon.App.csproj -c Release -o ./nupkg
-dotnet tool install --global --add-source ./nupkg Docmon
+dotnet pack src/Docmon.App/Docmon.App.csproj -c Release -p:TargetFrameworks=net8.0 -o ./nupkg
+dotnet tool install --global --add-source ./nupkg --framework net8.0 Docmon
 ```
 
 ## Usage
