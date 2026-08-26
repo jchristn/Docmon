@@ -395,6 +395,9 @@ namespace Docmon.App
                 _ToolsScreen.SetUsage(usage);
                 UpdateMetricsTarget();
 
+                if (_Content != null)
+                    _Content.Initializing = false;
+
                 if (_Header != null)
                     _Header.HostSummary = _Endpoint + "   " + usage.RunningCount + "/" + usage.ContainerCount + " running";
             });
