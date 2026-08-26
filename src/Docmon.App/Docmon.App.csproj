@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <AssemblyName>docmon</AssemblyName>
+    <RootNamespace>Docmon.App</RootNamespace>
+
+    <!-- Global tool packaging -->
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>docmon</ToolCommandName>
+    <PackageId>Docmon</PackageId>
+    <PackageOutputPath>$(MSBuildThisFileDirectory)../../nupkg</PackageOutputPath>
+    <PackageReadmeFile>DOCKERHUB_README.md</PackageReadmeFile>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/jchristn/Docmon</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/jchristn/Docmon</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>docker;tui;terminal;monitoring;containers;devops;cli</PackageTags>
+    <Description>Docmon is a keyboard-driven, multi-pane terminal UI for managing and monitoring a local Docker stack: containers, live metrics, image-update checks, lifecycle control, exec, file transfer, and an interactive shell. Runs on Windows, Linux, and macOS.</Description>
+    <RollForward>Major</RollForward>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="TUIKit" Version="0.8.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Docmon.Core\Docmon.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)../../DOCKERHUB_README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,141 @@
+<div align="center">
+
+# Docmon
+
+**A terminal UI for managing and monitoring your Docker stack.**
+
+Docmon is a keyboard-driven, multi-pane TUI that puts your containers, their
+live metrics, image freshness, and day-to-day operations one screen away — on
+Windows, Linux, and macOS.
+
+![Docmon](assets/docmon.svg)
+
+[![NuGet](https://img.shields.io/nuget/v/Docmon.svg?style=flat)](https://www.nuget.org/packages/Docmon/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE.md)
+
+</div>
+
+## What it does
+
+Docmon connects to the Docker daemon on the machine it runs on and gives you a
+single console for the things you actually do all day:
+
+- **See everything running.** Containers with image, tag, short/full ID, exposed
+  ports, state, health, uptime, and live CPU/memory — in a sortable table.
+- **Watch performance over time.** CPU, memory, network, and block I/O plotted
+  as charts for the whole deployment or for one container.
+- **Know when images are stale.** Docmon compares your local image digests
+  against the registry and flags what has an update waiting.
+- **Group by compose project.** If you live in `compose.yaml` files, Docmon
+  understands stacks: it groups containers by project and drives stack-level
+  actions.
+- **Operate.** Start, stop, restart, kill, pause, and remove containers; pull
+  images; prune; and apply an update with one action.
+- **Get inside a container.** Run a one-shot command with output captured
+  in-pane, transfer files in and out, or open a full interactive shell.
+
+## Screens
+
+Docmon is organized into sections you move between with `Tab` / `Shift+Tab` or
+the number keys `1`–`6`:
+
+| # | Screen | What you get |
+|---|---|---|
+| 1 | **Containers** | The master table plus a live detail pane with inline CPU/memory charts |
+| 2 | **Stacks** | Compose projects, their services, and stack-level actions |
+| 3 | **Metrics** | Full-size CPU / memory / network / disk charts, overall or per container |
+| 4 | **Images** | Local images, registry digests, and update status |
+| 5 | **Events** | A live stream of Docker daemon events |
+| 6 | **Tools** | Disk usage, prune, and housekeeping |
+
+## Requirements
+
+- The **.NET 10 SDK** (or the .NET 10 runtime, if you install the packaged tool).
+- A reachable **Docker daemon** on the same host:
+  - Windows: the `npipe://./pipe/docker_engine` named pipe (Docker Desktop).
+  - Linux/macOS: the `unix:///var/run/docker.sock` socket. Set `DOCKER_HOST` to
+    override.
+- The `docker` CLI on `PATH` — used only for the interactive shell and TTY exec.
+
+Docmon runs in any modern terminal. For the best rendering, use a terminal with
+truecolor and a font that includes box-drawing and block glyphs (Windows
+Terminal, iTerm2, most Linux terminals).
+
+## Install
+
+Docmon ships as a **.NET global tool** named `docmon`. Once installed you can run
+`docmon` from any directory.
+
+```bash
+dotnet tool install --global Docmon
+docmon
+```
+
+Building and installing from source:
+
+```bash
+git clone https://github.com/jchristn/Docmon.git
+cd Docmon
+# Windows convenience scripts (pack + install the 'docmon' command):
+./install-tool.bat      # first install
+./reinstall-tool.bat    # rebuild and replace an existing install
+./remove-tool.bat       # uninstall
+```
+
+On Linux/macOS the same thing by hand:
+
+```bash
+dotnet pack src/Docmon.App/Docmon.App.csproj -c Release -o ./nupkg
+dotnet tool install --global --add-source ./nupkg Docmon
+```
+
+## Usage
+
+```
+docmon                 # connect to the local Docker daemon and open the TUI
+docmon --no-splash     # skip the startup splash screen
+docmon --version       # print version and exit
+docmon --help          # print usage and exit
+```
+
+Common keys once you're in:
+
+```
+Tab / Shift+Tab   move between panes            1..6   jump to a screen
+↑ ↓ PgUp PgDn      navigate a table/pane         /      search / filter
+Enter              inspect selected              Ctrl+P command palette
+s / x / l          shell / exec / logs           F1 / ? help
+r S K p            restart / stop / kill / pause  u / U check updates / pull+apply
+t                  transfer files                Ctrl+Q quit
+```
+
+## How it works
+
+Docmon talks to Docker two ways. Most data and control goes through the Docker
+Engine API using [Docker.DotNet](https://github.com/dotnet/Docker.DotNet):
+listing, inspecting, stats streaming, lifecycle, image pulls, and archive-based
+file transfer. Interactive work that needs a real terminal — opening a shell or
+an `exec -it` session — shells out to the `docker` CLI, because a TUI pane can't
+host a pseudo-terminal. For those, Docmon suspends its own UI, hands the terminal
+to the child process, and restores the dashboard when you exit.
+
+The code is split into a dependency-light `Docmon.Core` library (models,
+services, the registry abstraction) and a `Docmon.App` executable that hosts the
+[TUIKit](https://www.nuget.org/packages/TUIKit/) interface. Update checks go
+through an `IRegistryProvider` interface; Docker Hub ships first, and other
+registries slot in behind the same interface.
+
+The full design and roadmap live in [DOCMON.md](DOCMON.md).
+
+## Building
+
+```bash
+dotnet build src/Docmon.slnx -c Release
+dotnet test  src/Docmon.slnx -c Release
+```
+
+The build treats warnings as errors and generates XML documentation.
+
+## License
+
+MIT — see [LICENSE.md](LICENSE.md). Copyright (c) 2026 Joel Christner.

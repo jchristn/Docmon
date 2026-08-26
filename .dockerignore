@@ -1,0 +1,16 @@
+**/bin/
+**/obj/
+**/.vs/
+**/.idea/
+**/.git/
+**/*.user
+**/*.suo
+nupkg/
+artifacts/
+publish/
+*.log
+logs/
+crash-logs/
+.git
+.gitignore
+DOCMON.md

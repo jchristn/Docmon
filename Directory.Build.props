@@ -1,0 +1,15 @@
+<Project>
+
+  <PropertyGroup>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <Authors>Joel Christner</Authors>
+    <Product>Docmon</Product>
+    <Company>Joel Christner</Company>
+    <Copyright>Copyright (c) 2026 Joel Christner</Copyright>
+    <Version>0.1.0</Version>
+    <NeutralLanguage>en-US</NeutralLanguage>
+  </PropertyGroup>
+
+</Project>

@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="../test/Docmon.Test/Docmon.Test.csproj" />
+  <Project Path="Docmon.App/Docmon.App.csproj" />
+  <Project Path="Docmon.Core/Docmon.Core.csproj" />
+</Solution>

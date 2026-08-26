@@ -1,0 +1,53 @@
+# Build output
+bin/
+obj/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Ww][Ii][Nn]32/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+build/
+out/
+publish/
+*.binlog
+
+# .NET
+project.lock.json
+project.fragment.lock.json
+artifacts/
+*.nupkg
+*.snupkg
+.packages/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.vs/
+.vs/
+
+# NuGet local packages produced by pack
+nupkg/
+
+# Rider / Visual Studio
+.idea/
+_ReSharper*/
+*.DotSettings.user
+
+# VS Code
+.vscode/*
+!.vscode/extensions.json
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs and crash reports
+*.log
+logs/
+crash-logs/
+
+# User configuration written at runtime
+docmon.local.json
