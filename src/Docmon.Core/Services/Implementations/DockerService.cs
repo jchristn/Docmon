@@ -202,9 +202,28 @@ namespace Docmon.Core.Services.Implementations
         }
 
         /// <inheritdoc/>
+        public async Task RemoveImageAsync(string imageId, bool force, CancellationToken token)
+        {
+            if (imageId == null) throw new ArgumentNullException(nameof(imageId));
+
+            ImageDeleteParameters parameters = new ImageDeleteParameters { Force = force };
+            await _Client.Images.DeleteImageAsync(imageId, parameters, token).ConfigureAwait(false);
+        }
+
+        /// <inheritdoc/>
         public async Task<long> PruneImagesAsync(CancellationToken token)
         {
-            ImagesPruneParameters parameters = new ImagesPruneParameters();
+            // Restrict the prune to dangling (untagged) images with an explicit filter. The Docker daemon
+            // additionally never removes an image that a container depends on, so a running or stopped
+            // deployment is never disrupted and no tagged image is deleted.
+            ImagesPruneParameters parameters = new ImagesPruneParameters
+            {
+                Filters = new Dictionary<string, IDictionary<string, bool>>
+                {
+                    { "dangling", new Dictionary<string, bool> { { "true", true } } }
+                }
+            };
+
             ImagesPruneResponse response = await _Client.Images.PruneImagesAsync(parameters, token).ConfigureAwait(false);
             return (long)response.SpaceReclaimed;
         }

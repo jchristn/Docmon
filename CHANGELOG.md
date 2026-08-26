@@ -21,7 +21,13 @@ Initial alpha.
   overall and per container, backed by streamed Docker stats.
 - Images screen with local-vs-registry digest comparison and an update flag,
   driven by an `IRegistryProvider` abstraction with a Docker Hub provider.
+  Actions: recheck updates, pull selected, pull a new image by name/tag through
+  a prompt with a live progress modal (Escape cancels), and delete an image.
 - Pull with layer progress, and a pull-and-apply update action.
+- Scrollable log viewer: line and page scrolling (Up/Down, PageUp/PageDown,
+  Home/End), copy-to-clipboard (`c`), and Escape to close.
+- Dangling-image prune restricted with an explicit `dangling=true` filter so it
+  never removes tagged images or anything a container depends on.
 - Stacks screen with compose-project grouping, discovery, and stack-level
   lifecycle actions.
 - Non-interactive exec with in-pane output capture.

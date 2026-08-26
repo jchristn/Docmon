@@ -100,7 +100,18 @@ namespace Docmon.Core.Services.Interfaces
         IAsyncEnumerable<string> PullAsync(string image, CancellationToken token);
 
         /// <summary>
-        /// Prunes dangling images.
+        /// Removes a local image by ID or reference.
+        /// </summary>
+        /// <param name="imageId">The image ID or reference. Must not be null.</param>
+        /// <param name="force">When true, remove even if the image is tagged multiple times; the Docker
+        /// daemon still refuses to remove an image a container depends on.</param>
+        /// <param name="token">A token to observe for cancellation.</param>
+        /// <returns>A task that completes when the request has been sent.</returns>
+        Task RemoveImageAsync(string imageId, bool force, CancellationToken token);
+
+        /// <summary>
+        /// Prunes dangling images only (untagged images not referenced by any container). Tagged images
+        /// and images in use are never removed.
         /// </summary>
         /// <param name="token">A token to observe for cancellation.</param>
         /// <returns>The number of bytes reclaimed.</returns>

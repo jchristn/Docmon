@@ -315,8 +315,13 @@ namespace Docmon.App
             {
                 case 'u': Launch(RecheckAllImagesAsync); return true;
                 case 'p':
-                    if (_ImagesScreen.SelectedTag is ImageInfo image)
-                        Launch(() => PullImageAsync(image.Repository + ":" + image.Tag));
+                    if (_ImagesScreen.SelectedTag is ImageInfo selected && !selected.IsDangling)
+                        Launch(() => PullImageWithProgressAsync(selected.Repository + ":" + selected.Tag));
+                    return true;
+                case 'P': Launch(PullNewImageAsync); return true;
+                case 'd':
+                    if (_ImagesScreen.SelectedTag is ImageInfo target)
+                        Launch(() => DeleteImageAsync(target));
                     return true;
                 case 'x': Launch(PruneImagesAsync); return true;
                 default: return false;
@@ -507,12 +512,13 @@ namespace Docmon.App
 
         private async Task LogsAsync(ContainerInfo container)
         {
-            IReadOnlyList<string> logs = await _Docker.GetLogsAsync(container.Id, 300, _Lifetime.Token).ConfigureAwait(false);
+            IReadOnlyList<string> logs = await _Docker.GetLogsAsync(container.Id, 1000, _Lifetime.Token).ConfigureAwait(false);
             List<string> lines = new List<string>(logs);
             if (lines.Count == 0)
                 lines.Add("(no output)");
 
-            await ShowInfoAsync("Logs: " + container.Name, lines).ConfigureAwait(false);
+            if (_App != null)
+                await _App.ShowAsync(new LogViewerModal("Logs: " + container.Name, lines)).ConfigureAwait(false);
         }
 
         private async Task ExecAsync(ContainerInfo container)
@@ -691,14 +697,79 @@ namespace Docmon.App
             SetStatus("Update check complete.");
         }
 
+        private async Task PullNewImageAsync()
+        {
+            string? reference = await PromptAsync("Image to pull (name and optional :tag, defaults to latest)", string.Empty).ConfigureAwait(false);
+            if (string.IsNullOrWhiteSpace(reference))
+                return;
+
+            await PullImageWithProgressAsync(reference!.Trim()).ConfigureAwait(false);
+        }
+
+        private async Task PullImageWithProgressAsync(string image)
+        {
+            if (_App == null)
+                return;
+
+            CancellationTokenSource cts = CancellationTokenSource.CreateLinkedTokenSource(_Lifetime.Token);
+            PullProgressModal modal = new PullProgressModal("Pulling " + image, () => cts.Cancel());
+            System.Threading.Tasks.Task<object?> shown = _App.ShowAsync(modal);
+
+            try
+            {
+                await foreach (string line in _Docker.PullAsync(image, cts.Token).ConfigureAwait(false))
+                    Post(() => modal.Append(line));
+
+                Post(() => modal.MarkDone("Pulled " + image));
+                SetStatus("Pulled " + image);
+            }
+            catch (OperationCanceledException)
+            {
+                Post(() => modal.MarkDone("Pull cancelled."));
+                SetStatus("Pull of " + image + " cancelled.");
+            }
+            catch (Exception ex)
+            {
+                Post(() => modal.MarkDone("Pull failed: " + ex.Message));
+                SetStatus("Pull of " + image + " failed: " + ex.Message);
+            }
+            finally
+            {
+                cts.Dispose();
+            }
+
+            await shown.ConfigureAwait(false);
+        }
+
+        private async Task DeleteImageAsync(ImageInfo image)
+        {
+            string reference = image.IsDangling ? image.Id : image.Repository + ":" + image.Tag;
+            bool confirmed = await ConfirmAsync("Delete image '" + reference + "'? The daemon refuses if a container depends on it.", "Delete", "Cancel").ConfigureAwait(false);
+            if (!confirmed)
+                return;
+
+            try
+            {
+                await _Docker.RemoveImageAsync(image.Id, false, _Lifetime.Token).ConfigureAwait(false);
+                SetStatus("Deleted image " + reference + ".");
+            }
+            catch (Exception ex)
+            {
+                SetStatus("Could not delete " + reference + ": " + ex.Message);
+            }
+        }
+
         private async Task PruneImagesAsync()
         {
-            bool confirmed = await ConfirmAsync("Prune all dangling images?", "Prune", "Cancel").ConfigureAwait(false);
+            bool confirmed = await ConfirmAsync(
+                "Prune dangling images? Only untagged images not used by any container are removed; tagged images and your running deployment are left untouched.",
+                "Prune",
+                "Cancel").ConfigureAwait(false);
             if (!confirmed)
                 return;
 
             long reclaimed = await _Docker.PruneImagesAsync(_Lifetime.Token).ConfigureAwait(false);
-            SetStatus("Pruned images, reclaimed " + ByteFormatter.Format(reclaimed) + ".");
+            SetStatus("Pruned dangling images, reclaimed " + ByteFormatter.Format(reclaimed) + ".");
         }
 
         private async Task ComposeAsync(ComposeStack stack, string action)
@@ -738,7 +809,7 @@ namespace Docmon.App
                 "  r restart  S stop  K kill  p pause  t transfer",
                 "  u check update   U pull+apply   d remove",
                 string.Empty,
-                "Images:  u recheck   p pull   x prune",
+                "Images:  u recheck   p pull selected   P pull new   d delete   x prune",
                 "Stacks:  u up   d down   r restart   P pull",
                 "Metrics: o toggle overall / container",
                 "Tools:   x prune",

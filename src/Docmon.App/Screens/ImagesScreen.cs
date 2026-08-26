@@ -24,7 +24,7 @@ namespace Docmon.App.Screens
         /// <inheritdoc/>
         public override string KeyHints
         {
-            get { return "↑↓ select · u recheck updates · p pull · x prune dangling"; }
+            get { return "↑↓ select · u recheck updates · p pull selected · P pull new image · d delete · x prune dangling"; }
         }
 
         /// <inheritdoc/>
