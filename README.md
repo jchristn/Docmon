@@ -178,6 +178,14 @@ dotnet test  src/Docmon.slnx -c Release
 
 The build treats warnings as errors and generates XML documentation.
 
+To build and run Docmon straight from source (Windows), use `go.bat`. It accepts
+an optional target framework and defaults to net10.0 when a .NET 10 SDK is present:
+
+```bat
+go.bat            REM build and run interactively (auto framework)
+go.bat net8.0     REM build and run against .NET 8
+```
+
 ## License
 
 MIT — see [LICENSE.md](LICENSE.md). Copyright (c) 2026 Joel Christner.
