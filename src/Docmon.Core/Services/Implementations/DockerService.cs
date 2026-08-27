@@ -369,8 +369,8 @@ namespace Docmon.Core.Services.Implementations
             if (response.RepoDigests != null)
                 info.RepoDigests = new List<string>(response.RepoDigests);
 
-            string repository = "&lt;none&gt;";
-            string tag = "&lt;none&gt;";
+            string repository = ImageInfo.NoneLabel;
+            string tag = ImageInfo.NoneLabel;
             if (response.RepoTags != null && response.RepoTags.Count > 0 && !IsNoneTag(response.RepoTags))
             {
                 string primary = response.RepoTags[0];

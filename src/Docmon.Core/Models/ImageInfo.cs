@@ -11,6 +11,11 @@ namespace Docmon.Core.Models
     public class ImageInfo
     {
         /// <summary>
+        /// The display label used for a repository or tag that Docker reports as unset (a dangling image).
+        /// </summary>
+        public const string NoneLabel = "—";
+
+        /// <summary>
         /// Gets or sets the image content ID (digest).
         /// </summary>
         public string Id { get; set; } = string.Empty;
@@ -18,12 +23,12 @@ namespace Docmon.Core.Models
         /// <summary>
         /// Gets or sets the repository portion of the primary tag, for example <c>ghcr.io/acme/api</c>.
         /// </summary>
-        public string Repository { get; set; } = "&lt;none&gt;";
+        public string Repository { get; set; } = NoneLabel;
 
         /// <summary>
         /// Gets or sets the tag portion of the primary tag, for example <c>1.4.2</c>.
         /// </summary>
-        public string Tag { get; set; } = "&lt;none&gt;";
+        public string Tag { get; set; } = NoneLabel;
 
         /// <summary>
         /// Gets or sets the local repo-digests reported by Docker (used to compare against the registry).
@@ -56,7 +61,7 @@ namespace Docmon.Core.Models
         /// </summary>
         public bool IsDangling
         {
-            get { return Repository == "&lt;none&gt;" || string.IsNullOrEmpty(Repository); }
+            get { return Repository == NoneLabel || string.IsNullOrEmpty(Repository); }
         }
     }
 }
