@@ -62,6 +62,12 @@ namespace Docmon.App
         private Func<Task>? _PendingSuspend;
         private bool _Quitting;
         private int _RefreshIntervalMs = 2000;
+        private int _RefreshTimeoutMs = 20000;
+        private int _StalledProbeIntervalMs = 300000;
+        private int _MaxOutstandingRefreshes = 4;
+        private int _OutstandingRefreshes;
+        private int _EventsRetryMinMs = 1000;
+        private int _EventsRetryMaxMs = 30000;
 
         #endregion
 
@@ -350,19 +356,35 @@ namespace Docmon.App
 
         private async Task RefreshLoopAsync(CancellationToken token)
         {
+            long lastAttemptTicks = 0;
+
             while (!token.IsCancellationRequested)
             {
-                try
+                // While too many abandoned attempts are still wedged, only probe occasionally so a dead
+                // daemon connection cannot accumulate an unbounded number of stuck requests.
+                bool stalled = Volatile.Read(ref _OutstandingRefreshes) >= _MaxOutstandingRefreshes;
+                bool probeDue = (Environment.TickCount64 - lastAttemptTicks) >= _StalledProbeIntervalMs;
+
+                if (!stalled || probeDue)
                 {
-                    await RefreshAllAsync(token).ConfigureAwait(false);
+                    lastAttemptTicks = Environment.TickCount64;
+
+                    try
+                    {
+                        await AttemptRefreshAsync(token).ConfigureAwait(false);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        break;
+                    }
+                    catch (Exception)
+                    {
+                        // Nothing here may kill the loop; the next tick retries.
+                    }
                 }
-                catch (OperationCanceledException)
+                else
                 {
-                    break;
-                }
-                catch (Exception ex)
-                {
-                    Post(() => SetStatus("Refresh error: " + ex.Message));
+                    Post(() => SetStatus("Docker is not responding; retrying every " + (_StalledProbeIntervalMs / 60000) + "m until it returns."));
                 }
 
                 try
@@ -374,6 +396,57 @@ namespace Docmon.App
                     break;
                 }
             }
+        }
+
+        private async Task AttemptRefreshAsync(CancellationToken token)
+        {
+            // A wedged named-pipe request can ignore cancellation entirely (the daemon-side hang that
+            // froze the container list for days), so the refresh is raced against a deadline and
+            // abandoned if it loses. The continuation deregisters the attempt whenever the abandoned
+            // task eventually completes.
+            CancellationTokenSource attemptCts = CancellationTokenSource.CreateLinkedTokenSource(token);
+            Interlocked.Increment(ref _OutstandingRefreshes);
+
+            Task refresh = RefreshAllAsync(attemptCts.Token);
+            _ = refresh.ContinueWith(completed =>
+            {
+                _ = completed.Exception;
+                Interlocked.Decrement(ref _OutstandingRefreshes);
+                attemptCts.Dispose();
+            }, CancellationToken.None, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default);
+
+            Task deadline = Task.Delay(_RefreshTimeoutMs, token);
+            Task first = await Task.WhenAny(refresh, deadline).ConfigureAwait(false);
+
+            if (first == refresh)
+            {
+                try
+                {
+                    await refresh.ConfigureAwait(false);
+                }
+                catch (OperationCanceledException)
+                {
+                    // Shutting down.
+                }
+                catch (Exception ex)
+                {
+                    Post(() => SetStatus("Refresh error: " + ex.Message));
+                }
+
+                return;
+            }
+
+            try
+            {
+                attemptCts.Cancel();
+            }
+            catch (ObjectDisposedException)
+            {
+                // The refresh completed and its continuation disposed the source between WhenAny and here.
+            }
+
+            if (!token.IsCancellationRequested)
+                Post(() => SetStatus("Docker did not respond within " + (_RefreshTimeoutMs / 1000) + "s; still retrying."));
         }
 
         private async Task RefreshAllAsync(CancellationToken token)
@@ -410,17 +483,44 @@ namespace Docmon.App
                 Post(() => _EventsScreen.AddEvent(info));
             });
 
-            try
+            int retryDelayMs = _EventsRetryMinMs;
+
+            // The stream ends whenever the daemon restarts or the connection drops; reconnect with
+            // exponential backoff instead of leaving the events pane dead for the rest of the session.
+            while (!token.IsCancellationRequested)
             {
-                await _Events.MonitorAsync(progress, token).ConfigureAwait(false);
-            }
-            catch (OperationCanceledException)
-            {
-                // Shutting down.
-            }
-            catch (Exception ex)
-            {
-                Post(() => SetStatus("Events stream ended: " + ex.Message));
+                long connectedTicks = Environment.TickCount64;
+
+                try
+                {
+                    await _Events.MonitorAsync(progress, token).ConfigureAwait(false);
+                }
+                catch (OperationCanceledException)
+                {
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    Post(() => SetStatus("Events stream interrupted: " + ex.Message));
+                }
+
+                if (token.IsCancellationRequested)
+                    break;
+
+                // A connection that survived a while earns a fresh backoff; rapid failures double it.
+                if (Environment.TickCount64 - connectedTicks >= _EventsRetryMaxMs)
+                    retryDelayMs = _EventsRetryMinMs;
+
+                try
+                {
+                    await Task.Delay(retryDelayMs, token).ConfigureAwait(false);
+                }
+                catch (OperationCanceledException)
+                {
+                    break;
+                }
+
+                retryDelayMs = Math.Min(retryDelayMs * 2, _EventsRetryMaxMs);
             }
         }
 
@@ -472,6 +572,20 @@ namespace Docmon.App
                 catch (Exception)
                 {
                     // Streaming stops when the container stops or the app shuts down; ignore.
+                }
+                finally
+                {
+                    // Deregister on the loop thread so the next refresh restarts the stream if the
+                    // container is still running. Guard on identity: the slot may already belong to a
+                    // newer stream for the same container.
+                    if (!_Lifetime.IsCancellationRequested)
+                    {
+                        Post(() =>
+                        {
+                            if (_StatsStreams.TryGetValue(containerId, out CancellationTokenSource? current) && ReferenceEquals(current, cts))
+                                _StatsStreams.Remove(containerId);
+                        });
+                    }
                 }
             }, cts.Token);
         }
