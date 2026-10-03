@@ -25,7 +25,7 @@ namespace Docmon.App
         /// Builds the startup splash lines: the wordmark, a blank line, the version and copyright, a
         /// blank line, and the project URL. The modal appends its own "press any key" hint below these.
         /// </summary>
-        /// <param name="version">The product version string, for example <c>0.1.0</c>. May be null.</param>
+        /// <param name="version">The product version string, for example <c>0.1.1</c>. May be null.</param>
         /// <returns>The splash content lines. Never null.</returns>
         public static IReadOnlyList<string> SplashLines(string? version)
         {
@@ -36,7 +36,7 @@ namespace Docmon.App
             lines.Add(string.Empty);
             lines.Add(Tagline);
             lines.Add(string.Empty);
-            lines.Add("v" + (string.IsNullOrEmpty(version) ? "0.1.0" : version) + " Alpha - (c)2026 Joel Christner");
+            lines.Add("v" + (string.IsNullOrEmpty(version) ? "0.1.1" : version) + " Alpha - (c)2026 Joel Christner");
             lines.Add(string.Empty);
             lines.Add(ProjectUrl);
             return lines;

@@ -109,7 +109,7 @@ namespace Docmon.App
             _Compose = compose ?? throw new ArgumentNullException(nameof(compose));
             _Registry = registry ?? throw new ArgumentNullException(nameof(registry));
             _Endpoint = endpoint ?? string.Empty;
-            _Version = version ?? "0.1.0";
+            _Version = version ?? "0.1.1";
             _ShowSplash = showSplash;
         }
 

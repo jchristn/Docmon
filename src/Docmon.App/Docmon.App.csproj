@@ -17,10 +17,10 @@
 
   <!-- ========================== Versioning ========================= -->
   <PropertyGroup>
-    <Version>0.1.0</Version>
-    <AssemblyVersion>0.1.0.0</AssemblyVersion>
-    <FileVersion>0.1.0.0</FileVersion>
-    <InformationalVersion>0.1.0-alpha</InformationalVersion>
+    <Version>0.1.1</Version>
+    <AssemblyVersion>0.1.1.0</AssemblyVersion>
+    <FileVersion>0.1.1.0</FileVersion>
+    <InformationalVersion>0.1.1-alpha</InformationalVersion>
   </PropertyGroup>
 
   <!-- =================== Global tool / NuGet package =============== -->
@@ -35,7 +35,7 @@
     <Company>Joel Christner</Company>
     <Product>Docmon</Product>
     <Copyright>Copyright (c) 2026 Joel Christner</Copyright>
-    <Description>Docmon is a keyboard-driven, multi-pane terminal UI for managing and monitoring a local Docker stack: containers, live metrics, image-update checks, lifecycle control, exec, file transfer, and an interactive shell. Runs on Windows, Linux, and macOS. This is a v0.1.0 alpha release and is subject to change.</Description>
+    <Description>Docmon is a keyboard-driven, multi-pane terminal UI for managing and monitoring a local Docker stack: containers, live metrics, image-update checks, lifecycle control, exec, file transfer, and an interactive shell. Runs on Windows, Linux, and macOS. This is a v0.1.1 alpha release and is subject to change.</Description>
     <PackageTags>docker;tui;terminal;monitoring;containers;devops;cli;dashboard;compose</PackageTags>
     <PackageProjectUrl>https://github.com/jchristn/Docmon</PackageProjectUrl>
     <RepositoryUrl>https://github.com/jchristn/Docmon</RepositoryUrl>
@@ -43,14 +43,16 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReadmeFile>DOCKERHUB_README.md</PackageReadmeFile>
     <PackageIcon>logo.png</PackageIcon>
-    <PackageReleaseNotes>v0.1.0 alpha - initial release. Early and under active development; features, behavior, and APIs are subject to change.</PackageReleaseNotes>
+    <PackageReleaseNotes>v0.1.1 alpha - dependency updates (TUIKit 1.2.0), fixes for container copy-out, exec output interleaving, Docker Hub error handling, and digest-pinned pulls. See CHANGELOG.md.</PackageReleaseNotes>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <PackageOutputPath>$(MSBuildThisFileDirectory)..\..\nupkg</PackageOutputPath>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="TUIKit" Version="0.8.4" />
+    <PackageReference Include="TUIKit" Version="1.2.0" />
   </ItemGroup>
 
   <ItemGroup>

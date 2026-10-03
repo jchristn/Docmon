@@ -12,7 +12,7 @@ Windows, Linux, and macOS.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE.md)
 
-**v0.1.0 — Alpha.** This is an early release under active development; features,
+**v0.1.1 — Alpha.** This is an early release under active development; features,
 behavior, and APIs are subject to change.
 
 </div>
@@ -189,7 +189,9 @@ descriptors in `src/Test.Shared` and run through any of three runners:
 Add `-- --results results.json` to the console runner to export JSON results.
 
 Most suites run offline (helpers, models, registry logic against an in-memory
-HTTP handler, Docker payload mapping, argument validation, and TUI state). The
+HTTP handler, Docker payload mapping, argument validation, TUI state, and
+off-screen rendering of the header, tabs, status bar, and screens through
+TUIKit's testing surface). The
 `Docker*` suites exercise a live daemon: they pull `alpine:3.20` if needed and
 create uniquely named containers and compose projects labeled `io.docmon.test`,
 which they always remove. They never touch existing containers or images, and

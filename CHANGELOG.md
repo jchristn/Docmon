@@ -6,7 +6,22 @@ All notable changes to Docmon are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-10-03
+
+### Changed
+- Updated TUIKit from 0.8.4 to 1.2.0.
+- Updated test dependencies: Touchstone.Core, Touchstone.Cli,
+  Touchstone.XunitAdapter, and Touchstone.NunitAdapter (0.1.12 → 0.2.0);
+  Microsoft.NET.Test.Sdk (17.14.1 → 18.10.1); coverlet.collector
+  (6.0.4 → 10.1.0); xunit.runner.visualstudio (3.1.4 → 4.0.0); NUnit
+  (4.3.2 → 5.0.0); NUnit.Analyzers (4.7.0 → 4.15.0); NUnit3TestAdapter
+  (5.0.0 → 6.3.0).
+
 ### Added
+- `Rendering` test suite that renders the header, tab bar, status bar,
+  containers screen, and metrics screen off-screen through TUIKit's
+  `Snapshot`/`WidgetTester`, covering text output, key-driven selection, empty
+  data, and undersized surfaces, so TUIKit upgrades are guarded by tests.
 - Touchstone-based test infrastructure: shared descriptors in `Test.Shared`
   executed by `Test.Automated` (console), `Test.Xunit`, and `Test.Nunit`,
   replacing the previous ad-hoc `test/Docmon.Test` runner. Coverage spans
@@ -62,5 +77,6 @@ Initial alpha.
   helper scripts; the install and reinstall scripts accept an optional target
   framework argument (net8.0 or net10.0).
 
-[Unreleased]: https://github.com/jchristn/Docmon/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/jchristn/Docmon/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/jchristn/Docmon/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/jchristn/Docmon/releases/tag/v0.1.0

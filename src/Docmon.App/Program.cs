@@ -160,7 +160,7 @@ namespace Docmon.App
         {
             Version? version = Assembly.GetExecutingAssembly().GetName().Version;
             if (version == null)
-                return "0.1.0";
+                return "0.1.1";
 
             return version.Major + "." + version.Minor + "." + version.Build;
         }
