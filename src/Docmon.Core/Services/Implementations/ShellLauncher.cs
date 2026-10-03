@@ -71,7 +71,7 @@ namespace Docmon.Core.Services.Implementations
             }
         }
 
-        private static bool DetectCli()
+        internal static bool DetectCli()
         {
             string? pathValue = Environment.GetEnvironmentVariable("PATH");
             if (string.IsNullOrEmpty(pathValue))

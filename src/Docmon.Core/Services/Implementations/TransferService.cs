@@ -39,9 +39,16 @@ namespace Docmon.Core.Services.Implementations
             GetArchiveFromContainerParameters parameters = new GetArchiveFromContainerParameters { Path = containerPath };
             GetArchiveFromContainerResponse response = await _Client.Containers.GetArchiveFromContainerAsync(containerId, parameters, false, token).ConfigureAwait(false);
 
+            // Spool the archive to a temporary file before extracting. Reading the tar directly from the
+            // Docker.DotNet chunked response stream fails with EndOfStreamException on current engines,
+            // and a file (rather than memory) keeps large copies off the heap.
+            string spoolPath = Path.GetTempFileName();
             using (Stream tar = response.Stream)
+            using (FileStream spool = new FileStream(spoolPath, FileMode.Create, FileAccess.ReadWrite, FileShare.None, 81920, FileOptions.Asynchronous | FileOptions.DeleteOnClose))
             {
-                await TarFile.ExtractToDirectoryAsync(tar, hostDirectory, true, token).ConfigureAwait(false);
+                await tar.CopyToAsync(spool, 81920, token).ConfigureAwait(false);
+                spool.Seek(0, SeekOrigin.Begin);
+                await TarFile.ExtractToDirectoryAsync(spool, hostDirectory, true, token).ConfigureAwait(false);
             }
         }
 

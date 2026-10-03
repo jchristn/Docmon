@@ -111,7 +111,7 @@ namespace Docmon.Core.Services.Implementations
             return RunComposeAsync(arguments, output, token);
         }
 
-        private static List<string> BuildBaseArguments(string project, string configFile)
+        internal static List<string> BuildBaseArguments(string project, string configFile)
         {
             if (project == null) throw new ArgumentNullException(nameof(project));
 
@@ -165,13 +165,13 @@ namespace Docmon.Core.Services.Implementations
             }
         }
 
-        private static string FirstConfigFile(string configFiles)
+        internal static string FirstConfigFile(string configFiles)
         {
             string[] parts = configFiles.Split(',');
             return parts.Length > 0 ? parts[0].Trim() : string.Empty;
         }
 
-        private static ContainerStateEnum MapState(string? state)
+        internal static ContainerStateEnum MapState(string? state)
         {
             if (string.IsNullOrEmpty(state))
                 return ContainerStateEnum.Unknown;

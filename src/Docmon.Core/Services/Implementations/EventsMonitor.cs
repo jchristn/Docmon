@@ -47,7 +47,7 @@ namespace Docmon.Core.Services.Implementations
             }
         }
 
-        private static DockerEventInfo Convert(Message message)
+        internal static DockerEventInfo Convert(Message message)
         {
             DockerEventInfo info = new DockerEventInfo();
             info.Type = message.Type ?? string.Empty;
@@ -57,7 +57,7 @@ namespace Docmon.Core.Services.Implementations
             return info;
         }
 
-        private static string ExtractActor(Message message)
+        internal static string ExtractActor(Message message)
         {
             if (message.Actor?.Attributes != null)
             {

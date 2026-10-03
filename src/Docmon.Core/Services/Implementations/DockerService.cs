@@ -293,7 +293,7 @@ namespace Docmon.Core.Services.Implementations
 
         #region Private-Methods
 
-        private static ContainerInfo MapContainer(ContainerListResponse response)
+        internal static ContainerInfo MapContainer(ContainerListResponse response)
         {
             ContainerInfo info = new ContainerInfo();
             info.Id = response.ID ?? string.Empty;
@@ -317,7 +317,7 @@ namespace Docmon.Core.Services.Implementations
             return info;
         }
 
-        private static ContainerDetail MapDetail(ContainerInspectResponse response)
+        internal static ContainerDetail MapDetail(ContainerInspectResponse response)
         {
             ContainerDetail detail = new ContainerDetail();
             detail.Id = response.ID ?? string.Empty;
@@ -359,7 +359,7 @@ namespace Docmon.Core.Services.Implementations
             return detail;
         }
 
-        private static ImageInfo MapImage(ImagesListResponse response)
+        internal static ImageInfo MapImage(ImagesListResponse response)
         {
             ImageInfo info = new ImageInfo();
             info.Id = response.ID ?? string.Empty;
@@ -391,7 +391,7 @@ namespace Docmon.Core.Services.Implementations
             return info;
         }
 
-        private static string ExtractName(IList<string>? names)
+        internal static string ExtractName(IList<string>? names)
         {
             if (names == null || names.Count == 0)
                 return string.Empty;
@@ -399,7 +399,7 @@ namespace Docmon.Core.Services.Implementations
             return names[0].TrimStart('/');
         }
 
-        private static ContainerStateEnum MapState(string? state)
+        internal static ContainerStateEnum MapState(string? state)
         {
             if (string.IsNullOrEmpty(state))
                 return ContainerStateEnum.Unknown;
@@ -417,7 +417,7 @@ namespace Docmon.Core.Services.Implementations
             }
         }
 
-        private static string ExtractHealth(string? status)
+        internal static string ExtractHealth(string? status)
         {
             if (string.IsNullOrEmpty(status))
                 return string.Empty;
@@ -436,7 +436,7 @@ namespace Docmon.Core.Services.Implementations
             return string.Empty;
         }
 
-        private static IReadOnlyList<PortMap> MapPorts(IList<Port>? ports)
+        internal static IReadOnlyList<PortMap> MapPorts(IList<Port>? ports)
         {
             List<PortMap> result = new List<PortMap>();
             if (ports == null)
@@ -455,7 +455,7 @@ namespace Docmon.Core.Services.Implementations
             return result;
         }
 
-        private static IReadOnlyList<PortMap> MapPortBindings(IDictionary<string, IList<PortBinding>>? ports)
+        internal static IReadOnlyList<PortMap> MapPortBindings(IDictionary<string, IList<PortBinding>>? ports)
         {
             List<PortMap> result = new List<PortMap>();
             if (ports == null)
@@ -501,7 +501,7 @@ namespace Docmon.Core.Services.Implementations
             return result;
         }
 
-        private static string BuildCommand(IList<string>? entrypoint, IList<string>? cmd)
+        internal static string BuildCommand(IList<string>? entrypoint, IList<string>? cmd)
         {
             StringBuilder builder = new StringBuilder();
             if (entrypoint != null)
@@ -518,7 +518,7 @@ namespace Docmon.Core.Services.Implementations
             return builder.ToString().Trim();
         }
 
-        private static bool IsNoneTag(IList<string> repoTags)
+        internal static bool IsNoneTag(IList<string> repoTags)
         {
             foreach (string tag in repoTags)
             {
@@ -529,7 +529,7 @@ namespace Docmon.Core.Services.Implementations
             return true;
         }
 
-        private static DateTime ParseDockerTime(string? value)
+        internal static DateTime ParseDockerTime(string? value)
         {
             if (string.IsNullOrEmpty(value))
                 return DateTime.MinValue;
@@ -540,8 +540,12 @@ namespace Docmon.Core.Services.Implementations
             return DateTime.MinValue;
         }
 
-        private static ImagesCreateParameters BuildCreateParameters(string image)
+        internal static ImagesCreateParameters BuildCreateParameters(string image)
         {
+            // A digest-pinned reference (name@sha256:...) is pulled as-is; its colon is not a tag separator.
+            if (image.IndexOf('@') >= 0)
+                return new ImagesCreateParameters { FromImage = image };
+
             string fromImage = image;
             string tag = "latest";
 
@@ -555,7 +559,7 @@ namespace Docmon.Core.Services.Implementations
             return new ImagesCreateParameters { FromImage = fromImage, Tag = tag };
         }
 
-        private static string? FormatPullMessage(JSONMessage message)
+        internal static string? FormatPullMessage(JSONMessage message)
         {
             if (!string.IsNullOrEmpty(message.ErrorMessage))
                 return "error: " + message.ErrorMessage;
@@ -587,7 +591,7 @@ namespace Docmon.Core.Services.Implementations
             return builder.ToString();
         }
 
-        private static IReadOnlyList<string> SplitLines(string text)
+        internal static IReadOnlyList<string> SplitLines(string text)
         {
             if (string.IsNullOrEmpty(text))
                 return new List<string>();

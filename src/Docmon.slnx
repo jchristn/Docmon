@@ -1,5 +1,10 @@
 <Solution>
-  <Project Path="../test/Docmon.Test/Docmon.Test.csproj" />
   <Project Path="Docmon.App/Docmon.App.csproj" />
   <Project Path="Docmon.Core/Docmon.Core.csproj" />
+  <Folder Name="/Tests/">
+    <Project Path="Test.Automated/Test.Automated.csproj" />
+    <Project Path="Test.Nunit/Test.Nunit.csproj" />
+    <Project Path="Test.Shared/Test.Shared.csproj" />
+    <Project Path="Test.Xunit/Test.Xunit.csproj" />
+  </Folder>
 </Solution>

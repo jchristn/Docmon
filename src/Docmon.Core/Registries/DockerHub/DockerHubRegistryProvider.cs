@@ -74,7 +74,7 @@ namespace Docmon.Core.Registries.DockerHub
                 foreach (string accept in _ManifestAcceptTypes)
                     request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue(accept));
 
-                using (HttpResponseMessage response = await _Http.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, token).ConfigureAwait(false))
+                using (HttpResponseMessage response = await SendAsync(request, HttpCompletionOption.ResponseHeadersRead, "resolving " + reference, token).ConfigureAwait(false))
                 {
                     if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
                         return null;
@@ -106,13 +106,13 @@ namespace Docmon.Core.Registries.DockerHub
             using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url))
             {
                 request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", bearer);
-                using (HttpResponseMessage response = await _Http.SendAsync(request, token).ConfigureAwait(false))
+                using (HttpResponseMessage response = await SendAsync(request, HttpCompletionOption.ResponseContentRead, "listing tags for " + reference.Repository, token).ConfigureAwait(false))
                 {
                     if (!response.IsSuccessStatusCode)
                         throw new RegistryException("Docker Hub returned " + (int)response.StatusCode + " listing tags for " + reference.Repository + ".");
 
                     string body = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                    DockerHubTagsResponse? parsed = JsonSerializer.Deserialize<DockerHubTagsResponse>(body, _JsonOptions);
+                    DockerHubTagsResponse? parsed = Deserialize<DockerHubTagsResponse>(body, "the tag list for " + reference.Repository);
                     if (parsed?.Tags == null)
                         return new List<string>();
 
@@ -135,19 +135,54 @@ namespace Docmon.Core.Registries.DockerHub
                     request.Headers.Authorization = new AuthenticationHeaderValue("Basic", encoded);
                 }
 
-                using (HttpResponseMessage response = await _Http.SendAsync(request, token).ConfigureAwait(false))
+                using (HttpResponseMessage response = await SendAsync(request, HttpCompletionOption.ResponseContentRead, "requesting a pull token for " + repository, token).ConfigureAwait(false))
                 {
                     if (!response.IsSuccessStatusCode)
                         throw new RegistryException("Could not obtain a Docker Hub pull token for '" + repository + "' (HTTP " + (int)response.StatusCode + ").");
 
                     string body = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                    DockerHubTokenResponse? parsed = JsonSerializer.Deserialize<DockerHubTokenResponse>(body, _JsonOptions);
+                    DockerHubTokenResponse? parsed = Deserialize<DockerHubTokenResponse>(body, "the pull token for " + repository);
                     string? bearer = parsed?.Token ?? parsed?.AccessToken;
                     if (string.IsNullOrWhiteSpace(bearer))
                         throw new RegistryException("Docker Hub returned an empty token for '" + repository + "'.");
 
                     return bearer!;
                 }
+            }
+        }
+
+        private async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, HttpCompletionOption completion, string context, CancellationToken token)
+        {
+            // Transport failures are surfaced as RegistryException, per the IRegistryProvider contract, so
+            // callers can report an Error status instead of aborting. Caller cancellation still propagates.
+            try
+            {
+                return await _Http.SendAsync(request, completion, token).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException) when (token.IsCancellationRequested)
+            {
+                throw;
+            }
+            catch (OperationCanceledException ex)
+            {
+                throw new RegistryException("Docker Hub timed out " + context + ".", ex);
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new RegistryException("Could not reach Docker Hub " + context + ": " + ex.Message, ex);
+            }
+        }
+
+        private T? Deserialize<T>(string body, string context)
+            where T : class
+        {
+            try
+            {
+                return JsonSerializer.Deserialize<T>(body, _JsonOptions);
+            }
+            catch (JsonException ex)
+            {
+                throw new RegistryException("Docker Hub returned malformed JSON for " + context + ".", ex);
             }
         }
 

@@ -34,6 +34,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <InternalsVisibleTo Include="Test.Shared" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Docker.DotNet" Version="3.125.15" />
   </ItemGroup>
 

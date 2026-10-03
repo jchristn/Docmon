@@ -89,7 +89,7 @@ namespace Docmon.Core.Services.Implementations
             return await provider.ListTagsAsync(reference, token).ConfigureAwait(false);
         }
 
-        private static string ExtractDigest(string repoDigest)
+        internal static string ExtractDigest(string repoDigest)
         {
             int atIndex = repoDigest.IndexOf('@');
             return atIndex >= 0 ? repoDigest.Substring(atIndex + 1) : repoDigest;

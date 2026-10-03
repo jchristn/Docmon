@@ -62,7 +62,11 @@ namespace Docmon.Core.Services.Implementations
         private static async Task PumpOutputAsync(MultiplexedStream stream, IProgress<string> output, CancellationToken token)
         {
             byte[] buffer = new byte[8192];
-            StringBuilder pending = new StringBuilder();
+
+            // Stdout and stderr arrive as interleaved frames; keep a partial-line buffer per stream so an
+            // unterminated fragment on one stream is never glued onto a line from the other.
+            StringBuilder pendingOut = new StringBuilder();
+            StringBuilder pendingErr = new StringBuilder();
 
             while (true)
             {
@@ -73,15 +77,18 @@ namespace Docmon.Core.Services.Implementations
                 if (result.Count <= 0)
                     continue;
 
+                StringBuilder pending = result.Target == MultiplexedStream.TargetStream.StandardError ? pendingErr : pendingOut;
                 pending.Append(Encoding.UTF8.GetString(buffer, 0, result.Count));
                 EmitCompleteLines(pending, output);
             }
 
-            if (pending.Length > 0)
-                output.Report(pending.ToString());
+            if (pendingOut.Length > 0)
+                output.Report(pendingOut.ToString());
+            if (pendingErr.Length > 0)
+                output.Report(pendingErr.ToString());
         }
 
-        private static void EmitCompleteLines(StringBuilder pending, IProgress<string> output)
+        internal static void EmitCompleteLines(StringBuilder pending, IProgress<string> output)
         {
             while (true)
             {

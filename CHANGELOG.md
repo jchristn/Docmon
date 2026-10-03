@@ -4,6 +4,27 @@ All notable changes to Docmon are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- Touchstone-based test infrastructure: shared descriptors in `Test.Shared`
+  executed by `Test.Automated` (console), `Test.Xunit`, and `Test.Nunit`,
+  replacing the previous ad-hoc `test/Docmon.Test` runner. Coverage spans
+  helpers, models, registry logic, Docker payload mapping, argument guards, TUI
+  state, and live-daemon container, exec, transfer, stats, events, and compose
+  workflows.
+
+### Fixed
+- Copying files out of a container failed with `EndOfStreamException` for every
+  path; the archive is now spooled to a temporary file before extraction.
+- Exec output glued an unterminated stdout fragment onto the next stderr line;
+  stdout and stderr are now line-buffered separately.
+- Docker Hub transport failures, timeouts, and malformed JSON escaped as raw
+  exceptions instead of `RegistryException`, which aborted "recheck all" and
+  could leave an image stuck in the Checking state. They now report `Error`.
+- Pulling a digest-pinned reference (`name@sha256:...`) split the digest as if
+  it were a tag.
+
 ## [0.1.0] - 2026-08-26
 
 Initial alpha.

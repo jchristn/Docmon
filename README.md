@@ -175,6 +175,27 @@ dotnet test  src/Docmon.slnx -c Release
 
 The build treats warnings as errors and generates XML documentation.
 
+## Testing
+
+Tests are written once as [Touchstone](https://github.com/jchristn/touchstone)
+descriptors in `src/Test.Shared` and run through any of three runners:
+
+| Project          | Runner                                  | Command                                              |
+|------------------|-----------------------------------------|------------------------------------------------------|
+| `Test.Automated` | Touchstone console runner               | `dotnet run --project src/Test.Automated -f net10.0` |
+| `Test.Xunit`     | xUnit (fact-style and per-case theory)  | `dotnet test src/Test.Xunit`                         |
+| `Test.Nunit`     | NUnit (fact-style and per-case source)  | `dotnet test src/Test.Nunit`                         |
+
+Add `-- --results results.json` to the console runner to export JSON results.
+
+Most suites run offline (helpers, models, registry logic against an in-memory
+HTTP handler, Docker payload mapping, argument validation, and TUI state). The
+`Docker*` suites exercise a live daemon: they pull `alpine:3.20` if needed and
+create uniquely named containers and compose projects labeled `io.docmon.test`,
+which they always remove. They never touch existing containers or images, and
+never prune. Those suites are skipped automatically when no daemon is
+reachable, or explicitly with `DOCMON_TEST_SKIP_DOCKER=1`.
+
 To build and run Docmon straight from source (Windows), use `go.bat`. It accepts
 an optional target framework and defaults to net10.0 when a .NET 10 SDK is present:
 

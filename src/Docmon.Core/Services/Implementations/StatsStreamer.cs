@@ -57,7 +57,7 @@ namespace Docmon.Core.Services.Implementations
             }
         }
 
-        private static ContainerStatsSample? Convert(string containerId, ContainerStatsResponse response)
+        internal static ContainerStatsSample? Convert(string containerId, ContainerStatsResponse response)
         {
             if (response == null || response.CPUStats == null || response.PreCPUStats == null)
                 return null;
