@@ -322,8 +322,8 @@ the number keys `1`–`6`:
 | 5 | **Events** | A live stream of Docker daemon events |
 | 6 | **Tools** | Engine/OS information, resource counts, image storage, and dangling-image pruning |
 
-In **Metrics**, use Left/Right to select a chart, `/` (or `]`) for the next scope,
-and `[` for the previous scope. Scopes include host Docker workloads and individual
+In **Metrics**, use Left/Right to select a chart, `[` for the previous scope,
+and `]` for the next scope. Scopes include host Docker workloads and individual
 containers, including stopped containers
 (which show no live data). Press `o` to switch between host workloads and the
 container selected in the Containers screen. Up/Down inspect older/newer samples;

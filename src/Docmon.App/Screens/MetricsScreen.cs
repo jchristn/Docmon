@@ -36,7 +36,7 @@ namespace Docmon.App.Screens
         /// <inheritdoc/>
         public override string KeyHints
         {
-            get { return "←/→ chart · / next scope · [ previous · t/T timeframe · ↑/↓ sample · End latest · o host/selected"; }
+            get { return "←/→ chart · [ previous · ] next scope · t/T timeframe · ↑/↓ sample · End latest · o host/selected"; }
         }
 
         /// <summary>Gets the selected history window, or live for near real time.</summary>
@@ -107,7 +107,7 @@ namespace Docmon.App.Screens
                 ResetHistory();
                 return true;
             }
-            if (key.Rune == '[' || key.Rune == ']' || key.Rune == '/')
+            if (key.Rune == '[' || key.Rune == ']')
             {
                 int index = TargetIndex() + 1;
                 int next = (index + (key.Rune != '[' ? 1 : _Containers.Count)) % (_Containers.Count + 1);
@@ -137,7 +137,7 @@ namespace Docmon.App.Screens
                 targetIndex >= 0 ? _Containers[targetIndex].Name : _TargetId;
             CellStyle muted = DocmonPalette.BaseStyle.WithForeground(DocmonPalette.Muted);
             CellStyle accent = DocmonPalette.BaseStyle.WithForeground(DocmonPalette.Accent);
-            Draw.Text(surface, 0, 0, "Scope: " + scope + "  (/ next, [ previous)", muted, width);
+            Draw.Text(surface, 0, 0, "Scope: " + scope + "  ([ previous, ] next)", muted, width);
             Draw.Text(surface, 0, 1, "Window: " + _TimeframeLabels[_Timeframe] + "  (t/T change) · Host = Docker workloads", muted, width);
             Draw.Text(surface, 0, 2, (_Chart + 1) + "/6  < " + _Titles[_Chart] + " >", accent, width);
 
@@ -150,7 +150,7 @@ namespace Docmon.App.Screens
             }
             if (!historical && (history == null || history.Cpu.Snapshot().Count == 0))
             {
-                Draw.Text(surface, 0, 4, "No live data for this scope. Use / for next scope or [ for previous.", muted, width);
+                Draw.Text(surface, 0, 4, "No live data for this scope. Use [ for previous scope or ] for next.", muted, width);
                 return;
             }
             List<double> values = new List<double>();
