@@ -4,7 +4,7 @@ namespace Docmon.Core.Models
     /// <summary>Typed parameters shared by REST operations and MCP tools.</summary>
     public sealed class OperationRequest : EnumerationQuery
     {
-        /// <summary>Optional request-history window: hour, day, week, or month.</summary>
+        /// <summary>Optional metric/request-history window: hour, day, week, or month.</summary>
         public string? Timeframe { get; set; }
         /// <summary>Container or image identifier.</summary>
         public string Id { get; set; } = string.Empty;

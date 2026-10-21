@@ -192,5 +192,8 @@
   "lastWeek": "Last week",
   "lastMonth": "Last month",
   "requestsPerBucket": "Requests per bucket",
-  "dockerWorkloads": "All Docker workloads"
+  "dockerWorkloads": "All Docker workloads",
+  "nearRealTime": "Near real time",
+  "metricHistoryHint": "Historical CPU and memory are averages; network and disk show last observed byte counters. Gaps mean no observations. History accumulates while monitoring is running.",
+  "noObservations": "No observations"
 }

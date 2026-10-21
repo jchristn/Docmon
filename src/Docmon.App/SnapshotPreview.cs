@@ -7,6 +7,7 @@ namespace Docmon.App
     using Docmon.App.Widgets;
     using Docmon.Core.Enums;
     using Docmon.Core.Models;
+    using TUIKit.Input;
     using TUIKit.Testing;
 
     /// <summary>
@@ -45,6 +46,14 @@ namespace Docmon.App
             Console.WriteLine(Snapshot.RenderWidget(containersScreen, 100, 22));
             Console.WriteLine();
             Console.WriteLine("== Metrics screen ==");
+            Console.WriteLine(Snapshot.RenderWidget(metricsScreen, 100, 22));
+            List<MetricHistoryBucket> buckets = new List<MetricHistoryBucket>();
+            DateTime end = DateTime.UtcNow;
+            for (int i = 0; i < 60; i++)
+                buckets.Add(new MetricHistoryBucket { AtUtc = end.AddMinutes(i - 60), EndUtc = end.AddMinutes(i - 59), CpuPercent = 30 + 20 * Math.Sin(i / 5.0), HasData = i < 15 || i > 25, SampleCount = i < 15 || i > 25 ? 30 : 0 });
+            metricsScreen.HandleKey(KeyEvent.Char('t'));
+            metricsScreen.SetHistoricalData("hour", "", buckets);
+            Console.WriteLine("== Historical metrics (gaps indicate no observations) ==");
             Console.WriteLine(Snapshot.RenderWidget(metricsScreen, 100, 22));
         }
 

@@ -11,6 +11,8 @@ namespace Test.Shared.Suites
     using System.Text.Json;
     using System.Threading;
     using System.Threading.Tasks;
+    using Docmon.Core.Models;
+    using Docmon.Core.Monitoring;
     using Docmon.Core.Services;
     using Docmon.Server;
     using Test.Shared.Infrastructure;
@@ -45,6 +47,37 @@ namespace Test.Shared.Suites
                         }
                         foreach (string path in new[] { "/mcp", "/api/v1/containers/missing/archive?path=/tmp" })
                         { using HttpResponseMessage response = await fixture.Client.GetAsync(path, ct).ConfigureAwait(false); Check.Equal(HttpStatusCode.Unauthorized, response.StatusCode, path); }
+                    }
+                    finally { await fixture.StopAsync().ConfigureAwait(false); }
+                }),
+                c.Async("MetricTimeframes", "Historical REST enumeration, remote adapter, and timeframe validation use durable buckets", async ct =>
+                {
+                    using ServerFixture fixture = new ServerFixture(directory =>
+                    {
+                        MetricHistoryStore store = new MetricHistoryStore(Path.Combine(directory, "metrics"));
+                        store.Add(new ContainerStatsSample { ContainerId = "historical-container", AtUtc = DateTime.UtcNow.AddMinutes(-3), CpuPercent = 42, NetworkRxBytes = 1234 });
+                        store.FlushAsync(CancellationToken.None).GetAwaiter().GetResult();
+                    });
+                    try
+                    {
+                        using RemoteDocmonClient remote = new RemoteDocmonClient(fixture.Client.BaseAddress!, ServerFixture.Token);
+                        string[] names = { "hour", "day", "week", "month" };
+                        int[] counts = { 60, 96, 84, 90 };
+                        for (int i = 0; i < names.Length; i++)
+                        {
+                            System.Collections.Generic.IReadOnlyList<MetricHistoryBucket> rows = await remote.GetMetricHistoryAsync(names[i], "historical-container", ct).ConfigureAwait(false);
+                            Check.Equal(counts[i], rows.Count, names[i]);
+                            Check.Close(42, rows.Single(row => row.HasData).CpuPercent, 0, "durable value through HTTP adapter");
+                        }
+                        using HttpResponseMessage page = await fixture.Client.GetAsync("/api/v1/metrics/summary?timeframe=day&maxResults=10", ct).ConfigureAwait(false);
+                        using JsonDocument json = JsonDocument.Parse(await page.Content.ReadAsStringAsync(ct).ConfigureAwait(false));
+                        Check.Equal(96, json.RootElement.GetProperty("totalRecords").GetInt32(), "full historical count");
+                        Check.Equal(10, json.RootElement.GetProperty("objects").GetArrayLength(), "enumeration page size");
+                        string cursor = Uri.EscapeDataString(json.RootElement.GetProperty("continuationToken").GetString()!);
+                        using HttpResponseMessage changed = await fixture.Client.GetAsync("/api/v1/metrics/summary?timeframe=week&maxResults=10&continuationToken=" + cursor, ct).ConfigureAwait(false);
+                        Check.Equal(HttpStatusCode.BadRequest, changed.StatusCode, "cursor bound to timeframe");
+                        using HttpResponseMessage invalid = await fixture.Client.GetAsync("/api/v1/metrics/summary?timeframe=year", ct).ConfigureAwait(false);
+                        Check.Equal(HttpStatusCode.BadRequest, invalid.StatusCode, "invalid timeframe");
                     }
                     finally { await fixture.StopAsync().ConfigureAwait(false); }
                 }),

@@ -252,6 +252,43 @@ Example `tools/call`:
 }
 ```
 
+### `metrics_summary`
+
+Persistent historical metrics: hour/day/week/month buckets; CPU and memory means, last byte counters, gaps marked by hasData.
+
+Equivalent REST operation: `GET /api/v1/metrics/summary`.
+
+| Parameter | Type | Required |
+| --- | --- | --- |
+| `timeframe` | string | No |
+| `maxResults` | integer | No |
+| `continuationToken` | string | No |
+| `search` | string | No |
+| `sortBy` | string | No |
+| `ordering` | string | No |
+| `containerIdFilter` | string | No |
+| `startUtc` | string | No |
+| `endUtc` | string | No |
+| `filters` | object | No |
+
+Example `tools/call`:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "tools/call",
+  "params": {
+    "name": "metrics_summary",
+    "arguments": {
+      "timeframe": "day",
+      "containerIdFilter": "",
+      "maxResults": 100
+    }
+  }
+}
+```
+
 ### `metrics_history`
 
 Bounded recent container metric history.
@@ -672,9 +709,9 @@ Example `tools/call`:
   "params": {
     "name": "containers_copy_in",
     "arguments": {
-      "id": "{{containerId}}",
+      "path": "/tmp",
       "hostPath": "{{hostPath}}",
-      "path": "/tmp"
+      "id": "{{containerId}}"
     }
   }
 }
@@ -702,9 +739,9 @@ Example `tools/call`:
   "params": {
     "name": "containers_copy_out",
     "arguments": {
-      "id": "{{containerId}}",
+      "path": "/tmp",
       "hostPath": "{{hostPath}}",
-      "path": "/tmp"
+      "id": "{{containerId}}"
     }
   }
 }

@@ -21,6 +21,11 @@ namespace Docmon.App.Screens
         {
             "CPU %", "Memory", "Network received", "Network transmitted", "Block read", "Block written"
         };
+        private static readonly string[] _Timeframes = { "live", "hour", "day", "week", "month" };
+        private static readonly string[] _TimeframeLabels = { "Near real time", "Last hour", "Last day", "Last week", "Last month" };
+        private int _Timeframe;
+        private IReadOnlyList<MetricHistoryBucket>? _Historical;
+        private string? _HistoryError;
         private StatsHistory? _History;
         private IReadOnlyList<ContainerInfo> _Containers = Array.Empty<ContainerInfo>();
         private string _TargetId = string.Empty;
@@ -31,7 +36,25 @@ namespace Docmon.App.Screens
         /// <inheritdoc/>
         public override string KeyHints
         {
-            get { return "←/→ chart · [/] host/container · o host/selected · ↑/↓ inspect sample · End live"; }
+            get { return "←/→ chart · [/] scope · t/T timeframe · ↑/↓ sample · End latest · o host/selected"; }
+        }
+
+        /// <summary>Gets the selected history window, or live for near real time.</summary>
+        public string Timeframe => _Timeframes[_Timeframe];
+
+        /// <summary>Gets the selected container ID, or empty for host Docker workloads.</summary>
+        public string TargetId => _TargetId;
+
+        /// <summary>Applies a history response only if its scope still matches the current selection.</summary>
+        /// <param name="timeframe">Requested timeframe.</param>
+        /// <param name="containerId">Requested scope.</param>
+        /// <param name="buckets">Chronological buckets, or null on error.</param>
+        /// <param name="error">Optional load error.</param>
+        public void SetHistoricalData(string timeframe, string containerId, IReadOnlyList<MetricHistoryBucket>? buckets, string? error = null)
+        {
+            if (timeframe != Timeframe || containerId != _TargetId) return;
+            _Historical = buckets;
+            _HistoryError = error;
         }
 
         /// <summary>Updates history and the container selected in the Containers screen.</summary>
@@ -54,7 +77,7 @@ namespace Docmon.App.Screens
             if (_TargetId.Length > 0 && TargetIndex() < 0)
             {
                 _TargetId = string.Empty;
-                _SampleOffset = 0;
+                ResetHistory();
             }
         }
 
@@ -68,7 +91,7 @@ namespace Docmon.App.Screens
             }
             if (key.Code == KeyCode.Up || key.Code == KeyCode.Down)
             {
-                int count = CurrentHistory()?.Cpu.Snapshot().Count ?? 0;
+                int count = Timeframe == "live" ? CurrentHistory()?.Cpu.Snapshot().Count ?? 0 : _Historical?.Count ?? 0;
                 _SampleOffset = Math.Clamp(_SampleOffset + (key.Code == KeyCode.Up ? 1 : -1), 0, Math.Max(0, count - 1));
                 return true;
             }
@@ -78,18 +101,24 @@ namespace Docmon.App.Screens
                 return true;
             }
             if (key.Code != KeyCode.Character) return false;
+            if (key.Rune == 't' || key.Rune == 'T')
+            {
+                _Timeframe = (_Timeframe + (key.Rune == 't' ? 1 : _Timeframes.Length - 1)) % _Timeframes.Length;
+                ResetHistory();
+                return true;
+            }
             if (key.Rune == '[' || key.Rune == ']')
             {
                 int index = TargetIndex() + 1;
                 int next = (index + (key.Rune == ']' ? 1 : _Containers.Count)) % (_Containers.Count + 1);
                 _TargetId = next == 0 ? string.Empty : _Containers[next - 1].Id;
-                _SampleOffset = 0;
+                ResetHistory();
                 return true;
             }
             if (key.Rune == 'o' || key.Rune == 'O')
             {
                 _TargetId = _TargetId.Length == 0 ? _SelectedId : string.Empty;
-                _SampleOffset = 0;
+                ResetHistory();
                 return true;
             }
             return false;
@@ -109,41 +138,86 @@ namespace Docmon.App.Screens
             CellStyle muted = DocmonPalette.BaseStyle.WithForeground(DocmonPalette.Muted);
             CellStyle accent = DocmonPalette.BaseStyle.WithForeground(DocmonPalette.Accent);
             Draw.Text(surface, 0, 0, "Scope: " + scope + "  [/] change", muted, width);
-            Draw.Text(surface, 0, 1, "Host scope sums Docker containers; excludes other OS processes.", muted, width);
+            Draw.Text(surface, 0, 1, "Window: " + _TimeframeLabels[_Timeframe] + "  (t/T change) · Host = Docker workloads", muted, width);
             Draw.Text(surface, 0, 2, (_Chart + 1) + "/6  < " + _Titles[_Chart] + " >", accent, width);
 
             ContainerHistory? history = CurrentHistory();
-            if (history == null || history.Cpu.Snapshot().Count == 0)
+            bool historical = Timeframe != "live";
+            if (historical && _Historical == null)
+            {
+                Draw.Text(surface, 0, 4, _HistoryError ?? "Loading historical metrics...", muted, width);
+                return;
+            }
+            if (!historical && (history == null || history.Cpu.Snapshot().Count == 0))
             {
                 Draw.Text(surface, 0, 4, "No live data for this scope. Select another container with [ or ].", muted, width);
                 return;
             }
-            MetricSeries series = Series(history);
-            IReadOnlyList<double> values = series.Snapshot();
-            IReadOnlyList<double> times = history.SampleTimes.Snapshot();
+            List<double> values = new List<double>();
+            List<double> times = new List<double>();
+            List<bool> available = new List<bool>();
+            if (historical)
+            {
+                foreach (MetricHistoryBucket bucket in _Historical!)
+                {
+                    values.Add(Value(bucket));
+                    times.Add(bucket.AtUtc.Ticks);
+                    available.Add(bucket.HasData);
+                }
+            }
+            else
+            {
+                values.AddRange(Series(history!).Snapshot());
+                times.AddRange(history!.SampleTimes.Snapshot());
+                foreach (double value in values) available.Add(true);
+            }
+            if (values.Count == 0) return;
             int selected = Math.Max(0, values.Count - 1 - _SampleOffset);
             string unit = _Chart == 0 ? "%" : "bytes";
             Rect inner = Draw.Panel(surface, new Rect(0, 3, width, height - 3), _Titles[_Chart] + " (" + unit + ")", muted);
             if (inner.Width < 18 || inner.Height < 5) return;
-            Draw.Text(surface, inner.X, inner.Y, Time(times[selected]) + " UTC  " + Format(values[selected]) +
-                (_SampleOffset == 0 ? "  live" : "  sample detail"), accent, inner.Width);
+            Draw.Text(surface, inner.X, inner.Y, Time(times[selected]) + (historical ? " to " + Time(_Historical![selected].EndUtc.Ticks) : "") + " UTC  " + (available[selected] ? Format(values[selected]) : "No observations") +
+                (_SampleOffset == 0 ? historical ? "  latest bucket" : "  live" : "  sample detail"), accent, inner.Width);
             int axisWidth = Math.Min(13, inner.Width / 3);
             Rect plot = new Rect(inner.X + axisWidth, inner.Y + 1, inner.Width - axisWidth, inner.Height - 3);
-            double maximum = Math.Max(_Chart == 0 ? 100 : 1, series.Max);
+            double maximum = _Chart == 0 ? 100 : 1;
+            foreach (double value in values) maximum = Math.Max(maximum, value);
             Draw.Text(surface, inner.X, plot.Y, Format(maximum), muted, axisWidth);
             Draw.Text(surface, inner.X, plot.Y + plot.Height - 1, "0 " + unit, muted, axisWidth);
             // Resample the entire retained window, so narrow terminals do not discard history.
-            List<double> plotted = new List<double>(plot.Width);
             for (int column = 0; column < plot.Width; column++)
-                plotted.Add(values[(int)Math.Round(column * (values.Count - 1.0) / Math.Max(1, plot.Width - 1))]);
-            Draw.AreaChart(surface, plot, plotted, maximum, accent);
+            {
+                int index = (int)Math.Round(column * (values.Count - 1.0) / Math.Max(1, plot.Width - 1));
+                if (available[index])
+                    Draw.AreaChart(surface, new Rect(plot.X + column, plot.Y, 1, plot.Height), new[] { values[index] }, maximum, accent);
+            }
             int cursorX = plot.X + (int)Math.Round(selected * (plot.Width - 1.0) / Math.Max(1, values.Count - 1));
             surface.Set(cursorX, plot.Y + plot.Height - 1, Cell.Glyph("▲", muted, 1));
             Draw.Text(surface, plot.X, plot.Y + plot.Height, Time(times[0]), muted, plot.Width);
-            string latest = Time(times[times.Count - 1]);
+            string latest = Time(historical ? _Historical![_Historical.Count - 1].EndUtc.Ticks : times[times.Count - 1]);
             if (plot.Width >= latest.Length * 2 + 1)
                 Draw.Text(surface, plot.X + plot.Width - latest.Length, plot.Y + plot.Height, latest, muted, latest.Length);
             Draw.Text(surface, plot.X, plot.Y + plot.Height + 1, "Time (UTC) · ↑ older / ↓ newer", muted, plot.Width);
+        }
+
+        private void ResetHistory()
+        {
+            _Historical = null;
+            _HistoryError = null;
+            _SampleOffset = 0;
+        }
+
+        private double Value(ContainerStatsSample sample)
+        {
+            return _Chart switch
+            {
+                1 => sample.MemoryUsage,
+                2 => sample.NetworkRxBytes,
+                3 => sample.NetworkTxBytes,
+                4 => sample.BlockReadBytes,
+                5 => sample.BlockWriteBytes,
+                _ => sample.CpuPercent
+            };
         }
 
         private int TargetIndex()
@@ -176,9 +250,9 @@ namespace Docmon.App.Screens
             return _Chart == 0 ? value.ToString("0.0", CultureInfo.InvariantCulture) + "%" : ByteFormatter.Format((long)value);
         }
 
-        private static string Time(double ticks)
+        private string Time(double ticks)
         {
-            return new DateTime((long)ticks, DateTimeKind.Utc).ToString("HH:mm:ss", CultureInfo.InvariantCulture);
+            return new DateTime((long)ticks, DateTimeKind.Utc).ToString(Timeframe == "live" || Timeframe == "hour" ? "HH:mm:ss" : "MM-dd HH:mm", CultureInfo.InvariantCulture);
         }
     }
 }

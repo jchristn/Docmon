@@ -6,9 +6,11 @@ import { ErrorBanner } from "../components/Common";
 import { bytes, number } from "../i18n/formatters";
 export default function Metrics() {
   const { t, i18n } = useTranslation();
-  const history = useResource("metrics/history"),
-    containers = useResource("containers");
   const [target, setTarget] = useState("");
+  const [timeframe, setTimeframe] = useState("live");
+  const history = useResource(timeframe === "live" ? "metrics/history" :
+    `metrics/summary?timeframe=${timeframe}&containerIdFilter=${encodeURIComponent(target)}`),
+    containers = useResource("containers");
   const [field, setField] = useState("cpuPercent");
   const fields = [
     "cpuPercent",
@@ -30,7 +32,7 @@ export default function Metrics() {
       byContainer.set(s.containerId, s);
     grouped.set(bucket, byContainer);
   });
-  const points = [...grouped.entries()]
+  const livePoints = [...grouped.entries()]
     .sort((a, b) => a[0] - b[0])
     .slice(-120)
     .map(([bucket, byContainer]) => ({
@@ -50,30 +52,44 @@ export default function Metrics() {
         },
       ),
     }));
+  const points = timeframe === "live" ? livePoints : history.data || [];
   return (
     <>
       <div className="page-heading">
         <div>
-          <p className="eyebrow">{t("live")}</p>
+          <p className="eyebrow">{t(timeframe === "live" ? "nearRealTime" : `last${timeframe[0].toUpperCase()}${timeframe.slice(1)}`)}</p>
           <h1>{t("metrics")}</h1>
         </div>
-        <select
-          aria-label={t("target")}
-          value={target}
-          onChange={(e) => setTarget(e.target.value)}
-        >
-          <option value="">{t("dockerWorkloads")}</option>
-          {(containers.data || []).map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.name}
-            </option>
-          ))}
-        </select>
+        <div className="row">
+          <select
+            aria-label={t("timeframe")}
+            value={timeframe}
+            onChange={(e) => setTimeframe(e.target.value)}
+          >
+            <option value="live">{t("nearRealTime")}</option>
+            {["hour", "day", "week", "month"].map((value) => (
+              <option key={value} value={value}>
+                {t(`last${value[0].toUpperCase()}${value.slice(1)}`)}
+              </option>
+            ))}
+          </select>
+          <select
+            aria-label={t("target")}
+            value={target}
+            onChange={(e) => setTarget(e.target.value)}
+          >
+            <option value="">{t("dockerWorkloads")}</option>
+            {(containers.data || []).map((c) => (
+              <option key={c.id} value={c.id}>{c.name}</option>
+            ))}
+          </select>
+        </div>
       </div>
       <ErrorBanner error={history.error} retry={history.refresh} />
       <p className="muted small">
         {t(target ? "containerMetricsHint" : "hostMetricsHint")}
       </p>
+      {timeframe !== "live" && <p className="muted small">{t("metricHistoryHint")}</p>}
       <div className="metric-tabs" role="tablist" aria-label={t("metrics")}>
         {fields.map((key) => (
           <button
@@ -96,7 +112,7 @@ export default function Metrics() {
       >
         <h2>{t(field)}</h2>
         <TimeChart
-          points={points.map((p) => ({ atUtc: p.atUtc, value: p[field] || 0 }))}
+          points={points.map((p) => ({ atUtc: p.atUtc, endUtc: p.endUtc, value: p[field] || 0, hasData: p.hasData }))}
           label={t(field)}
           format={(value) =>
             field === "cpuPercent"

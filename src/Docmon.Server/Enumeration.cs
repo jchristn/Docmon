@@ -13,7 +13,7 @@ namespace Docmon.Server
 
     internal static class Enumeration
     {
-        internal static bool IsCollection(ApiOperation operation) => operation.Name.EndsWith("_list") || operation.Name == "metrics_history" || operation.Name == "containers_logs" || operation.Name == "images_tags";
+        internal static bool IsCollection(ApiOperation operation) => operation.Name.EndsWith("_list") || (operation.Name == "metrics_history" || operation.Name == "metrics_summary") || operation.Name == "containers_logs" || operation.Name == "images_tags";
         internal static EnumerationResult<T> Page<T>(IEnumerable<T> source, EnumerationQuery query, string scope)
         {
             Stopwatch watch = Stopwatch.StartNew();

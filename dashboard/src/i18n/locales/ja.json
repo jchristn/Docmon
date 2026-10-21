@@ -192,5 +192,8 @@
   "lastWeek": "過去 1 週間",
   "lastMonth": "過去 1 か月",
   "requestsPerBucket": "区間ごとのリクエスト",
-  "dockerWorkloads": "すべての Docker ワークロード"
+  "dockerWorkloads": "すべての Docker ワークロード",
+  "nearRealTime": "ほぼリアルタイム",
+  "metricHistoryHint": "過去の CPU とメモリは平均値、ネットワークとディスクは最後に観測されたバイトカウンターです。空白は観測がない期間です。履歴は監視中に蓄積されます。",
+  "noObservations": "観測データなし"
 }

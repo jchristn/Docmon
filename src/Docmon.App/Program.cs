@@ -128,7 +128,7 @@ namespace Docmon.App
                     }
                     finally
                     {
-                        controller.Shutdown();
+                        await controller.ShutdownAsync(CancellationToken.None).ConfigureAwait(false);
                         app.Stop();
                     }
                 }

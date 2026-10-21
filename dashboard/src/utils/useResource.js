@@ -8,6 +8,9 @@ export function useResource(path, poll = true) {
   const [revision, setRevision] = useState(0);
   const refresh = useCallback(() => setRevision((x) => x + 1), []);
   useEffect(() => {
+    setData(null);
+    setError(null);
+    setLoading(true);
     const controller = new AbortController();
     let active = true,
       timer;
@@ -19,6 +22,7 @@ export function useResource(path, poll = true) {
           "stacks",
           "metrics",
           "metrics/history",
+          "metrics/summary",
           "events",
           "history",
         ].includes(path.split("?")[0]);

@@ -18,7 +18,7 @@ namespace Docmon.Core.Services
     using Docmon.Core.Services.Interfaces;
 
     /// <summary>Authenticated HTTP adapter for the same services used by the local TUI. Thread safe.</summary>
-    public sealed class RemoteDocmonClient : IDockerService, IComposeService, IStatsStreamer, IEventsMonitor, IExecService, ITransferService, IRegistryService, IDisposable
+    public sealed class RemoteDocmonClient : IDockerService, IComposeService, IStatsStreamer, IEventsMonitor, IExecService, ITransferService, IRegistryService, IMetricHistoryProvider, IDisposable
     {
         private readonly HttpClient _Http;
         private static readonly JsonSerializerOptions _Json = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase, PropertyNameCaseInsensitive = true, Converters = { new JsonStringEnumConverter() } };
@@ -32,6 +32,11 @@ namespace Docmon.Core.Services
             if (string.IsNullOrWhiteSpace(token)) throw new ArgumentException("A bearer token is required for remote TUI access. Use --token or DOCMON_BEARER_TOKEN.", nameof(token));
             _Http = new HttpClient(new HttpClientHandler { AllowAutoRedirect = false }) { BaseAddress = new Uri(endpoint.ToString().TrimEnd('/') + "/"), Timeout = TimeSpan.FromMinutes(30) };
             _Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        }
+        /// <inheritdoc/>
+        public async Task<IReadOnlyList<MetricHistoryBucket>> GetMetricHistoryAsync(string timeframe, string containerId, CancellationToken token)
+        {
+            return await GetCollectionAsync<MetricHistoryBucket>("metrics/summary?timeframe=" + Escape(timeframe) + "&containerIdFilter=" + Escape(containerId), token).ConfigureAwait(false);
         }
         /// <summary>Verifies authentication and server availability.</summary>
         public async Task VerifyAsync(CancellationToken token) { await GetAsync<object>("system/info", token).ConfigureAwait(false); }

@@ -372,3 +372,38 @@ test("history timeframes, compact rows, toolbar order, and viewport-sized inspec
   expect(box.width).toBeCloseTo(1440 * 0.95, 0);
   expect(box.height).toBeCloseTo(1000 * 0.95, 0);
 });
+
+test("metric history switches all windows and scopes across all six charts", async ({ page }) => {
+  await login(page);
+  await page.goto("/metrics");
+  const timeframe = page.getByLabel("Timeframe", { exact: true });
+  await expect(timeframe).toHaveValue("live");
+  for (const [window, count] of [["hour", 60], ["day", 96], ["week", 84], ["month", 90]]) {
+    const response = page.waitForResponse((r) => r.url().includes(`/metrics/summary?timeframe=${window}`) && r.status() === 200);
+    await timeframe.selectOption(window);
+    const body = await (await response).json();
+    expect(body.objects).toHaveLength(count);
+    await expect(page.locator(".metric-chart svg")).toBeVisible();
+  }
+  for (const tab of await page.getByRole("tab").all()) {
+    await tab.click();
+    await expect(tab).toHaveAttribute("aria-selected", "true");
+    await expect(page.locator(".metric-chart svg")).toBeVisible();
+  }
+  const target = page.getByLabel("Target", { exact: true });
+  const choices = await target.locator("option").evaluateAll((options) => options.map((o) => o.value));
+  if (choices.length > 1) {
+    const response = page.waitForResponse((r) => r.url().includes("/metrics/summary?timeframe=month&containerIdFilter=") && !r.url().endsWith("containerIdFilter=") && r.status() === 200);
+    await target.selectOption(choices[1]);
+    const body = await (await response).json();
+    expect(body.objects.every((point) => point.containerId === choices[1])).toBeTruthy();
+  }
+  for (const width of [390, 1440]) {
+    await page.setViewportSize({ width, height: 950 });
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBeTruthy();
+    await page.screenshot({ path: `test-results/metric-history-${width}.png`, fullPage: true });
+  }
+  const live = page.waitForResponse((r) => r.url().includes("/metrics/history") && r.status() === 200);
+  await timeframe.selectOption("live");
+  await live;
+});

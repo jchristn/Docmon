@@ -22,7 +22,7 @@ On Docker Desktop, set `DOCMON_DOCKER_SOCKET` to the actual socket if `/var/run/
 
 ## Persistence and maintenance
 
-`docmon-data` stores redacted daily request journals (30-day retention); the in-memory API retains the newest 1000 summaries. Docker resources stay in the host daemon. `docker compose down` preserves them. Metrics and events held by Docmon itself reset when the backend restarts.
+`docmon-data` stores redacted daily request journals and persistent metric minute aggregates (30-day retention). The API retains the newest 1000 request summaries in memory. Historical metric windows survive backend restarts; only the near-real-time metric buffer and in-memory events reset. Docker resources stay in the host daemon. `docker compose down` preserves the data volume. The dashboard and remote TUI can select near-real-time metrics or the last hour, day, week, and thirty days. History accumulates while the backend runs; it cannot backfill observations from before monitoring started.
 
 Compose uses named images without build contexts: `jchristn77/docmon-server:v0.1.0` and `jchristn77/docmon-dashboard:v0.1.0`. Run `./docker/update.sh` (Linux/macOS) or `docker\update.bat` (Windows) to pull the configured tags, recreate the stack, and report container status without removing named volumes.
 

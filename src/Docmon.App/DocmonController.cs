@@ -2,6 +2,7 @@ namespace Docmon.App
 {
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using System.Threading;
     using System.Threading.Tasks;
     using Docmon.App.Monitoring;
@@ -11,6 +12,7 @@ namespace Docmon.App
     using Docmon.Core.Enums;
     using Docmon.Core.Helpers;
     using Docmon.Core.Models;
+    using Docmon.Core.Monitoring;
     using Docmon.Core.Services.Interfaces;
     using TUIKit.Hosting;
     using TUIKit.Input;
@@ -40,6 +42,8 @@ namespace Docmon.App
         private readonly string _Version;
         private readonly bool _ShowSplash;
 
+        private readonly IMetricHistoryProvider _MetricProvider;
+        private readonly MetricHistoryStore? _MetricJournal;
         private readonly StatsHistory _History = new StatsHistory(120);
         private readonly Dictionary<string, CancellationTokenSource> _StatsStreams = new Dictionary<string, CancellationTokenSource>(StringComparer.Ordinal);
 
@@ -111,6 +115,13 @@ namespace Docmon.App
             _Endpoint = endpoint ?? string.Empty;
             _Version = version ?? "0.1.1";
             _ShowSplash = showSplash;
+            if (stats is IMetricHistoryProvider remoteHistory) _MetricProvider = remoteHistory;
+            else
+            {
+                string directory = Environment.GetEnvironmentVariable("DOCMON_TUI_DATA_DIRECTORY") ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Docmon");
+                _MetricJournal = new MetricHistoryStore(Path.Combine(directory, "metrics"));
+                _MetricProvider = _MetricJournal;
+            }
         }
 
         #endregion
@@ -176,6 +187,7 @@ namespace Docmon.App
 
             _ = RefreshLoopAsync(_Lifetime.Token);
             _ = EventsLoopAsync(_Lifetime.Token);
+            _ = FlushMetricHistoryAsync(_Lifetime.Token);
         }
 
         /// <summary>
@@ -200,6 +212,29 @@ namespace Docmon.App
             foreach (CancellationTokenSource cts in _StatsStreams.Values)
                 cts.Cancel();
             _StatsStreams.Clear();
+        }
+
+        /// <summary>Cancels background collection and persists pending local metric observations.</summary>
+        /// <param name="token">Cancellation token for the final disk write.</param>
+        public async Task ShutdownAsync(CancellationToken token)
+        {
+            Shutdown();
+            if (_MetricJournal != null) await _MetricJournal.FlushAsync(token).ConfigureAwait(false);
+        }
+
+        private async Task FlushMetricHistoryAsync(CancellationToken token)
+        {
+            if (_MetricJournal == null) return;
+            try
+            {
+                while (!token.IsCancellationRequested)
+                {
+                    await Task.Delay(TimeSpan.FromSeconds(30), token).ConfigureAwait(false);
+                    try { await _MetricJournal.FlushAsync(token).ConfigureAwait(false); }
+                    catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException) { Post(() => SetStatus("Metric history persistence failed: " + ex.Message)); }
+                }
+            }
+            catch (OperationCanceledException) when (token.IsCancellationRequested) { }
         }
 
         #endregion
@@ -451,6 +486,20 @@ namespace Docmon.App
 
         private async Task RefreshAllAsync(CancellationToken token)
         {
+            if (_Active == ScreenId.Metrics && _MetricsScreen.Timeframe != "live")
+            {
+                string timeframe = _MetricsScreen.Timeframe;
+                string scope = _MetricsScreen.TargetId;
+                try
+                {
+                    IReadOnlyList<MetricHistoryBucket> buckets = await _MetricProvider.GetMetricHistoryAsync(timeframe, scope, token).ConfigureAwait(false);
+                    Post(() => _MetricsScreen.SetHistoricalData(timeframe, scope, buckets));
+                }
+                catch (Exception ex) when (ex is IOException || ex is System.Net.Http.HttpRequestException || ex is ArgumentException)
+                {
+                    Post(() => _MetricsScreen.SetHistoricalData(timeframe, scope, null, "History unavailable: " + ex.Message));
+                }
+            }
             IReadOnlyList<ContainerInfo> containers = await _Docker.ListContainersAsync(true, token).ConfigureAwait(false);
             IReadOnlyList<ImageInfo> images = await _Docker.ListImagesAsync(token).ConfigureAwait(false);
             IReadOnlyList<ComposeStack> stacks = await _Compose.DiscoverAsync(token).ConfigureAwait(false);
@@ -561,6 +610,7 @@ namespace Docmon.App
 
             DelegateProgress<ContainerStatsSample> progress = new DelegateProgress<ContainerStatsSample>(sample =>
             {
+                _MetricJournal?.Add(sample);
                 Post(() => _History.AddSample(sample));
             });
 

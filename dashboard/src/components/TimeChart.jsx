@@ -20,7 +20,7 @@ export default function TimeChart({
   }, []);
   const observed = Math.max(
     1,
-    ...points.map((p) => (stacked ? p.ok + p.failed : p.value)),
+    ...points.filter((p) => p.hasData !== false).map((p) => (stacked ? p.ok + p.failed : p.value)),
   );
   const max = stacked ? Math.max(4, Math.ceil(observed / 4) * 4) : observed;
   const left = 85,
@@ -28,7 +28,7 @@ export default function TimeChart({
     top = 25,
     bottom = 260;
   const first = points[0]?.atUtc,
-    last = stacked ? points.at(-1)?.endUtc : points.at(-1)?.atUtc;
+    last = points.at(-1)?.endUtc || points.at(-1)?.atUtc;
   const range = Math.max(1, new Date(last) - new Date(first));
   const x = (p, i) =>
     stacked
@@ -36,7 +36,7 @@ export default function TimeChart({
       : left + ((new Date(p.atUtc) - new Date(first)) / range) * (right - left);
   const y = (v) => bottom - (v / max) * (bottom - top);
   const describe = (p) =>
-    `${date(p.atUtc, i18n.language)}${stacked && p.endUtc ? ` – ${time(p.endUtc, i18n.language)}` : ""} · ${stacked ? `${t("successes")}: ${number(p.ok, i18n.language)} · ${t("failures")}: ${number(p.failed, i18n.language)}` : `${label}: ${format(p.value)}`}`;
+    `${date(p.atUtc, i18n.language)}${stacked && p.endUtc ? ` – ${time(p.endUtc, i18n.language)}` : ""} · ${stacked ? `${t("successes")}: ${number(p.ok, i18n.language)} · ${t("failures")}: ${number(p.failed, i18n.language)}` : `${label}: ${p.hasData === false ? t("noObservations") : format(p.value)}`}`;
   const longRange = range > 86400000;
   const active = hover === null ? null : points[hover];
   return (
@@ -89,14 +89,11 @@ export default function TimeChart({
               : "−"}
           </text>
         ))}
-        {!stacked && (
-          <polyline
-            points={points.map((p, i) => `${x(p, i)},${y(p.value)}`).join(" ")}
-            fill="none"
-            stroke="var(--accent)"
-            strokeWidth="2.5"
-          />
-        )}
+        {!stacked && points.map((p, i) => {
+          if (i === 0 || p.hasData === false || points[i - 1].hasData === false) return null;
+          return <line key={`segment-${i}`} x1={x(points[i - 1], i - 1)} y1={y(points[i - 1].value)}
+            x2={x(p, i)} y2={y(p.value)} stroke="var(--accent)" strokeWidth="2.5" />;
+        })}
         {points.map((p, i) => (
           <g
             key={i}
@@ -134,6 +131,8 @@ export default function TimeChart({
                   fill="transparent"
                 />
               </>
+            ) : p.hasData === false ? (
+              <rect x={x(p, i)} y={top} width={Math.max(1, (right - left) / points.length)} height={bottom - top} fill="transparent" />
             ) : (
               <>
                 <circle

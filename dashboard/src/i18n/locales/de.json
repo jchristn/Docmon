@@ -192,5 +192,8 @@
   "lastWeek": "Letzte Woche",
   "lastMonth": "Letzter Monat",
   "requestsPerBucket": "Anfragen pro Intervall",
-  "dockerWorkloads": "Alle Docker-Workloads"
+  "dockerWorkloads": "Alle Docker-Workloads",
+  "nearRealTime": "Nahezu Echtzeit",
+  "metricHistoryHint": "Historische CPU- und Speicherwerte sind Mittelwerte; Netzwerk und Datenträger zeigen die zuletzt beobachteten Bytezähler. Lücken bedeuten fehlende Messungen. Der Verlauf wird während der Überwachung erfasst.",
+  "noObservations": "Keine Messungen"
 }

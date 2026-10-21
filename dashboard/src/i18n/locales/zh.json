@@ -192,5 +192,8 @@
   "lastWeek": "最近一周",
   "lastMonth": "最近一个月",
   "requestsPerBucket": "每时段请求数",
-  "dockerWorkloads": "所有 Docker 工作负载"
+  "dockerWorkloads": "所有 Docker 工作负载",
+  "nearRealTime": "近实时",
+  "metricHistoryHint": "历史 CPU 和内存值为平均值；网络和磁盘显示最后观测到的字节计数。空白表示没有观测数据。历史记录在监控运行期间积累。",
+  "noObservations": "无观测数据"
 }

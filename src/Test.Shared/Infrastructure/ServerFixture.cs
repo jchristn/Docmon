@@ -18,9 +18,10 @@ namespace Test.Shared.Infrastructure
         private readonly Task _Run;
         internal string DirectoryPath { get; } = Path.Combine(Path.GetTempPath(), "docmon-tests-" + Guid.NewGuid().ToString("N"));
         internal HttpClient Client { get; }
-        internal ServerFixture()
+        internal ServerFixture(Action<string>? seed = null)
         {
             int port = FreePort(), mcp = FreePort(); while (mcp == port) mcp = FreePort();
+            seed?.Invoke(DirectoryPath);
             _Server = new DocmonServer(new ServerSettings(Token, "127.0.0.1", port, mcp, DirectoryPath));
             _Run = _Server.StartAsync(_Lifetime.Token);
             Client = new HttpClient { BaseAddress = new Uri("http://127.0.0.1:" + port), Timeout = TimeSpan.FromSeconds(10) };

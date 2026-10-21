@@ -103,8 +103,39 @@ matching host paths. See [Compose project access](docker/README.md#compose-proje
   dangling-image counts, total image size, and volume count through the system
   usage API and TUI Tools screen.
 
-The server retains up to 10,000 metric samples and 1,000 Docker events in memory.
-These histories reset when it restarts.
+Near-real-time views retain the latest 120 samples per series in the TUI and up to
+10,000 raw samples on the server. Events retain 1,000 records in memory. These
+short buffers reset on restart.
+
+Both metric interfaces also offer **Last hour**, **Last day**, **Last week**, and
+**Last month**, for host Docker workloads or a specific container:
+
+| Metric timeframe | Bucket width | Buckets |
+| --- | --- | --- |
+| Last hour | 1 minute | 60 |
+| Last day | 15 minutes | 96 |
+| Last week | 2 hours | 84 |
+| Last month (30 days) | 8 hours | 90 |
+
+Historical CPU and memory show averages of observed minute values. Host averages
+sum containers per observed minute before averaging over the bucket. Network and
+block charts show the last observed cumulative byte counters per container,
+summed for host scope; counters can decrease after container restarts or workload
+changes. Empty periods appear as gaps, not zero usage. The final bucket can be
+partial. Dates and times appear on historical chart axes and sample details.
+
+Metric history persists for thirty days as minute aggregates under
+`DOCMON_DATA_DIRECTORY/metrics` on the server, including the existing Docker
+`docmon-data` volume. The standalone local TUI writes to
+`<LocalApplicationData>/Docmon/metrics`; set `DOCMON_TUI_DATA_DIRECTORY` to override
+the parent directory. Each collector needs its own directory. The local TUI
+collects while it is running; run the server continuously and connect the remote
+TUI to it for uninterrupted collection. A remote TUI uses the server's historical
+API instead of maintaining a second journal. History accumulates from monitoring
+start; earlier Docker stats cannot be backfilled. Dirty minute aggregates flush
+every thirty seconds and on orderly shutdown; a crash can lose recent unflushed
+observations. REST and MCP expose these windows through `metrics_summary`
+(`GET /api/v1/metrics/summary?timeframe=day&containerIdFilter=...`).
 
 ### Request history and diagnostics
 
@@ -295,9 +326,10 @@ In **Metrics**, use Left/Right to select a chart and `[` / `]` to cycle between
 host Docker workloads and individual containers, including stopped containers
 (which show no live data). Press `o` to switch between host workloads and the
 container selected in the Containers screen. Up/Down inspect older/newer samples;
-End returns to live values. Network and block charts use cumulative byte counters,
-matching the dashboard. The TUI retains the latest 120 samples for each series;
-charts span the entire retained window at any terminal width. Host scope sums
+End selects the latest sample in the current window. Use `t` / `T` to cycle
+between **Near real time**, **Last hour**, **Last day**, **Last week**, and
+**Last month**. Network and block charts use cumulative byte counters, matching
+the dashboard. Charts span the selected window at any terminal width. Host scope sums
 Docker container workloads and excludes unrelated host OS processes.
 
 ## Requirements

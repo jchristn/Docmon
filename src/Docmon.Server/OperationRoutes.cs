@@ -29,7 +29,7 @@ namespace Docmon.Server
                 foreach (string name in new[] { "id", "project" })
                     if (operation.Path.Contains("{" + name + "}")) metadata.WithParameter(OpenApiParameterMetadata.Path(name, "Resource identifier", OpenApiSchemaMetadata.String()));
                 if (operation.Name == "containers_logs") metadata.WithParameter(OpenApiParameterMetadata.Query("tail", "Trailing log lines, from 1 through 10000. Default 200.", false, OpenApiSchemaMetadata.Integer()));
-                if (operation.Name == "history_list" || operation.Name == "history_summary") metadata.WithParameter(OpenApiParameterMetadata.Query("timeframe", "Rolling window: hour (60 one-minute buckets), day (96 fifteen-minute buckets), week (84 two-hour buckets), month (90 eight-hour buckets over 30 days).", false, OpenApiSchemaMetadata.String()));
+                if (operation.Name == "history_list" || operation.Name == "history_summary" || operation.Name == "metrics_summary") metadata.WithParameter(OpenApiParameterMetadata.Query("timeframe", "Rolling window: hour (60 one-minute buckets), day (96 fifteen-minute buckets), week (84 two-hour buckets), month (90 eight-hour buckets over 30 days).", false, OpenApiSchemaMetadata.String()));
                 if (Enumeration.IsCollection(operation))
                     foreach (PropertyInfo property in typeof(EnumerationQuery).GetProperties())
                         metadata.WithParameter(OpenApiParameterMetadata.Query(JsonNamingPolicy.CamelCase.ConvertName(property.Name), property.Name == "Filters" ? "JSON object mapping scalar field names to substring filters." : "EnumerationQuery " + property.Name, false, property.Name == "Filters" ? OpenApiSchemaMetadata.String() : Schema(property.PropertyType)));
@@ -80,7 +80,7 @@ namespace Docmon.Server
                     EnumerationQuery query = JsonSerializer.Deserialize<EnumerationQuery>(JsonSerializer.Serialize(values, DocmonServer.Json), DocmonServer.Json)!;
                     foreach (PropertyInfo property in typeof(EnumerationQuery).GetProperties()) property.SetValue(request, property.GetValue(query));
                 }
-                if (operation.Name == "history_list" || operation.Name == "history_summary") request.Timeframe = WebUtility.UrlDecode(context.Request.Query.Elements["timeframe"]);
+                if (operation.Name == "history_list" || operation.Name == "history_summary" || operation.Name == "metrics_summary") request.Timeframe = WebUtility.UrlDecode(context.Request.Query.Elements["timeframe"]);
                 object result = await _Host.ExecuteAsync(operation.Name, request, timeout.Token).ConfigureAwait(false);
                 await DocmonServer.SendJsonAsync(context, result).ConfigureAwait(false);
             }
@@ -105,7 +105,7 @@ namespace Docmon.Server
         internal static OpenApiSchemaMetadata RequestSchema(ApiOperation operation)
         {
             HashSet<string> names = operation.Required.ToHashSet();
-            if (operation.Name == "history_list" || operation.Name == "history_summary") names.Add("timeframe");
+            if (operation.Name == "history_list" || operation.Name == "history_summary" || operation.Name == "metrics_summary") names.Add("timeframe");
             if (Enumeration.IsCollection(operation))
                 foreach (PropertyInfo property in typeof(EnumerationQuery).GetProperties()) names.Add(JsonNamingPolicy.CamelCase.ConvertName(property.Name));
             if (operation.Name.EndsWith("_remove")) names.Add("force");
@@ -139,7 +139,7 @@ namespace Docmon.Server
                 "containers_list" => typeof(ContainerInfo[]), "containers_inspect" => typeof(ContainerDetail), "containers_logs" => typeof(string[]),
                 "images_list" => typeof(ImageInfo[]), "images_check" => typeof(ImageInfo), "images_tags" => typeof(string[]),
                 "stacks_list" => typeof(ComposeStack[]), "system_usage" => typeof(SystemUsage), "events_list" => typeof(DockerEventInfo[]),
-                "metrics_history" => typeof(ContainerStatsSample[]), "metrics_list" => typeof(ContainerStatsSample[]), "history_summary" => typeof(RequestHistorySummary), "history_list" => typeof(RequestRecord[]), "history_inspect" => typeof(RequestRecord), "system_info" => typeof(ServerInfo), _ => typeof(OperationResult)
+                "metrics_summary" => typeof(MetricHistoryBucket[]), "metrics_history" => typeof(ContainerStatsSample[]), "metrics_list" => typeof(ContainerStatsSample[]), "history_summary" => typeof(RequestHistorySummary), "history_list" => typeof(RequestRecord[]), "history_inspect" => typeof(RequestRecord), "system_info" => typeof(ServerInfo), _ => typeof(OperationResult)
             };
             if (type.IsArray) type = typeof(EnumerationResult<>).MakeGenericType(type.GetElementType()!);
             return Schema(type);

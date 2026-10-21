@@ -2140,6 +2140,346 @@
         ]
       }
     },
+    "/api/v1/metrics/summary": {
+      "get": {
+        "operationId": "metrics_summary",
+        "summary": "Persistent historical metrics: hour/day/week/month buckets; CPU and memory means, last byte counters, gaps marked by hasData",
+        "tags": [
+          "metrics"
+        ],
+        "parameters": [
+          {
+            "name": "timeframe",
+            "in": "query",
+            "description": "Rolling window: hour (60 one-minute buckets), day (96 fifteen-minute buckets), week (84 two-hour buckets), month (90 eight-hour buckets over 30 days).",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "maxResults",
+            "in": "query",
+            "description": "EnumerationQuery MaxResults",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "continuationToken",
+            "in": "query",
+            "description": "EnumerationQuery ContinuationToken",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "EnumerationQuery Search",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "description": "EnumerationQuery SortBy",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ordering",
+            "in": "query",
+            "description": "EnumerationQuery Ordering",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "containerIdFilter",
+            "in": "query",
+            "description": "EnumerationQuery ContainerIdFilter",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "startUtc",
+            "in": "query",
+            "description": "EnumerationQuery StartUtc",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "endUtc",
+            "in": "query",
+            "description": "EnumerationQuery EndUtc",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "filters",
+            "in": "query",
+            "description": "JSON object mapping scalar field names to substring filters.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Completed request. Inspect exitCode for CLI and exec operations.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "maxResults": {
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "totalRecords": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "recordsRemaining": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "continuationToken": {
+                      "type": "string"
+                    },
+                    "endOfResults": {
+                      "type": "boolean"
+                    },
+                    "objects": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "endUtc": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "hasData": {
+                            "type": "boolean"
+                          },
+                          "sampleCount": {
+                            "type": "integer",
+                            "format": "int64"
+                          },
+                          "containerId": {
+                            "type": "string"
+                          },
+                          "cpuPercent": {
+                            "type": "number"
+                          },
+                          "memoryUsage": {
+                            "type": "integer",
+                            "format": "int64"
+                          },
+                          "memoryLimit": {
+                            "type": "integer",
+                            "format": "int64"
+                          },
+                          "networkRxBytes": {
+                            "type": "integer",
+                            "format": "int64"
+                          },
+                          "networkTxBytes": {
+                            "type": "integer",
+                            "format": "int64"
+                          },
+                          "blockReadBytes": {
+                            "type": "integer",
+                            "format": "int64"
+                          },
+                          "blockWriteBytes": {
+                            "type": "integer",
+                            "format": "int64"
+                          },
+                          "atUtc": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "memoryPercent": {
+                            "type": "number"
+                          }
+                        }
+                      }
+                    },
+                    "totalMs": {
+                      "type": "number"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Structured error with code, message and requestId.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Structured error with code, message and requestId.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Structured error with code, message and requestId.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Structured error with code, message and requestId.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Structured error with code, message and requestId.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Structured error with code, message and requestId.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Structured error with code, message and requestId.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
     "/api/v1/metrics/history": {
       "get": {
         "operationId": "metrics_history",

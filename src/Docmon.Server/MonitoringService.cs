@@ -7,6 +7,7 @@ namespace Docmon.Server
     using System.Threading;
     using System.Threading.Tasks;
     using Docmon.Core.Models;
+    using Docmon.Core.Monitoring;
     using Docmon.Core.Services;
 
     internal sealed class MonitoringService
@@ -15,14 +16,25 @@ namespace Docmon.Server
         private readonly ConcurrentQueue<DockerEventInfo> _Events = new ConcurrentQueue<DockerEventInfo>();
         private readonly ConcurrentDictionary<string, ContainerStatsSample> _Metrics = new ConcurrentDictionary<string, ContainerStatsSample>();
         private readonly ConcurrentQueue<ContainerStatsSample> _History = new ConcurrentQueue<ContainerStatsSample>();
+        internal MetricHistoryStore Journal { get; }
         internal ContainerStatsSample[] History => _History.ToArray();
         internal DockerEventInfo[] Events => _Events.ToArray();
         internal ContainerStatsSample[] Metrics => _Metrics.Values.ToArray();
         internal string? Error { get; private set; }
-        internal MonitoringService(DocmonRuntime runtime) { _Runtime = runtime; }
+        internal MonitoringService(DocmonRuntime runtime, string directory) { _Runtime = runtime; Journal = new MetricHistoryStore(System.IO.Path.Combine(directory, "metrics")); }
         internal async Task RunAsync(CancellationToken token)
         {
-            await Task.WhenAll(EventsAsync(token), MetricsAsync(token)).ConfigureAwait(false);
+            try { await Task.WhenAll(EventsAsync(token), MetricsAsync(token), FlushAsync(token)).ConfigureAwait(false); }
+            finally { await Journal.FlushAsync(CancellationToken.None).ConfigureAwait(false); }
+        }
+        private async Task FlushAsync(CancellationToken token)
+        {
+            while (!token.IsCancellationRequested)
+            {
+                await Task.Delay(TimeSpan.FromSeconds(30), token).ConfigureAwait(false);
+                try { await Journal.FlushAsync(token).ConfigureAwait(false); }
+                catch (Exception ex) when (ex is System.IO.IOException || ex is UnauthorizedAccessException) { Error = "Metric history persistence failed: " + ex.Message; }
+            }
         }
         private async Task EventsAsync(CancellationToken token)
         {
@@ -82,7 +94,7 @@ namespace Docmon.Server
         {
             while (!token.IsCancellationRequested)
             {
-                try { await _Runtime.Stats.StreamAsync(id, new InlineProgress<ContainerStatsSample>(sample => { _Metrics[id] = sample; _History.Enqueue(sample); while (_History.Count > 10000) _History.TryDequeue(out _); }), token).ConfigureAwait(false); }
+                try { await _Runtime.Stats.StreamAsync(id, new InlineProgress<ContainerStatsSample>(sample => { _Metrics[id] = sample; Journal.Add(sample); _History.Enqueue(sample); while (_History.Count > 10000) _History.TryDequeue(out _); }), token).ConfigureAwait(false); }
                 catch (OperationCanceledException) when (token.IsCancellationRequested) { return; }
                 catch (Exception ex) { Error = ex.Message; }
                 try { await Task.Delay(5000, token).ConfigureAwait(false); }

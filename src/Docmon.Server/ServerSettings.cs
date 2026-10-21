@@ -14,14 +14,14 @@ namespace Docmon.Server
         public int McpPort { get; } = ReadPort("DOCMON_MCP_PORT", 8081);
         /// <summary>Allowed browser origin. Empty means same-origin only.</summary>
         public string AllowedOrigin { get; } = Environment.GetEnvironmentVariable("DOCMON_ALLOWED_ORIGIN") ?? string.Empty;
-        /// <summary>Directory for durable request history. Defaults to ./data.</summary>
+        /// <summary>Directory for durable request and metric history. Defaults to ./data.</summary>
         public string DataDirectory { get; } = Environment.GetEnvironmentVariable("DOCMON_DATA_DIRECTORY") ?? "./data";
         /// <summary>Creates explicit configuration, useful for embedding and isolated tests.</summary>
         /// <param name="token">Required bearer token.</param>
         /// <param name="host">Bind hostname.</param>
         /// <param name="port">Public port, from 1 through 65535.</param>
         /// <param name="mcpPort">Distinct private loopback port.</param>
-        /// <param name="dataDirectory">Durable request history directory.</param>
+        /// <param name="dataDirectory">Durable request and metric history directory.</param>
         public ServerSettings(string token, string host, int port, int mcpPort, string dataDirectory)
         {
             if (string.IsNullOrWhiteSpace(token)) throw new ArgumentException("Bearer token is required.", nameof(token));

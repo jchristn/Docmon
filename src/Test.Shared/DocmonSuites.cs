@@ -35,6 +35,7 @@ namespace Test.Shared
                     GuardSuites.ServiceGuardSuite(),
                     GuardSuites.ClientProviderSuite(),
                     MonitoringSuites.MetricsSuite(),
+                    MetricHistorySuites.Suite(),
                     MonitoringSuites.TableStateSuite(),
                     RenderingSuites.WidgetRenderingSuite(),
                     DockerIntegrationSuites.EngineSuite(),

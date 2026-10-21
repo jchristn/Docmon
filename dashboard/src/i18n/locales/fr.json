@@ -192,5 +192,8 @@
   "lastWeek": "Dernière semaine",
   "lastMonth": "Dernier mois",
   "requestsPerBucket": "Requêtes par intervalle",
-  "dockerWorkloads": "Toutes les charges Docker"
+  "dockerWorkloads": "Toutes les charges Docker",
+  "nearRealTime": "Quasi temps réel",
+  "metricHistoryHint": "Les valeurs historiques du processeur et de la mémoire sont des moyennes ; le réseau et le disque affichent les derniers compteurs d’octets observés. Les lacunes indiquent une absence de mesures. L’historique est collecté pendant la surveillance.",
+  "noObservations": "Aucune mesure"
 }

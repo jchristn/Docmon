@@ -192,5 +192,8 @@
   "lastWeek": "Última semana",
   "lastMonth": "Último mês",
   "requestsPerBucket": "Solicitações por intervalo",
-  "dockerWorkloads": "Todas as cargas do Docker"
+  "dockerWorkloads": "Todas as cargas do Docker",
+  "nearRealTime": "Quase em tempo real",
+  "metricHistoryHint": "CPU e memória históricas são médias; rede e disco mostram os últimos contadores de bytes observados. Lacunas indicam ausência de medições. O histórico é coletado durante o monitoramento.",
+  "noObservations": "Sem medições"
 }

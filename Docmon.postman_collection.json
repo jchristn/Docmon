@@ -1052,6 +1052,30 @@
       "description": "Metrics resources and lifecycle operations. Mutations require machine-operator bearer access. Inspect required variables before running.",
       "item": [
         {
+          "name": "metrics_summary",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/metrics/summary?timeframe=hour&maxResults=100",
+            "description": "Persistent historical metrics: hour/day/week/month buckets; CPU and memory means, last byte counters, gaps marked by hasData.\n\n- `timeframe` (query, string, optional): Rolling window: hour (60 one-minute buckets), day (96 fifteen-minute buckets), week (84 two-hour buckets), month (90 eight-hour buckets over 30 days).\n- `maxResults` (query, integer, optional): EnumerationQuery MaxResults\n- `continuationToken` (query, string, optional): EnumerationQuery ContinuationToken\n- `search` (query, string, optional): EnumerationQuery Search\n- `sortBy` (query, string, optional): EnumerationQuery SortBy\n- `ordering` (query, string, optional): EnumerationQuery Ordering\n- `containerIdFilter` (query, string, optional): EnumerationQuery ContainerIdFilter\n- `startUtc` (query, string, optional): EnumerationQuery StartUtc\n- `endUtc` (query, string, optional): EnumerationQuery EndUtc\n- `filters` (query, string, optional): JSON object mapping scalar field names to substring filters."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Successful HTTP status\", () => pm.expect(pm.response.code).to.be.within(200, 299));",
+                  "pm.test(\"JSON response\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"No reported operation failure\", () => { const b = pm.response.json(); if (b.exitCode !== undefined) pm.expect(b.exitCode).to.equal(0); });",
+                  "pm.test(\"EnumerationResult paging contract\", () => { const b = pm.response.json(); pm.expect(b.success).to.equal(true); pm.expect(b.objects).to.be.an(\"array\"); pm.expect(b.maxResults).to.be.within(1,1000); pm.expect(b.objects.length).to.be.at.most(b.maxResults); pm.expect(b.totalRecords).to.be.at.least(b.objects.length); pm.expect(b.recordsRemaining).to.be.at.least(0); pm.expect(b.endOfResults).to.equal(b.recordsRemaining === 0); if (!b.endOfResults) pm.expect(b.continuationToken).to.be.a(\"string\").and.not.empty; });",
+                  "pm.test(\"Metric history window contract\", () => { const b=pm.response.json(); pm.expect(b.totalRecords).to.equal(60); pm.expect(b.objects).to.have.length(60); pm.expect(b.endOfResults).to.equal(true); for (const p of b.objects) { pm.expect(p.hasData).to.be.a(\"boolean\"); pm.expect(p.sampleCount).to.be.at.least(0); pm.expect(Date.parse(p.endUtc)).to.be.above(Date.parse(p.atUtc)); if (!p.hasData) pm.expect(p.sampleCount).to.equal(0); } });"
+                ]
+              }
+            }
+          ]
+        },
+        {
           "name": "metrics_history",
           "request": {
             "method": "GET",

@@ -7,6 +7,7 @@ All notable changes to Docmon are documented here. The format follows
 ## [Unreleased]
 
 ### Added
+- Persistent thirty-day metric history shared by the server and local/remote TUI, with hour/day/week/month controls in both interfaces, fixed-size buckets, gap rendering, and REST/MCP enumeration.
 - Remote TUI `--token` option, with precedence over the existing environment-variable fallback.
 - Cross-platform source launchers (`go`, `run-tui`, `run-server`) and complete retained-journal request summaries for hour/day/week/30-day windows.
 - Watson 7 REST server with bearer authentication, typed route metadata, OpenAPI and Swagger.

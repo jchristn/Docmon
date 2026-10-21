@@ -195,6 +195,48 @@
     }
   },
   {
+    "name": "metrics_summary",
+    "method": "GET",
+    "path": "/api/v1/metrics/summary",
+    "summary": "Persistent historical metrics: hour/day/week/month buckets; CPU and memory means, last byte counters, gaps marked by hasData",
+    "required": [],
+    "properties": {
+      "timeframe": {
+        "type": "string"
+      },
+      "maxResults": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "continuationToken": {
+        "type": "string"
+      },
+      "search": {
+        "type": "string"
+      },
+      "sortBy": {
+        "type": "string"
+      },
+      "ordering": {
+        "type": "string"
+      },
+      "containerIdFilter": {
+        "type": "string"
+      },
+      "startUtc": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "endUtc": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "filters": {
+        "type": "string"
+      }
+    }
+  },
+  {
     "name": "metrics_history",
     "method": "GET",
     "path": "/api/v1/metrics/history",

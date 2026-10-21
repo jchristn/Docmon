@@ -50,7 +50,7 @@ namespace Docmon.Server
             _History = new RequestHistoryStore(settings.DataDirectory, settings.Token);
             _Runtime = new DocmonRuntime();
             _Operations = new DocmonOperations(_Runtime);
-            _Monitoring = new MonitoringService(_Runtime);
+            _Monitoring = new MonitoringService(_Runtime, settings.DataDirectory);
             _Authentication = new BearerAuthentication(settings.Token);
             WebserverSettings web = new WebserverSettings(settings.Host, settings.Port, false);
             web.Headers.DefaultHeaders.Clear();
@@ -108,6 +108,7 @@ namespace Docmon.Server
                 "stacks_list" => Enumeration.Page((IEnumerable<ComposeStack>)result, request, operation),
                 "events_list" => Enumeration.Page((IEnumerable<DockerEventInfo>)result, request, operation),
                 "metrics_list" or "metrics_history" => Enumeration.Page((IEnumerable<ContainerStatsSample>)result, request, operation),
+                "metrics_summary" => Enumeration.Page((IEnumerable<MetricHistoryBucket>)result, request, operation + ":" + request.Timeframe),
                 "history_list" => Enumeration.Page((IEnumerable<RequestRecord>)result, request, operation + ":" + request.Timeframe),
                 "containers_logs" or "images_tags" => Enumeration.Page((IEnumerable<string>)result, request, operation + ":" + request.Id),
                 _ => result
@@ -120,6 +121,7 @@ namespace Docmon.Server
                 case "system_info": return new ServerInfo { Endpoint = _Runtime.Provider.Endpoint, MonitoringError = _Monitoring.Error };
                 case "metrics_list": return _Monitoring.Metrics;
                 case "metrics_history": return _Monitoring.History;
+                case "metrics_summary": return await _Monitoring.Journal.GetMetricHistoryAsync(request.Timeframe ?? "hour", request.ContainerIdFilter ?? string.Empty, token).ConfigureAwait(false);
                 case "events_list": return _Monitoring.Events;
                 case "history_list": return request.Timeframe == null ? _History.ReadSummary() : await _History.ReadWindowAsync(request.Timeframe, token).ConfigureAwait(false);
                 case "history_summary": return await _History.SummarizeAsync(request.Timeframe, token).ConfigureAwait(false);

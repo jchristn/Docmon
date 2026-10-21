@@ -192,5 +192,8 @@
   "lastWeek": "Minggu terakhir",
   "lastMonth": "Bulan terakhir",
   "requestsPerBucket": "Permintaan setiap sela",
-  "dockerWorkloads": "Semua beban Docker"
+  "dockerWorkloads": "Semua beban Docker",
+  "nearRealTime": "Hampir masa nyata",
+  "metricHistoryHint": "CPU dan memori sejarah ialah purata; rangkaian dan cakera menunjukkan pembilang bait terakhir yang diperhatikan. Jurang bermaksud tiada pemerhatian. Sejarah dikumpul semasa pemantauan berjalan.",
+  "noObservations": "Tiada pemerhatian"
 }

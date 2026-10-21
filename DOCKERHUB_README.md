@@ -17,6 +17,12 @@ Docmon is under active development. Features and APIs may change.
 
 The repository's release scripts build for `linux/amd64` and `linux/arm64/v8`. The included Compose deployment pins both images to `v0.1.0`.
 
+Historical metrics are available for the last hour, day, week, and thirty days,
+with 60 one-minute, 96 fifteen-minute, 84 two-hour, and 90 eight-hour buckets.
+Both the dashboard and remote TUI retain near-real-time mode. Metric history
+persists in the backend's existing `docmon-data` volume and accumulates while the
+server monitors Docker. Empty periods are gaps; earlier stats cannot be backfilled.
+
 ## Quick start
 
 Install Docker with Docker Compose, then download the deployment configuration:

@@ -192,5 +192,8 @@
   "lastWeek": "آخر أسبوع",
   "lastMonth": "آخر شهر",
   "requestsPerBucket": "الطلبات لكل فترة",
-  "dockerWorkloads": "كل أحمال Docker"
+  "dockerWorkloads": "كل أحمال Docker",
+  "nearRealTime": "شبه آني",
+  "metricHistoryHint": "قيم المعالج والذاكرة التاريخية هي متوسطات؛ وتعرض الشبكة والقرص آخر عدادات بايت تمت ملاحظتها. تعني الفجوات عدم وجود قياسات. يتراكم السجل أثناء تشغيل المراقبة.",
+  "noObservations": "لا توجد قياسات"
 }

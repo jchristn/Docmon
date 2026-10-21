@@ -139,6 +139,29 @@ namespace Test.Shared.Suites
                     screen.SetContainers(Array.Empty<ContainerInfo>());
                     Check.True(Snapshot.RenderWidget(screen, 100, 22).Contains("Host: all Docker workloads"), "removed selection falls back to host");
                 }),
+                c.Sync("MetricTimeframes", "TUI cycles live and historical windows, rejects stale responses, and distinguishes gaps", () =>
+                {
+                    MetricsScreen screen = new MetricsScreen();
+                    screen.SetData(new StatsHistory(120), "a", "web-api");
+                    WidgetTester tester = WidgetTester.For(screen, 100, 22);
+                    string[] windows = { "hour", "day", "week", "month", "live" };
+                    foreach (string window in windows)
+                    {
+                        tester.Press(KeyEvent.Char('t'));
+                        Check.Equal(window, screen.Timeframe, "timeframe cycle");
+                    }
+                    tester.Press(KeyEvent.Char('T'));
+                    Check.Equal("month", screen.Timeframe, "reverse cycle");
+                    screen.SetHistoricalData("hour", "", new List<MetricHistoryBucket>());
+                    Check.True(Snapshot.RenderWidget(screen, 100, 22).Contains("Loading historical"), "stale response ignored");
+                    DateTime at = DateTime.UtcNow;
+                    screen.SetHistoricalData("month", "", new[] { new MetricHistoryBucket { AtUtc = at, EndUtc = at.AddHours(8), HasData = false } });
+                    Check.True(Snapshot.RenderWidget(screen, 100, 22).Contains("No observations"), "gap detail");
+                    tester.Press(KeyEvent.Char(']'));
+                    Check.True(Snapshot.RenderWidget(screen, 100, 22).Contains("Loading historical"), "scope change clears old data");
+                    screen.SetHistoricalData("month", "a", null, "History unavailable");
+                    Check.True(Snapshot.RenderWidget(screen, 100, 22).Contains("History unavailable"), "remote error is visible");
+                }),
                 c.Sync("TinySurface", "Widgets render into a very small surface without throwing", () =>
                 {
                     TabBar tabs = new TabBar(new[] { "Containers", "Stacks" });

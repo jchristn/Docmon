@@ -35,6 +35,7 @@ namespace Docmon.Server
             new ApiOperation("system_usage", "GET", "/system/usage", "Docker disk and resource usage"),
             new ApiOperation("system_info", "GET", "/system/info", "Server connection and version"),
             new ApiOperation("events_list", "GET", "/events", "Recent daemon events"),
+            new ApiOperation("metrics_summary", "GET", "/metrics/summary", "Persistent historical metrics: hour/day/week/month buckets; CPU and memory means, last byte counters, gaps marked by hasData"),
             new ApiOperation("metrics_history", "GET", "/metrics/history", "Bounded recent container metric history"),
             new ApiOperation("metrics_list", "GET", "/metrics", "Latest live container metrics"),
             new ApiOperation("history_summary", "GET", "/history/summary", "Request history time buckets across the retained journal"),
