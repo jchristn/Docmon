@@ -18,24 +18,183 @@ behavior, and APIs are subject to change.
 
 </div>
 
-## What it does
+## Capabilities
 
-Docmon connects to the Docker daemon on the machine it runs on and gives you a
-single console for the things you actually do all day:
+Docmon provides these interfaces to a Docker machine:
 
-- **See everything running.** Containers with image, tag, short/full ID, exposed
-  ports, state, health, uptime, and live CPU/memory — in a sortable table.
-- **Watch performance over time.** CPU, memory, network, and block I/O plotted
-  as charts for the whole deployment or for one container.
-- **Know when images are stale.** Docmon compares your local image digests
-  against the registry and flags what has an update waiting.
-- **Group by compose project.** If you live in `compose.yaml` files, Docmon
-  understands stacks: it groups containers by project and drives stack-level
-  actions.
-- **Operate.** Start, stop, restart, kill, pause, and remove containers; pull
-  images; prune; and apply an update with one action.
-- **Get inside a container.** Run a one-shot command with output captured
-  in-pane, transfer files in and out, or open a full interactive shell.
+| Interface | Capabilities | Authentication |
+| --- | --- | --- |
+| Local terminal UI | Keyboard-driven container, image, Compose, metrics, events, and housekeeping screens on Windows, Linux, and macOS | No token; connects only to the local Docker socket or named pipe |
+| Remote terminal UI | Docker operations through a Docmon server, including client-side file transfers and interactive shells | `--server <url>` with `--token <token>` or `DOCMON_BEARER_TOKEN` |
+| Web dashboard | React console for monitoring, management, charts, request inspection, and API exploration | Bearer-token login |
+| REST API and MCP | Programmatic Docker monitoring and control for scripts, integrations, and agents | Bearer token on every management request |
+
+### Containers
+
+- List running and stopped containers with names, IDs, images, states, health,
+  status, creation times, ports, and Compose associations.
+- Inspect command, restart policy, environment variables, mounts, networks,
+  labels, published ports, and creation/start times.
+- Start, stop, restart, kill, pause, unpause, and remove containers, with optional
+  forced removal through the API/dashboard.
+- Read recent container logs. The REST log reader supports a configurable tail
+  of 1 through 10,000 lines.
+- Execute commands with explicit executable/argument arrays, captured output,
+  and exit codes.
+- Open interactive shells: the local TUI uses the Docker CLI; the browser and
+  remote TUI use an authenticated WebSocket connection to Docker exec.
+- Pull a container's image and apply it to its Compose service. For standalone
+  containers, this action pulls the image; recreating the container is a
+  separate step, because restarting preserves its original image.
+
+### Images and registries
+
+- List local images with repository, primary tag, all available tags, image ID,
+  digests, creation time, size, and update status.
+- Identify untagged images explicitly and retain their IDs for inspection and
+  removal; named repositories sort ahead of missing repository values in the
+  dashboard.
+- Pull a new image by name/tag or digest, or pull the reference of an existing
+  tagged image selected by ID.
+- Compare local and registry digests to check for updates, with unknown,
+  checking, current, update-available, and error states.
+- Discover registry tags. Docker Hub is the implemented provider for registry
+  update checks and tag discovery.
+- Remove individual images, optionally force removal, and prune dangling images
+  with the reclaimed byte count reported.
+
+### Compose projects
+
+- Discover projects and services from Docker Compose labels, including project
+  configuration paths and running/service counts.
+- Bring projects up or down, restart them, and pull their service images.
+- Target a service when bringing a project up or applying a container update.
+- Capture Compose command output and exit codes.
+
+Discovery uses the Docker socket. Lifecycle operations also require the original
+Compose files and referenced dependencies to be accessible to the backend at
+matching host paths. See [Compose project access](docker/README.md#compose-project-access).
+
+### File transfers
+
+- Copy files and directories into and out of containers using Docker archives.
+- Use filesystem paths with the local TUI or the API's copy-in/copy-out operations.
+  API filesystem paths refer to the backend's filesystem, including its mounts
+  when the backend runs in Docker.
+- Upload tar archives from the browser and download container files/directories
+  as tar archives, without first staging them on the backend filesystem.
+- Transfer files from the remote TUI's own machine through the archive endpoints.
+- Support tar uploads up to 4 MiB. Larger server-side transfers can use the
+  filesystem copy operations with appropriately mounted working directories.
+
+### Metrics, events, and resource usage
+
+- Collect live container CPU usage, memory usage/limits, network receive/transmit
+  counters, and block-device read/write counters.
+- View individual-container metrics or aggregate all Docker container workloads.
+  The aggregate excludes unrelated host OS processes. Network and disk values
+  are cumulative byte counters.
+- Show live charts in the TUI and one full-width chart per metric tab in the web
+  dashboard, with time/value axes and hover or keyboard-focus details.
+- Read the latest metrics and recent metric history through REST and MCP.
+- Monitor Docker daemon events with timestamps, event types, actions, and actors.
+- Report Docker Engine version/OS, container and running counts, image and
+  dangling-image counts, total image size, and volume count through the system
+  usage API and TUI Tools screen.
+
+The server retains up to 10,000 metric samples and 1,000 Docker events in memory.
+These histories reset when it restarts.
+
+### Request history and diagnostics
+
+- Persist redacted request journals for 30 days, including method, path, status,
+  duration, correlation ID, headers, and bounded request/response bodies.
+- Browse, search, filter, sort, and page through request summaries, then open a
+  full request inspector occupying 95% of the browser viewport.
+- Retrieve retained request details even after an entry leaves the recent
+  1,000-record memory cache.
+- Chart successful and failed requests using complete time buckets, including
+  empty intervals, computed from the retained journal.
+
+| History timeframe | Bucket width | Number of buckets |
+| --- | --- | --- |
+| Last hour | 1 minute | 60 |
+| Last day | 15 minutes | 96 |
+| Last week | 2 hours | 84 |
+| Last month, rolling 30 days | 8 hours | 90 |
+
+Timeframe selection applies to the dashboard history table and chart. The API
+also exposes windowed enumeration and bucket summaries. Request bodies are
+bounded to 4,096 characters after redaction; see the [REST API conventions](REST_API.md#authentication-and-conventions)
+for capture behavior and limits.
+
+### Web dashboard
+
+- Overview cards, recent request activity, Docker workload totals, containers
+  needing attention, and quick navigation to management pages.
+- Dedicated containers, images, Compose stacks, metrics, events, request history,
+  API explorer, and server/settings pages.
+- Compact tables with ascending/descending column sorting, global search,
+  per-column filters, selectable columns, pagination, manual refresh, and automatic
+  refresh every five seconds.
+- Persist selected columns, page sizes, history timeframe, language, and theme.
+- Row inspection dialogs, copy controls, operation confirmations, and context
+  menus rendered above page content and kept within the viewport.
+- OpenAPI-driven endpoint selection, path/query parameter inputs, JSON request
+  editing, tar upload/download support, response/header inspection, and request
+  copying in the API explorer.
+- Navy & Silver light/dark themes, responsive layouts, project branding, and
+  GitHub/Discord links in the topbar.
+- Twelve languages: English, Spanish, Brazilian Portuguese, French, Italian,
+  German, Simplified Chinese, Arabic, Russian, Malay, Hindi, and Japanese.
+  Language selection works before and after login, with locale-aware formatting,
+  Arabic RTL layout, and expansion/RTL test locales. See [internationalization](dashboard/I18N.md).
+- Token storage scoped to the browser tab session, sign-out clearing, and
+  automatic sign-out when the API rejects the token.
+
+### REST, MCP, and integration tooling
+
+- C# Watson 7 REST server at `/api/v1`, with typed requests/responses, bearer
+  authentication, structured errors, and request correlation IDs.
+- Live OpenAPI metadata at `/openapi.json`, interactive Swagger at `/swagger`,
+  and checked-in [REST documentation](REST_API.md) and [OpenAPI snapshot](assets/openapi.json).
+- A colocated Voltaic MCP server exposed through the authenticated `/mcp`
+  gateway, with tools for container lifecycle, inspection, logs, exec, copies,
+  image operations, Compose operations, metrics, events, system information,
+  and request history. See the [MCP tool reference](MCP_API.md).
+- Shared `EnumerationQuery`/`EnumerationResult<T>` collection contracts with
+  search, scalar-field filters, sorting, container/time filters, result counts,
+  and continuation-token pagination. The dashboard and remote TUI follow pages
+  automatically.
+- Public Docker readiness checks at `/health`; management APIs and MCP require
+  authentication. The token grants machine-wide Docker access.
+- Root [Postman collection](Docmon.postman_collection.json), a separate
+  [read-only smoke collection](Docmon.read-only.postman_collection.json), and a
+  generator that keeps API inventories, documentation, and collections aligned
+  with live route metadata.
+
+Interactive WebSocket terminals and binary archive transfer are REST transports;
+MCP agents use exec and filesystem copy tools for those tasks. Web/remote terminal
+resize negotiation is not implemented yet.
+
+### Deployment and local tooling
+
+- Separate named backend/dashboard images and a two-service Docker Compose
+  deployment with health checks, configurable ports/interface bindings, Docker
+  socket access, and a persistent request-history volume.
+- A working `docker/.env` with the default token `docmonadmin` and published
+  interfaces bound to `0.0.0.0`.
+- Dashboard-origin proxying of REST, Swagger/OpenAPI, WebSocket terminals, and MCP.
+- Shell and Windows batch build helpers for server, dashboard, or both: build
+  Linux amd64/arm64 images, push the requested tag plus `latest`, and refresh the native
+  local image copy.
+- `docker/update.sh` and `docker/update.bat` to pull the configured images and
+  recreate the services while preserving the named data volume.
+- `go.sh`/`go.bat`, `run-tui.sh`/`run-tui.bat`, and
+  `run-server.sh`/`run-server.bat` source launchers, with .NET 8/10 selection and
+  application argument forwarding.
+- .NET global-tool packaging, Windows install/reinstall/remove helpers, shared
+  backend test suites, frontend/browser tests, and GitHub Actions checks.
 
 ## Web dashboard and agent access
 
@@ -77,7 +236,8 @@ Compose file mounts, and persistence. The stack runs only the backend and dashbo
 
 ### Run from source
 
-Requires the .NET 10 SDK and Node.js 22 or newer for the dashboard:
+Requires the .NET 8 or .NET 10 SDK and Node.js 22 or newer for the dashboard.
+The commands below use .NET 10:
 
 ```bash
 export DOCMON_BEARER_TOKEN="$(openssl rand -hex 32)"
@@ -127,7 +287,7 @@ the number keys `1`–`6`:
 | 3 | **Metrics** | Full-size CPU / memory / network / disk charts, overall or per container |
 | 4 | **Images** | Local images, registry digests, and update status |
 | 5 | **Events** | A live stream of Docker daemon events |
-| 6 | **Tools** | Disk usage, prune, and housekeeping |
+| 6 | **Tools** | Engine/OS information, resource counts, image storage, and dangling-image pruning |
 
 ## Requirements
 
@@ -137,7 +297,8 @@ the number keys `1`–`6`:
   - Windows: the `npipe://./pipe/docker_engine` named pipe (Docker Desktop).
   - Linux/macOS: the `unix:///var/run/docker.sock` socket. The backend honors `DOCKER_HOST` to
     override.
-- The `docker` CLI on `PATH` — used only for the interactive shell and TTY exec.
+- The `docker` CLI and Compose plugin on `PATH` for Compose lifecycle operations
+  and local interactive shells/TTY exec. The backend Docker image includes them.
 
 Docmon runs in any modern terminal. For the best rendering, use a terminal with
 truecolor and a font that includes box-drawing and block glyphs (Windows
@@ -216,14 +377,15 @@ docmon                 # connect to the local Docker daemon and open the TUI
 docmon --no-splash     # skip the startup splash screen
 docmon --version       # print version and exit
 docmon --help          # print usage and exit
+docmon --server https://your-machine --token "your-token"  # remote TUI
 ```
 
 Common keys once you're in:
 
 ```
 Tab / Shift+Tab   move between panes            1..6   jump to a screen
-↑ ↓ PgUp PgDn      navigate a table/pane         /      search / filter
-Enter              inspect selected              Ctrl+P command palette
+↑ ↓ PgUp PgDn      navigate a table/pane         Home / End   first / last row
+Enter              inspect selected              o      toggle metrics scope
 s / x / l          shell / exec / logs           F1 / ? help
 r S K p            restart / stop / kill / pause  u / U check updates / pull+apply
 t                  transfer files                Ctrl+Q quit
