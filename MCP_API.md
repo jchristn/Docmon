@@ -6,6 +6,8 @@ MCP implements initialize, initialized, tools/list, tools/call, cancellation and
 
 Tools share the REST application service, models, and side effects. Successful results are returned as camelCase JSON in MCP text content. Nonzero CLI/exec exit codes also set isError. Resource reads return the JSON resource shape described in [REST_API.md](REST_API.md); mutations return `{ "exitCode": 0, "output": [], "reclaimedBytes": 0 }`. Inspect nonzero exit codes. Tool exceptions become MCP errors. The `containers_copy_in` and `containers_copy_out` host paths refer to the API server machine, not the agent machine. Binary archive transfer and the interactive WebSocket terminal are REST transports; use exec for agent commands.
 
+Collection tools accept the same EnumerationQuery fields documented in REST_API.md and return EnumerationResult objects. Pass `filters` as an object in MCP arguments (REST query parameters encode that object as a JSON string). Follow `continuationToken` with unchanged query fields until `endOfResults` is true.
+
 ## Client configuration
 
 ```json
@@ -31,7 +33,15 @@ Equivalent REST operation: `GET /api/v1/containers`.
 
 | Parameter | Type | Required |
 | --- | --- | --- |
-| None | | |
+| `maxResults` | integer | No |
+| `continuationToken` | string | No |
+| `search` | string | No |
+| `sortBy` | string | No |
+| `ordering` | string | No |
+| `containerIdFilter` | string | No |
+| `startUtc` | string | No |
+| `endUtc` | string | No |
+| `filters` | object | No |
 
 Example `tools/call`:
 
@@ -55,7 +65,15 @@ Equivalent REST operation: `GET /api/v1/images`.
 
 | Parameter | Type | Required |
 | --- | --- | --- |
-| None | | |
+| `maxResults` | integer | No |
+| `continuationToken` | string | No |
+| `search` | string | No |
+| `sortBy` | string | No |
+| `ordering` | string | No |
+| `containerIdFilter` | string | No |
+| `startUtc` | string | No |
+| `endUtc` | string | No |
+| `filters` | object | No |
 
 Example `tools/call`:
 
@@ -130,7 +148,15 @@ Equivalent REST operation: `GET /api/v1/stacks`.
 
 | Parameter | Type | Required |
 | --- | --- | --- |
-| None | | |
+| `maxResults` | integer | No |
+| `continuationToken` | string | No |
+| `search` | string | No |
+| `sortBy` | string | No |
+| `ordering` | string | No |
+| `containerIdFilter` | string | No |
+| `startUtc` | string | No |
+| `endUtc` | string | No |
+| `filters` | object | No |
 
 Example `tools/call`:
 
@@ -202,7 +228,15 @@ Equivalent REST operation: `GET /api/v1/events`.
 
 | Parameter | Type | Required |
 | --- | --- | --- |
-| None | | |
+| `maxResults` | integer | No |
+| `continuationToken` | string | No |
+| `search` | string | No |
+| `sortBy` | string | No |
+| `ordering` | string | No |
+| `containerIdFilter` | string | No |
+| `startUtc` | string | No |
+| `endUtc` | string | No |
+| `filters` | object | No |
 
 Example `tools/call`:
 
@@ -226,7 +260,15 @@ Equivalent REST operation: `GET /api/v1/metrics/history`.
 
 | Parameter | Type | Required |
 | --- | --- | --- |
-| None | | |
+| `maxResults` | integer | No |
+| `continuationToken` | string | No |
+| `search` | string | No |
+| `sortBy` | string | No |
+| `ordering` | string | No |
+| `containerIdFilter` | string | No |
+| `startUtc` | string | No |
+| `endUtc` | string | No |
+| `filters` | object | No |
 
 Example `tools/call`:
 
@@ -250,7 +292,15 @@ Equivalent REST operation: `GET /api/v1/metrics`.
 
 | Parameter | Type | Required |
 | --- | --- | --- |
-| None | | |
+| `maxResults` | integer | No |
+| `continuationToken` | string | No |
+| `search` | string | No |
+| `sortBy` | string | No |
+| `ordering` | string | No |
+| `containerIdFilter` | string | No |
+| `startUtc` | string | No |
+| `endUtc` | string | No |
+| `filters` | object | No |
 
 Example `tools/call`:
 
@@ -266,6 +316,30 @@ Example `tools/call`:
 }
 ```
 
+### `history_summary`
+
+Request history time buckets across the retained journal.
+
+Equivalent REST operation: `GET /api/v1/history/summary`.
+
+| Parameter | Type | Required |
+| --- | --- | --- |
+| `timeframe` | string | No |
+
+Example `tools/call`:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "tools/call",
+  "params": {
+    "name": "history_summary",
+    "arguments": {}
+  }
+}
+```
+
 ### `history_list`
 
 Recent API requests without credentials.
@@ -274,7 +348,16 @@ Equivalent REST operation: `GET /api/v1/history`.
 
 | Parameter | Type | Required |
 | --- | --- | --- |
-| None | | |
+| `timeframe` | string | No |
+| `maxResults` | integer | No |
+| `continuationToken` | string | No |
+| `search` | string | No |
+| `sortBy` | string | No |
+| `ordering` | string | No |
+| `containerIdFilter` | string | No |
+| `startUtc` | string | No |
+| `endUtc` | string | No |
+| `filters` | object | No |
 
 Example `tools/call`:
 
@@ -326,6 +409,15 @@ Equivalent REST operation: `GET /api/v1/containers/{id}/logs`.
 | --- | --- | --- |
 | `id` | string | Yes |
 | `tail` | integer | No |
+| `maxResults` | integer | No |
+| `continuationToken` | string | No |
+| `search` | string | No |
+| `sortBy` | string | No |
+| `ordering` | string | No |
+| `containerIdFilter` | string | No |
+| `startUtc` | string | No |
+| `endUtc` | string | No |
+| `filters` | object | No |
 
 Example `tools/call`:
 
@@ -547,12 +639,12 @@ Example `tools/call`:
   "params": {
     "name": "containers_exec",
     "arguments": {
-      "id": "{{containerId}}",
       "command": [
         "/bin/sh",
         "-c",
         "echo hello"
-      ]
+      ],
+      "id": "{{containerId}}"
     }
   }
 }
@@ -580,9 +672,9 @@ Example `tools/call`:
   "params": {
     "name": "containers_copy_in",
     "arguments": {
+      "id": "{{containerId}}",
       "hostPath": "{{hostPath}}",
-      "path": "/tmp",
-      "id": "{{containerId}}"
+      "path": "/tmp"
     }
   }
 }
@@ -610,9 +702,9 @@ Example `tools/call`:
   "params": {
     "name": "containers_copy_out",
     "arguments": {
+      "id": "{{containerId}}",
       "hostPath": "{{hostPath}}",
-      "path": "/tmp",
-      "id": "{{containerId}}"
+      "path": "/tmp"
     }
   }
 }
@@ -706,6 +798,15 @@ Equivalent REST operation: `GET /api/v1/images/{id}/tags`.
 | Parameter | Type | Required |
 | --- | --- | --- |
 | `id` | string | Yes |
+| `maxResults` | integer | No |
+| `continuationToken` | string | No |
+| `search` | string | No |
+| `sortBy` | string | No |
+| `ordering` | string | No |
+| `containerIdFilter` | string | No |
+| `startUtc` | string | No |
+| `endUtc` | string | No |
+| `filters` | object | No |
 
 Example `tools/call`:
 

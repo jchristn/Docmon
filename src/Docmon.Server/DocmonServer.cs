@@ -98,9 +98,20 @@ namespace Docmon.Server
             finally { _Server.Stop(); _Mcp.Stop(); }
         }
 
-        internal Task<object> ExecuteAsync(string operation, OperationRequest request, CancellationToken token)
+        internal async Task<object> ExecuteAsync(string operation, OperationRequest request, CancellationToken token)
         {
-            return ExecuteCoreAsync(operation, request, token);
+            object result = await ExecuteCoreAsync(operation, request, token).ConfigureAwait(false);
+            return operation switch
+            {
+                "containers_list" => Enumeration.Page((IEnumerable<ContainerInfo>)result, request, operation),
+                "images_list" => Enumeration.Page((IEnumerable<ImageInfo>)result, request, operation),
+                "stacks_list" => Enumeration.Page((IEnumerable<ComposeStack>)result, request, operation),
+                "events_list" => Enumeration.Page((IEnumerable<DockerEventInfo>)result, request, operation),
+                "metrics_list" or "metrics_history" => Enumeration.Page((IEnumerable<ContainerStatsSample>)result, request, operation),
+                "history_list" => Enumeration.Page((IEnumerable<RequestRecord>)result, request, operation + ":" + request.Timeframe),
+                "containers_logs" or "images_tags" => Enumeration.Page((IEnumerable<string>)result, request, operation + ":" + request.Id),
+                _ => result
+            };
         }
         private async Task<object> ExecuteCoreAsync(string operation, OperationRequest request, CancellationToken token)
         {
@@ -110,8 +121,9 @@ namespace Docmon.Server
                 case "metrics_list": return _Monitoring.Metrics;
                 case "metrics_history": return _Monitoring.History;
                 case "events_list": return _Monitoring.Events;
-                case "history_list": return _History.ReadSummary();
-                case "history_inspect": return _History.Read().FirstOrDefault(record => record.Id == request.Id) ?? throw new KeyNotFoundException("Request record not found: " + request.Id);
+                case "history_list": return request.Timeframe == null ? _History.ReadSummary() : await _History.ReadWindowAsync(request.Timeframe, token).ConfigureAwait(false);
+                case "history_summary": return await _History.SummarizeAsync(request.Timeframe, token).ConfigureAwait(false);
+                case "history_inspect": return await _History.ReadByIdAsync(request.Id, token).ConfigureAwait(false) ?? throw new KeyNotFoundException("Request record not found: " + request.Id);
                 default: return await _Operations.ExecuteAsync(operation, request, token).ConfigureAwait(false);
             }
         }

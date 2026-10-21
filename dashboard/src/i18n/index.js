@@ -1,19 +1,35 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 import LanguageDetector from "i18next-browser-languagedetector";
-import resources from "./resources";
+import resources, { loaders } from "./resources";
 import { locales, normalizeLocale, STORAGE_KEY } from "./localeRegistry";
 function syncLanguage(value) {
   const locale = normalizeLocale(value);
   document.documentElement.lang = locale;
   document.documentElement.dir = locales.find((l) => l.code === locale).dir;
   localStorage.setItem(STORAGE_KEY, locale);
+  document.title = `Docmon · ${i18n.t("console")}`;
 }
-i18n
+const backend = {
+  type: "backend",
+  read(language, namespace, done) {
+    const loader = loaders[`./locales/${normalizeLocale(language)}.json`];
+    if (!loader) {
+      done(new Error("Unknown locale"));
+      return;
+    }
+    loader()
+      .then((module) => done(null, module.default))
+      .catch(done);
+  },
+};
+export const ready = i18n
+  .use(backend)
   .use(LanguageDetector)
   .use(initReactI18next)
   .init({
     resources,
+    partialBundledLanguages: true,
     fallbackLng: "en",
     supportedLngs: locales.map((l) => l.code),
     load: "currentOnly",
@@ -25,5 +41,5 @@ i18n
     },
   });
 i18n.on("languageChanged", syncLanguage);
-syncLanguage(i18n.language);
+ready.then(() => syncLanguage(i18n.language));
 export default i18n;

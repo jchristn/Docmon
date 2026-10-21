@@ -2,7 +2,7 @@ namespace Docmon.Server
 {
     using System;
     using System.Collections.Generic;
-    /// <summary>Redacted metadata for a completed request. Credentials and bodies are never captured.</summary>
+    /// <summary>Redacted metadata and bounded bodies for a completed request. Authentication secrets are removed.</summary>
     public sealed class RequestRecord
     {
         /// <summary>Correlation ID.</summary>

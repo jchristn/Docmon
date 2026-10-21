@@ -39,6 +39,17 @@ single console for the things you actually do all day:
 
 ## Web dashboard and agent access
 
+### Running in Docker
+
+The container monitors Docker through the mounted /var/run/docker.sock.
+
+Compose mounts the host socket into the backend. Docmon sends Docker Engine API
+requests through that socket to the host's Docker daemon for container state,
+resource statistics, logs, exec, images, and lifecycle operations. The dashboard's
+“All Docker workloads” view sums container metrics; it does not measure unrelated
+host processes or provide host-wide OS monitoring. With Docker Desktop, the daemon
+and Linux containers run inside Docker Desktop's Linux VM.
+
 ```bash
 # docker/.env is included; default bearer token: docmonadmin
 docker compose -f docker/compose.yaml up -d
@@ -237,6 +248,20 @@ that hosts the
 through an `IRegistryProvider` interface; Docker Hub ships first, and other
 registries slot in behind the same interface.
 
+## Dashboard and API conventions
+
+The dashboard uses the Navy & Silver palette derived from the icon, compact navigation,
+tabbed container/host-workload metrics with labeled interactive charts, sortable tables,
+viewport-safe operation menus, a request inspector, and an OpenAPI endpoint selector.
+See [dashboard internationalization](dashboard/I18N.md) for all twelve supported languages.
+The host metrics view aggregates Docker container workloads, excluding other host processes.
+
+Collection REST reads and MCP tools use `EnumerationQuery` and `EnumerationResult<T>`:
+page through `objects` using `continuationToken` until `endOfResults` is true. This replaces
+bare-array responses. Detail reads and actions retain their resource/result shapes.
+The dashboard and remote TUI follow every page automatically. See [REST_API.md](REST_API.md)
+for paging, ordering, filtering, and query-bound continuation tokens.
+
 ## Building
 
 ```bash
@@ -269,13 +294,26 @@ which they always remove. They never touch existing containers or images, and
 never prune. Those suites are skipped automatically when no daemon is
 reachable, or explicitly with `DOCMON_TEST_SKIP_DOCKER=1`.
 
-To build and run Docmon straight from source (Windows), use `go.bat`. It accepts
-an optional target framework and defaults to net10.0 when a .NET 10 SDK is present:
+Source launchers are available for macOS/Linux and Windows:
 
-```bat
-go.bat            REM build and run interactively (auto framework)
-go.bat net8.0     REM build and run against .NET 8
+```bash
+./go.sh                         # alias for the local TUI
+./run-tui.sh                    # build and run the TUI
+./run-tui.sh net8.0 --no-splash  # choose a framework and forward app options
+./run-server.sh                 # build and run the API/MCP server
 ```
+
+Windows equivalents are `go.bat`, `run-tui.bat`, and `run-server.bat`.
+All launchers work from any directory and default to .NET 10 when its SDK is
+installed, otherwise .NET 8. Use `net8.0`, `net10.0`, or `--framework <version>`
+to select explicitly. Server launchers preserve environment configuration and
+use `docmonadmin` when `DOCMON_BEARER_TOKEN` is unset. Native server binding
+still follows `DOCMON_HOST` (default `127.0.0.1`); Docker uses the included `.env`.
+
+Request history offers last hour/day/week/month views, with respectively
+60 one-minute, 96 fifteen-minute, 84 two-hour, and 90 eight-hour buckets.
+Month means the rolling last 30 days. Charts use the retained journal, and
+request details open in a dialog using 95% of the viewport.
 
 ## License
 

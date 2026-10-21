@@ -40,11 +40,6 @@ export default function Settings() {
         <h2>{t("language")}</h2>
         <LocaleSelector />
       </section>
-      <section className="panel">
-        <h2>{t("onboarding")}</h2>
-        <p>{t("onboardingHelp")}</p>
-        <p className="muted">{t("transportHelp")}</p>
-      </section>
     </>
   );
 }

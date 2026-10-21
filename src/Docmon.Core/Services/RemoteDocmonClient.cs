@@ -38,7 +38,7 @@ namespace Docmon.Core.Services
         /// <inheritdoc/>
         public async Task<IReadOnlyList<ContainerInfo>> ListContainersAsync(bool all, CancellationToken token)
         {
-            List<ContainerInfo> containers = await GetAsync<List<ContainerInfo>>("containers", token).ConfigureAwait(false);
+            List<ContainerInfo> containers = await GetCollectionAsync<ContainerInfo>("containers", token).ConfigureAwait(false);
             return all ? containers : containers.Where(c => c.IsRunning).ToArray();
         }
         /// <inheritdoc/>
@@ -59,7 +59,7 @@ namespace Docmon.Core.Services
         /// <inheritdoc/>
         public async Task RemoveAsync(string id, bool force, CancellationToken token) { await PostAsync<OperationResult>("containers/" + Escape(id) + "/remove", new OperationRequest { Force = force }, token).ConfigureAwait(false); }
         /// <inheritdoc/>
-        public async Task<IReadOnlyList<ImageInfo>> ListImagesAsync(CancellationToken token) => await GetAsync<List<ImageInfo>>("images", token).ConfigureAwait(false);
+        public async Task<IReadOnlyList<ImageInfo>> ListImagesAsync(CancellationToken token) => await GetCollectionAsync<ImageInfo>("images", token).ConfigureAwait(false);
         /// <inheritdoc/>
         public async IAsyncEnumerable<string> PullAsync(string image, [EnumeratorCancellation] CancellationToken token)
         {
@@ -71,11 +71,11 @@ namespace Docmon.Core.Services
         /// <inheritdoc/>
         public async Task<long> PruneImagesAsync(CancellationToken token) => (await PostAsync<OperationResult>("images/prune", new OperationRequest(), token).ConfigureAwait(false)).ReclaimedBytes;
         /// <inheritdoc/>
-        public async Task<IReadOnlyList<string>> GetLogsAsync(string id, int tailLines, CancellationToken token) => await GetAsync<List<string>>("containers/" + Escape(id) + "/logs?tail=" + Math.Clamp(tailLines, 1, 10000), token).ConfigureAwait(false);
+        public async Task<IReadOnlyList<string>> GetLogsAsync(string id, int tailLines, CancellationToken token) => await GetCollectionAsync<string>("containers/" + Escape(id) + "/logs?tail=" + Math.Clamp(tailLines, 1, 10000), token).ConfigureAwait(false);
         /// <inheritdoc/>
         public Task<SystemUsage> GetSystemUsageAsync(CancellationToken token) => GetAsync<SystemUsage>("system/usage", token);
         /// <inheritdoc/>
-        public async Task<IReadOnlyList<ComposeStack>> DiscoverAsync(CancellationToken token) => await GetAsync<List<ComposeStack>>("stacks", token).ConfigureAwait(false);
+        public async Task<IReadOnlyList<ComposeStack>> DiscoverAsync(CancellationToken token) => await GetCollectionAsync<ComposeStack>("stacks", token).ConfigureAwait(false);
         /// <inheritdoc/>
         public Task<int> UpAsync(string project, string configFile, string? service, IProgress<string> output, CancellationToken token) => ComposeAsync("up", project, service, output, token);
         /// <inheritdoc/>
@@ -99,14 +99,14 @@ namespace Docmon.Core.Services
             image.RemoteDigest = checkedImage.RemoteDigest; image.Status = checkedImage.Status; return image.Status;
         }
         /// <inheritdoc/>
-        public async Task<IReadOnlyList<string>> ListTagsAsync(ImageInfo image, CancellationToken token) => await GetAsync<List<string>>("images/" + Escape(image.Id) + "/tags", token).ConfigureAwait(false);
+        public async Task<IReadOnlyList<string>> ListTagsAsync(ImageInfo image, CancellationToken token) => await GetCollectionAsync<string>("images/" + Escape(image.Id) + "/tags", token).ConfigureAwait(false);
         /// <inheritdoc/>
         public async Task StreamAsync(string containerId, IProgress<ContainerStatsSample> progress, CancellationToken token)
         {
             DateTime latest = DateTime.MinValue;
             while (!token.IsCancellationRequested)
             {
-                ContainerStatsSample? sample = (await GetAsync<List<ContainerStatsSample>>("metrics", token).ConfigureAwait(false)).FirstOrDefault(s => s.ContainerId == containerId);
+                ContainerStatsSample? sample = (await GetCollectionAsync<ContainerStatsSample>("metrics", token).ConfigureAwait(false)).FirstOrDefault(s => s.ContainerId == containerId);
                 if (sample != null && sample.AtUtc > latest) { latest = sample.AtUtc; progress.Report(sample); }
                 await Task.Delay(2000, token).ConfigureAwait(false);
             }
@@ -117,7 +117,7 @@ namespace Docmon.Core.Services
             HashSet<string> seen = new HashSet<string>(); Queue<string> ordered = new Queue<string>();
             while (!token.IsCancellationRequested)
             {
-                foreach (DockerEventInfo item in await GetAsync<List<DockerEventInfo>>("events", token).ConfigureAwait(false))
+                foreach (DockerEventInfo item in await GetCollectionAsync<DockerEventInfo>("events", token).ConfigureAwait(false))
                 {
                     string key = item.TimeUtc.Ticks + ":" + item.Type + ":" + item.Actor + ":" + item.Action;
                     if (seen.Add(key)) { ordered.Enqueue(key); progress.Report(item); }
@@ -154,6 +154,19 @@ namespace Docmon.Core.Services
         {
             OperationResult result = await PostAsync<OperationResult>("stacks/" + Escape(project) + "/" + action, new OperationRequest { Service = service }, token).ConfigureAwait(false);
             foreach (string line in result.Output) output.Report(line); return result.ExitCode;
+        }
+        private async Task<List<T>> GetCollectionAsync<T>(string path, CancellationToken token)
+        {
+            List<T> objects = new List<T>();
+            string? continuation = null;
+            do
+            {
+                string query = path + (path.Contains('?') ? "&" : "?") + "maxResults=1000" + (continuation == null ? "" : "&continuationToken=" + Escape(continuation));
+                EnumerationResult<T> page = await GetAsync<EnumerationResult<T>>(query, token).ConfigureAwait(false);
+                objects.AddRange(page.Objects);
+                continuation = page.EndOfResults ? null : page.ContinuationToken ?? throw new InvalidDataException("Missing enumeration continuation token.");
+            } while (continuation != null);
+            return objects;
         }
         private Task<T> GetAsync<T>(string path, CancellationToken token) => SendAsync<T>(HttpMethod.Get, path, null, token);
         private Task<T> PostAsync<T>(string path, OperationRequest body, CancellationToken token) => SendAsync<T>(HttpMethod.Post, path, body, token);

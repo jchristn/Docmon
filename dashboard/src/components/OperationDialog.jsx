@@ -77,7 +77,7 @@ export default function OperationDialog({
               initial.id ||
               initial.project ||
               values.image ||
-              "Docker host"}
+              t("localMachine")}
           </code>
         </div>
         {fields.map((field) => (

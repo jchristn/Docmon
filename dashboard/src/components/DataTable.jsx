@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Badge } from "./Common";
+import { formatLocale } from "../i18n/localeRegistry";
 import { bytes, date, number } from "../i18n/formatters";
 export default function DataTable({
   data = [],
@@ -14,7 +15,7 @@ export default function DataTable({
   const [filters, setFilters] = useState({});
   const [search, setSearch] = useState(""),
     [sort, setSort] = useState(columns[0]),
-    [ascending, setAscending] = useState(true),
+    [ascending, setAscending] = useState(!columns[0].endsWith("Utc")),
     [page, setPage] = useState(1);
   const [size, setSize] = useState(
     () => Number(localStorage.getItem(`docmon.${storageKey}.pageSize`)) || 20,
@@ -42,20 +43,31 @@ export default function DataTable({
               .includes(value.toLowerCase()),
           ),
         )
-        .sort(
-          (a, b) =>
-            (typeof a[sort] === "number"
+        .sort((a, b) => {
+          const missing = (value) =>
+            value === null ||
+            value === undefined ||
+            value === "" ||
+            value === "—";
+          if (missing(a[sort]) !== missing(b[sort]))
+            return missing(a[sort]) ? 1 : -1;
+          const comparison =
+            typeof a[sort] === "number" && typeof b[sort] === "number"
               ? a[sort] - b[sort]
               : String(a[sort] ?? "").localeCompare(
                   String(b[sort] ?? ""),
-                  i18n.language === "en-XA" ? "en" : i18n.language,
-                )) * (ascending ? 1 : -1),
-        ),
+                  formatLocale(i18n.language),
+                );
+          return comparison * (ascending ? 1 : -1);
+        }),
     [data, search, filters, sort, ascending, i18n.language],
   );
   const pages = Math.max(1, Math.ceil(rows.length / size)),
     current = Math.min(page, pages);
   function render(key, value) {
+    if (key === "repository" && (!value || value === "—"))
+      return t("untaggedImage");
+    if (key === "tag" && (!value || value === "—")) return t("noTag");
     if (value === null || value === undefined || value === "") return "−";
     if (/state|status|health/.test(key)) return <Badge value={value} />;
     if (/Utc$/.test(key)) return date(value, i18n.language);
@@ -63,7 +75,9 @@ export default function DataTable({
       return bytes(value, i18n.language);
     if (typeof value === "number") return number(value, i18n.language);
     if (key === "id" || key === "containerId")
-      return <code title={value}>{value.slice(0, 12)}</code>;
+      return (
+        <code title={value}>{value.replace(/^sha256:/, "").slice(0, 12)}</code>
+      );
     return String(value);
   }
   return (
@@ -183,7 +197,17 @@ export default function DataTable({
               {columns
                 .filter((c) => visible.includes(c))
                 .map((column) => (
-                  <th scope="col" key={column}>
+                  <th
+                    scope="col"
+                    key={column}
+                    aria-sort={
+                      sort === column
+                        ? ascending
+                          ? "ascending"
+                          : "descending"
+                        : "none"
+                    }
+                  >
                     <button
                       onClick={() => {
                         setSort(column);
@@ -220,7 +244,20 @@ export default function DataTable({
             {rows.slice((current - 1) * size, current * size).map((row, i) => (
               <tr
                 key={row.id || row.containerId || row.project || i}
-                onClick={() => onInspect?.(row)}
+                onClick={(e) => {
+                  if (!e.target.closest("button,a,input,select,summary"))
+                    onInspect?.(row);
+                }}
+                tabIndex={onInspect ? 0 : undefined}
+                onKeyDown={(e) => {
+                  if (
+                    e.target === e.currentTarget &&
+                    (e.key === "Enter" || e.key === " ")
+                  ) {
+                    e.preventDefault();
+                    onInspect?.(row);
+                  }
+                }}
                 className={onInspect ? "clickable" : ""}
               >
                 {columns

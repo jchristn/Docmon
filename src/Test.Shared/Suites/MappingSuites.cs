@@ -256,6 +256,16 @@ namespace Test.Shared.Suites
                     Check.True(none.IsDangling, "<none> repo tags");
                     Check.Equal(ImageInfo.NoneLabel, none.Tag, "dangling tag label");
                 }),
+                c.Sync("MapImageIdentity", "Image mapping skips placeholder tags and preserves all valid tags and digest-only repositories", () =>
+                {
+                    ImageInfo tagged = DockerService.MapImage(new ImagesListResponse { RepoTags = new List<string> { "<none>:<none>", "localhost:5000/app:v1", "localhost:5000/app:latest" } });
+                    Check.Equal("localhost:5000/app", tagged.Repository, "valid repository after placeholder");
+                    Check.Equal("v1", tagged.Tag, "valid tag after placeholder");
+                    Check.Equal(2, tagged.RepoTags.Count, "all valid tags retained");
+                    ImageInfo digest = DockerService.MapImage(new ImagesListResponse { RepoDigests = new List<string> { "registry.example/app@sha256:abc" } });
+                    Check.Equal("registry.example/app", digest.Repository, "digest-only repository");
+                    Check.Equal(ImageInfo.NoneLabel, digest.Tag, "no invented tag");
+                }),
                 c.Sync("IsNoneTag", "IsNoneTag is true only when every tag is a <none> placeholder", () =>
                 {
                     Check.True(DockerService.IsNoneTag(new List<string> { "<none>:<none>" }), "only none");

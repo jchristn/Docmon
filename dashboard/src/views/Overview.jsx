@@ -1,15 +1,15 @@
+import RequestActivity from "../components/RequestActivity";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useResource } from "../utils/useResource";
-import { ActivityChart, ErrorBanner, Badge } from "../components/Common";
+import { ErrorBanner, Badge } from "../components/Common";
 import { bytes, number } from "../i18n/formatters";
 export default function Overview() {
   const { t, i18n } = useTranslation();
   const containers = useResource("containers"),
     images = useResource("images"),
     stacks = useResource("stacks"),
-    metrics = useResource("metrics"),
-    history = useResource("history");
+    metrics = useResource("metrics");
   const running = (containers.data || []).filter((c) => c.isRunning).length;
   const attention = (containers.data || []).filter(
     (c) => !c.isRunning || c.health === "unhealthy",
@@ -32,12 +32,12 @@ export default function Overview() {
           {t("manageContainers")} ↗
         </Link>
       </div>
-      {[containers, images, stacks, metrics, history].map((r, i) => (
+      {[containers, images, stacks, metrics].map((r, i) => (
         <ErrorBanner key={i} error={r.error} retry={r.refresh} />
       ))}
-      {[containers, images, stacks, metrics, history].some(
-        (r) => r.loading,
-      ) && <p role="status">{t("loading")}</p>}
+      {[containers, images, stacks, metrics].some((r) => r.loading) && (
+        <p role="status">{t("loading")}</p>
+      )}
       <div className="kpis">
         {cards.map(([label, value, link]) => (
           <Link to={link} className="kpi" key={label}>
@@ -53,10 +53,10 @@ export default function Overview() {
             <h2>{t("activity")}</h2>
             <Link to="/history">{t("history")} ↗</Link>
           </div>
-          <ActivityChart data={history.data || []} />
+          <RequestActivity />
         </section>
         <section className="panel">
-          <h2>{t("machineState")}</h2>
+          <h2>{t("dockerWorkloads")}</h2>
           <div className="resource-total">
             <span>{t("cpu")}</span>
             <strong>

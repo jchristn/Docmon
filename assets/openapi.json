@@ -63,75 +63,181 @@
         "tags": [
           "containers"
         ],
+        "parameters": [
+          {
+            "name": "maxResults",
+            "in": "query",
+            "description": "EnumerationQuery MaxResults",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "continuationToken",
+            "in": "query",
+            "description": "EnumerationQuery ContinuationToken",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "EnumerationQuery Search",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "description": "EnumerationQuery SortBy",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ordering",
+            "in": "query",
+            "description": "EnumerationQuery Ordering",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "containerIdFilter",
+            "in": "query",
+            "description": "EnumerationQuery ContainerIdFilter",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "startUtc",
+            "in": "query",
+            "description": "EnumerationQuery StartUtc",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "endUtc",
+            "in": "query",
+            "description": "EnumerationQuery EndUtc",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "filters",
+            "in": "query",
+            "description": "JSON object mapping scalar field names to substring filters.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Completed request. Inspect exitCode for CLI and exec operations.",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "shortId": {
-                        "type": "string"
-                      },
-                      "name": {
-                        "type": "string"
-                      },
-                      "image": {
-                        "type": "string"
-                      },
-                      "imageId": {
-                        "type": "string"
-                      },
-                      "state": {
-                        "type": "string"
-                      },
-                      "status": {
-                        "type": "string"
-                      },
-                      "health": {
-                        "type": "string"
-                      },
-                      "createdUtc": {
-                        "type": "string",
-                        "format": "date-time"
-                      },
-                      "ports": {
-                        "type": "array",
-                        "items": {
-                          "type": "object",
-                          "properties": {
-                            "hostIp": {
-                              "type": "string"
-                            },
-                            "hostPort": {
-                              "type": "integer",
-                              "format": "int32"
-                            },
-                            "containerPort": {
-                              "type": "integer",
-                              "format": "int32"
-                            },
-                            "protocol": {
-                              "type": "string"
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "maxResults": {
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "totalRecords": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "recordsRemaining": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "continuationToken": {
+                      "type": "string"
+                    },
+                    "endOfResults": {
+                      "type": "boolean"
+                    },
+                    "objects": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "shortId": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "image": {
+                            "type": "string"
+                          },
+                          "imageId": {
+                            "type": "string"
+                          },
+                          "state": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "health": {
+                            "type": "string"
+                          },
+                          "createdUtc": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "ports": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "hostIp": {
+                                  "type": "string"
+                                },
+                                "hostPort": {
+                                  "type": "integer",
+                                  "format": "int32"
+                                },
+                                "containerPort": {
+                                  "type": "integer",
+                                  "format": "int32"
+                                },
+                                "protocol": {
+                                  "type": "string"
+                                }
+                              }
                             }
+                          },
+                          "composeProject": {
+                            "type": "string"
+                          },
+                          "composeService": {
+                            "type": "string"
+                          },
+                          "isRunning": {
+                            "type": "boolean"
                           }
                         }
-                      },
-                      "composeProject": {
-                        "type": "string"
-                      },
-                      "composeService": {
-                        "type": "string"
-                      },
-                      "isRunning": {
-                        "type": "boolean"
                       }
+                    },
+                    "totalMs": {
+                      "type": "number"
                     }
                   }
                 }
@@ -300,48 +406,160 @@
         "tags": [
           "images"
         ],
+        "parameters": [
+          {
+            "name": "maxResults",
+            "in": "query",
+            "description": "EnumerationQuery MaxResults",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "continuationToken",
+            "in": "query",
+            "description": "EnumerationQuery ContinuationToken",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "EnumerationQuery Search",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "description": "EnumerationQuery SortBy",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ordering",
+            "in": "query",
+            "description": "EnumerationQuery Ordering",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "containerIdFilter",
+            "in": "query",
+            "description": "EnumerationQuery ContainerIdFilter",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "startUtc",
+            "in": "query",
+            "description": "EnumerationQuery StartUtc",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "endUtc",
+            "in": "query",
+            "description": "EnumerationQuery EndUtc",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "filters",
+            "in": "query",
+            "description": "JSON object mapping scalar field names to substring filters.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Completed request. Inspect exitCode for CLI and exec operations.",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "repository": {
-                        "type": "string"
-                      },
-                      "tag": {
-                        "type": "string"
-                      },
-                      "repoDigests": {
-                        "type": "array",
-                        "items": {
-                          "type": "string"
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "maxResults": {
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "totalRecords": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "recordsRemaining": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "continuationToken": {
+                      "type": "string"
+                    },
+                    "endOfResults": {
+                      "type": "boolean"
+                    },
+                    "objects": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "repository": {
+                            "type": "string"
+                          },
+                          "tag": {
+                            "type": "string"
+                          },
+                          "repoDigests": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "repoTags": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "sizeBytes": {
+                            "type": "integer",
+                            "format": "int64"
+                          },
+                          "createdUtc": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "remoteDigest": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "isDangling": {
+                            "type": "boolean"
+                          }
                         }
-                      },
-                      "sizeBytes": {
-                        "type": "integer",
-                        "format": "int64"
-                      },
-                      "createdUtc": {
-                        "type": "string",
-                        "format": "date-time"
-                      },
-                      "remoteDigest": {
-                        "type": "string"
-                      },
-                      "status": {
-                        "type": "string"
-                      },
-                      "isDangling": {
-                        "type": "boolean"
                       }
+                    },
+                    "totalMs": {
+                      "type": "number"
                     }
                   }
                 }
@@ -916,53 +1134,159 @@
         "tags": [
           "stacks"
         ],
+        "parameters": [
+          {
+            "name": "maxResults",
+            "in": "query",
+            "description": "EnumerationQuery MaxResults",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "continuationToken",
+            "in": "query",
+            "description": "EnumerationQuery ContinuationToken",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "EnumerationQuery Search",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "description": "EnumerationQuery SortBy",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ordering",
+            "in": "query",
+            "description": "EnumerationQuery Ordering",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "containerIdFilter",
+            "in": "query",
+            "description": "EnumerationQuery ContainerIdFilter",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "startUtc",
+            "in": "query",
+            "description": "EnumerationQuery StartUtc",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "endUtc",
+            "in": "query",
+            "description": "EnumerationQuery EndUtc",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "filters",
+            "in": "query",
+            "description": "JSON object mapping scalar field names to substring filters.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Completed request. Inspect exitCode for CLI and exec operations.",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "project": {
-                        "type": "string"
-                      },
-                      "configFilePath": {
-                        "type": "string"
-                      },
-                      "services": {
-                        "type": "array",
-                        "items": {
-                          "type": "object",
-                          "properties": {
-                            "name": {
-                              "type": "string"
-                            },
-                            "runningImage": {
-                              "type": "string"
-                            },
-                            "containerId": {
-                              "type": "string"
-                            },
-                            "state": {
-                              "type": "string"
-                            },
-                            "update": {
-                              "type": "string"
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "maxResults": {
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "totalRecords": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "recordsRemaining": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "continuationToken": {
+                      "type": "string"
+                    },
+                    "endOfResults": {
+                      "type": "boolean"
+                    },
+                    "objects": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "project": {
+                            "type": "string"
+                          },
+                          "configFilePath": {
+                            "type": "string"
+                          },
+                          "services": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "name": {
+                                  "type": "string"
+                                },
+                                "runningImage": {
+                                  "type": "string"
+                                },
+                                "containerId": {
+                                  "type": "string"
+                                },
+                                "state": {
+                                  "type": "string"
+                                },
+                                "update": {
+                                  "type": "string"
+                                }
+                              }
                             }
+                          },
+                          "runningCount": {
+                            "type": "integer",
+                            "format": "int32"
+                          },
+                          "serviceCount": {
+                            "type": "integer",
+                            "format": "int32"
                           }
                         }
-                      },
-                      "runningCount": {
-                        "type": "integer",
-                        "format": "int32"
-                      },
-                      "serviceCount": {
-                        "type": "integer",
-                        "format": "int32"
                       }
+                    },
+                    "totalMs": {
+                      "type": "number"
                     }
                   }
                 }
@@ -1526,29 +1850,135 @@
         "tags": [
           "events"
         ],
+        "parameters": [
+          {
+            "name": "maxResults",
+            "in": "query",
+            "description": "EnumerationQuery MaxResults",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "continuationToken",
+            "in": "query",
+            "description": "EnumerationQuery ContinuationToken",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "EnumerationQuery Search",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "description": "EnumerationQuery SortBy",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ordering",
+            "in": "query",
+            "description": "EnumerationQuery Ordering",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "containerIdFilter",
+            "in": "query",
+            "description": "EnumerationQuery ContainerIdFilter",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "startUtc",
+            "in": "query",
+            "description": "EnumerationQuery StartUtc",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "endUtc",
+            "in": "query",
+            "description": "EnumerationQuery EndUtc",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "filters",
+            "in": "query",
+            "description": "JSON object mapping scalar field names to substring filters.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Completed request. Inspect exitCode for CLI and exec operations.",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "type": {
-                        "type": "string"
-                      },
-                      "action": {
-                        "type": "string"
-                      },
-                      "actor": {
-                        "type": "string"
-                      },
-                      "timeUtc": {
-                        "type": "string",
-                        "format": "date-time"
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "maxResults": {
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "totalRecords": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "recordsRemaining": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "continuationToken": {
+                      "type": "string"
+                    },
+                    "endOfResults": {
+                      "type": "boolean"
+                    },
+                    "objects": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string"
+                          },
+                          "action": {
+                            "type": "string"
+                          },
+                          "actor": {
+                            "type": "string"
+                          },
+                          "timeUtc": {
+                            "type": "string",
+                            "format": "date-time"
+                          }
+                        }
                       }
+                    },
+                    "totalMs": {
+                      "type": "number"
                     }
                   }
                 }
@@ -1717,53 +2147,159 @@
         "tags": [
           "metrics"
         ],
+        "parameters": [
+          {
+            "name": "maxResults",
+            "in": "query",
+            "description": "EnumerationQuery MaxResults",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "continuationToken",
+            "in": "query",
+            "description": "EnumerationQuery ContinuationToken",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "EnumerationQuery Search",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "description": "EnumerationQuery SortBy",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ordering",
+            "in": "query",
+            "description": "EnumerationQuery Ordering",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "containerIdFilter",
+            "in": "query",
+            "description": "EnumerationQuery ContainerIdFilter",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "startUtc",
+            "in": "query",
+            "description": "EnumerationQuery StartUtc",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "endUtc",
+            "in": "query",
+            "description": "EnumerationQuery EndUtc",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "filters",
+            "in": "query",
+            "description": "JSON object mapping scalar field names to substring filters.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Completed request. Inspect exitCode for CLI and exec operations.",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "containerId": {
-                        "type": "string"
-                      },
-                      "cpuPercent": {
-                        "type": "number"
-                      },
-                      "memoryUsage": {
-                        "type": "integer",
-                        "format": "int64"
-                      },
-                      "memoryLimit": {
-                        "type": "integer",
-                        "format": "int64"
-                      },
-                      "networkRxBytes": {
-                        "type": "integer",
-                        "format": "int64"
-                      },
-                      "networkTxBytes": {
-                        "type": "integer",
-                        "format": "int64"
-                      },
-                      "blockReadBytes": {
-                        "type": "integer",
-                        "format": "int64"
-                      },
-                      "blockWriteBytes": {
-                        "type": "integer",
-                        "format": "int64"
-                      },
-                      "atUtc": {
-                        "type": "string",
-                        "format": "date-time"
-                      },
-                      "memoryPercent": {
-                        "type": "number"
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "maxResults": {
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "totalRecords": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "recordsRemaining": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "continuationToken": {
+                      "type": "string"
+                    },
+                    "endOfResults": {
+                      "type": "boolean"
+                    },
+                    "objects": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "containerId": {
+                            "type": "string"
+                          },
+                          "cpuPercent": {
+                            "type": "number"
+                          },
+                          "memoryUsage": {
+                            "type": "integer",
+                            "format": "int64"
+                          },
+                          "memoryLimit": {
+                            "type": "integer",
+                            "format": "int64"
+                          },
+                          "networkRxBytes": {
+                            "type": "integer",
+                            "format": "int64"
+                          },
+                          "networkTxBytes": {
+                            "type": "integer",
+                            "format": "int64"
+                          },
+                          "blockReadBytes": {
+                            "type": "integer",
+                            "format": "int64"
+                          },
+                          "blockWriteBytes": {
+                            "type": "integer",
+                            "format": "int64"
+                          },
+                          "atUtc": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "memoryPercent": {
+                            "type": "number"
+                          }
+                        }
                       }
+                    },
+                    "totalMs": {
+                      "type": "number"
                     }
                   }
                 }
@@ -1932,52 +2468,394 @@
         "tags": [
           "metrics"
         ],
+        "parameters": [
+          {
+            "name": "maxResults",
+            "in": "query",
+            "description": "EnumerationQuery MaxResults",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "continuationToken",
+            "in": "query",
+            "description": "EnumerationQuery ContinuationToken",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "EnumerationQuery Search",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "description": "EnumerationQuery SortBy",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ordering",
+            "in": "query",
+            "description": "EnumerationQuery Ordering",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "containerIdFilter",
+            "in": "query",
+            "description": "EnumerationQuery ContainerIdFilter",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "startUtc",
+            "in": "query",
+            "description": "EnumerationQuery StartUtc",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "endUtc",
+            "in": "query",
+            "description": "EnumerationQuery EndUtc",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "filters",
+            "in": "query",
+            "description": "JSON object mapping scalar field names to substring filters.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Completed request. Inspect exitCode for CLI and exec operations.",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "containerId": {
-                        "type": "string"
-                      },
-                      "cpuPercent": {
-                        "type": "number"
-                      },
-                      "memoryUsage": {
-                        "type": "integer",
-                        "format": "int64"
-                      },
-                      "memoryLimit": {
-                        "type": "integer",
-                        "format": "int64"
-                      },
-                      "networkRxBytes": {
-                        "type": "integer",
-                        "format": "int64"
-                      },
-                      "networkTxBytes": {
-                        "type": "integer",
-                        "format": "int64"
-                      },
-                      "blockReadBytes": {
-                        "type": "integer",
-                        "format": "int64"
-                      },
-                      "blockWriteBytes": {
-                        "type": "integer",
-                        "format": "int64"
-                      },
-                      "atUtc": {
-                        "type": "string",
-                        "format": "date-time"
-                      },
-                      "memoryPercent": {
-                        "type": "number"
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "maxResults": {
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "totalRecords": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "recordsRemaining": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "continuationToken": {
+                      "type": "string"
+                    },
+                    "endOfResults": {
+                      "type": "boolean"
+                    },
+                    "objects": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "containerId": {
+                            "type": "string"
+                          },
+                          "cpuPercent": {
+                            "type": "number"
+                          },
+                          "memoryUsage": {
+                            "type": "integer",
+                            "format": "int64"
+                          },
+                          "memoryLimit": {
+                            "type": "integer",
+                            "format": "int64"
+                          },
+                          "networkRxBytes": {
+                            "type": "integer",
+                            "format": "int64"
+                          },
+                          "networkTxBytes": {
+                            "type": "integer",
+                            "format": "int64"
+                          },
+                          "blockReadBytes": {
+                            "type": "integer",
+                            "format": "int64"
+                          },
+                          "blockWriteBytes": {
+                            "type": "integer",
+                            "format": "int64"
+                          },
+                          "atUtc": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "memoryPercent": {
+                            "type": "number"
+                          }
+                        }
+                      }
+                    },
+                    "totalMs": {
+                      "type": "number"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Structured error with code, message and requestId.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Structured error with code, message and requestId.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Structured error with code, message and requestId.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Structured error with code, message and requestId.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Structured error with code, message and requestId.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Structured error with code, message and requestId.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Structured error with code, message and requestId.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/history/summary": {
+      "get": {
+        "operationId": "history_summary",
+        "summary": "Request history time buckets across the retained journal",
+        "tags": [
+          "history"
+        ],
+        "parameters": [
+          {
+            "name": "timeframe",
+            "in": "query",
+            "description": "Rolling window: hour (60 one-minute buckets), day (96 fifteen-minute buckets), week (84 two-hour buckets), month (90 eight-hour buckets over 30 days).",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Completed request. Inspect exitCode for CLI and exec operations.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "timeframe": {
+                      "type": "string"
+                    },
+                    "bucketMinutes": {
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "startUtc": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "endUtc": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "totalCount": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "totalSuccess": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "totalFailure": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "buckets": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "atUtc": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "endUtc": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "ok": {
+                            "type": "integer",
+                            "format": "int64"
+                          },
+                          "failed": {
+                            "type": "integer",
+                            "format": "int64"
+                          }
+                        }
                       }
                     }
                   }
@@ -2147,56 +3025,170 @@
         "tags": [
           "history"
         ],
+        "parameters": [
+          {
+            "name": "timeframe",
+            "in": "query",
+            "description": "Rolling window: hour (60 one-minute buckets), day (96 fifteen-minute buckets), week (84 two-hour buckets), month (90 eight-hour buckets over 30 days).",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "maxResults",
+            "in": "query",
+            "description": "EnumerationQuery MaxResults",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "continuationToken",
+            "in": "query",
+            "description": "EnumerationQuery ContinuationToken",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "EnumerationQuery Search",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "description": "EnumerationQuery SortBy",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ordering",
+            "in": "query",
+            "description": "EnumerationQuery Ordering",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "containerIdFilter",
+            "in": "query",
+            "description": "EnumerationQuery ContainerIdFilter",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "startUtc",
+            "in": "query",
+            "description": "EnumerationQuery StartUtc",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "endUtc",
+            "in": "query",
+            "description": "EnumerationQuery EndUtc",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "filters",
+            "in": "query",
+            "description": "JSON object mapping scalar field names to substring filters.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Completed request. Inspect exitCode for CLI and exec operations.",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "atUtc": {
-                        "type": "string",
-                        "format": "date-time"
-                      },
-                      "method": {
-                        "type": "string"
-                      },
-                      "path": {
-                        "type": "string"
-                      },
-                      "status": {
-                        "type": "integer",
-                        "format": "int32"
-                      },
-                      "principalName": {
-                        "type": "string"
-                      },
-                      "requestHeaders": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "maxResults": {
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "totalRecords": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "recordsRemaining": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "continuationToken": {
+                      "type": "string"
+                    },
+                    "endOfResults": {
+                      "type": "boolean"
+                    },
+                    "objects": {
+                      "type": "array",
+                      "items": {
                         "type": "object",
-                        "description": "String key/value map."
-                      },
-                      "responseHeaders": {
-                        "type": "object",
-                        "description": "String key/value map."
-                      },
-                      "requestBody": {
-                        "type": "string"
-                      },
-                      "responseBody": {
-                        "type": "string"
-                      },
-                      "truncated": {
-                        "type": "boolean"
-                      },
-                      "elapsedMs": {
-                        "type": "number"
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "atUtc": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "method": {
+                            "type": "string"
+                          },
+                          "path": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "integer",
+                            "format": "int32"
+                          },
+                          "principalName": {
+                            "type": "string"
+                          },
+                          "requestHeaders": {
+                            "type": "object",
+                            "description": "String key/value map."
+                          },
+                          "responseHeaders": {
+                            "type": "object",
+                            "description": "String key/value map."
+                          },
+                          "requestBody": {
+                            "type": "string"
+                          },
+                          "responseBody": {
+                            "type": "string"
+                          },
+                          "truncated": {
+                            "type": "boolean"
+                          },
+                          "elapsedMs": {
+                            "type": "number"
+                          }
+                        }
                       }
+                    },
+                    "totalMs": {
+                      "type": "number"
                     }
                   }
                 }
@@ -2668,6 +3660,81 @@
               "type": "integer",
               "format": "int32"
             }
+          },
+          {
+            "name": "maxResults",
+            "in": "query",
+            "description": "EnumerationQuery MaxResults",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "continuationToken",
+            "in": "query",
+            "description": "EnumerationQuery ContinuationToken",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "EnumerationQuery Search",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "description": "EnumerationQuery SortBy",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ordering",
+            "in": "query",
+            "description": "EnumerationQuery Ordering",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "containerIdFilter",
+            "in": "query",
+            "description": "EnumerationQuery ContainerIdFilter",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "startUtc",
+            "in": "query",
+            "description": "EnumerationQuery StartUtc",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "endUtc",
+            "in": "query",
+            "description": "EnumerationQuery EndUtc",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "filters",
+            "in": "query",
+            "description": "JSON object mapping scalar field names to substring filters.",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -2676,9 +3743,38 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "maxResults": {
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "totalRecords": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "recordsRemaining": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "continuationToken": {
+                      "type": "string"
+                    },
+                    "endOfResults": {
+                      "type": "boolean"
+                    },
+                    "objects": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "totalMs": {
+                      "type": "number"
+                    }
                   }
                 }
               }
@@ -5458,6 +6554,12 @@
                         "type": "string"
                       }
                     },
+                    "repoTags": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
                     "sizeBytes": {
                       "type": "integer",
                       "format": "int64"
@@ -5651,6 +6753,81 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "maxResults",
+            "in": "query",
+            "description": "EnumerationQuery MaxResults",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "continuationToken",
+            "in": "query",
+            "description": "EnumerationQuery ContinuationToken",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "EnumerationQuery Search",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "description": "EnumerationQuery SortBy",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ordering",
+            "in": "query",
+            "description": "EnumerationQuery Ordering",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "containerIdFilter",
+            "in": "query",
+            "description": "EnumerationQuery ContainerIdFilter",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "startUtc",
+            "in": "query",
+            "description": "EnumerationQuery StartUtc",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "endUtc",
+            "in": "query",
+            "description": "EnumerationQuery EndUtc",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "filters",
+            "in": "query",
+            "description": "JSON object mapping scalar field names to substring filters.",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -5659,9 +6836,38 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "maxResults": {
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "totalRecords": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "recordsRemaining": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "continuationToken": {
+                      "type": "string"
+                    },
+                    "endOfResults": {
+                      "type": "boolean"
+                    },
+                    "objects": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "totalMs": {
+                      "type": "number"
+                    }
                   }
                 }
               }

@@ -43,3 +43,7 @@ On Windows, use `build-all.bat`, `build-server.bat`, or `build-dashboard.bat` wi
 Each component helper builds `linux/amd64` and `linux/arm64/v8` using Docker Buildx, pushes a multi-architecture image under the requested tag and `latest`, then pulls both tags into the local Docker image store using the daemon's native architecture. Passing `latest` builds and pulls that tag once. Failures stop the script immediately, including failed local pulls.
 
 The default builder is `cloud-jchristn77-jchristn77`, matching the other projects. Override it with `DOCMON_BUILDER` to use another configured multi-platform builder. A publish-capable Docker Hub login is required. These helpers publish images when run; committing the scripts does not publish a release. Compose remains pinned to `v0.1.0` until its image references are edited.
+
+## Docker socket and metric scope
+
+The container monitors Docker through the mounted /var/run/docker.sock. It asks the host Docker daemon for container statistics and management operations. The all-workloads view sums Docker container metrics; unrelated host OS processes are excluded. On Docker Desktop, the daemon runs in its Linux VM.

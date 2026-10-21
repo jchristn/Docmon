@@ -71,6 +71,99 @@ namespace Test.Shared.Suites
                     string audit = string.Join("", Directory.GetFiles(fixture.DirectoryPath, "*.jsonl").Select(File.ReadAllText));
                     Check.False(audit.Contains(ServerFixture.Token, StringComparison.Ordinal), "credentials redacted from disk");
                 }),
+                c.Async("Enumeration", "Collection queries page, filter and order results, rejecting invalid sizes and cross-query tokens", async ct =>
+                {
+                    using ServerFixture fixture = new ServerFixture();
+                    try
+                    {
+                        for (int i = 0; i < 4; i++) { using HttpResponseMessage generated = await fixture.Client.GetAsync("/api/v1/system/info", ct).ConfigureAwait(false); }
+                        string query = "/api/v1/history?maxResults=1&sortBy=atUtc&ordering=Ascending&search=system";
+                        using HttpResponseMessage first = await fixture.Client.GetAsync(query, ct).ConfigureAwait(false);
+                        Check.Equal(HttpStatusCode.OK, first.StatusCode, "first page status");
+                        using JsonDocument page = JsonDocument.Parse(await first.Content.ReadAsStringAsync(ct).ConfigureAwait(false));
+                        JsonElement result = page.RootElement;
+                        Check.Equal(1, result.GetProperty("objects").GetArrayLength(), "page size");
+                        Check.True(result.GetProperty("totalRecords").GetInt32() >= 4, "filter total");
+                        Check.False(result.GetProperty("endOfResults").GetBoolean(), "more pages");
+                        string continuation = result.GetProperty("continuationToken").GetString()!;
+                        using HttpResponseMessage second = await fixture.Client.GetAsync(query + "&continuationToken=" + Uri.EscapeDataString(continuation), ct).ConfigureAwait(false);
+                        using JsonDocument next = JsonDocument.Parse(await second.Content.ReadAsStringAsync(ct).ConfigureAwait(false));
+                        Check.False(result.GetProperty("objects")[0].GetProperty("id").GetString() == next.RootElement.GetProperty("objects")[0].GetProperty("id").GetString(), "next page advances");
+                        foreach (string invalidQuery in new[] { "maxResults=0", "maxResults=1001", "maxResults=oops", "ordering=invalid", "sortBy=missing", "continuationToken=invalid", "startUtc=invalid", "filters=%7Bbad", "maxResults=2&search=system&continuationToken=" + Uri.EscapeDataString(continuation) })
+                        { using HttpResponseMessage invalid = await fixture.Client.GetAsync("/api/v1/history?" + invalidQuery, ct).ConfigureAwait(false); Check.Equal(HttpStatusCode.BadRequest, invalid.StatusCode, invalidQuery); }
+                        using HttpResponseMessage filtered = await fixture.Client.GetAsync("/api/v1/history?filters=" + Uri.EscapeDataString("{\"method\":\"POST\"}"), ct).ConfigureAwait(false);
+                        using JsonDocument empty = JsonDocument.Parse(await filtered.Content.ReadAsStringAsync(ct).ConfigureAwait(false));
+                        Check.Equal(0, empty.RootElement.GetProperty("totalRecords").GetInt32(), "no matching records");
+                        Check.True(empty.RootElement.GetProperty("endOfResults").GetBoolean(), "empty page is final");
+                    }
+                    finally { await fixture.StopAsync().ConfigureAwait(false); }
+                }),
+                c.Sync("HistoryBuckets", "History windows have exact bucket counts, intervals and boundary semantics", () =>
+                {
+                    DateTime end = new DateTime(2026, 10, 20, 12, 0, 0, DateTimeKind.Utc);
+                    foreach (string timeframe in new[] { "hour", "day", "week", "month" })
+                    {
+                        RequestHistorySummary summary = RequestHistorySummary.Create(timeframe, end);
+                        int count = timeframe switch { "hour" => 60, "day" => 96, "week" => 84, _ => 90 };
+                        int width = timeframe switch { "hour" => 1, "day" => 15, "week" => 120, _ => 480 };
+                        Check.Equal(count, summary.Buckets.Count, timeframe + " bucket count");
+                        Check.Equal(width, summary.BucketMinutes, timeframe + " bucket interval");
+                        Check.Equal(end.AddMinutes(-count * width), summary.StartUtc, "window start");
+                        summary.Add(new RequestRecord { AtUtc = summary.StartUtc, Status = 200 });
+                        summary.Add(new RequestRecord { AtUtc = summary.StartUtc.AddMinutes(width), Status = 500 });
+                        summary.Add(new RequestRecord { AtUtc = end.AddTicks(-1), Status = 204 });
+                        summary.Add(new RequestRecord { AtUtc = end, Status = 200 });
+                        summary.Add(new RequestRecord { AtUtc = summary.StartUtc.AddTicks(-1), Status = 200 });
+                        Check.Equal(3L, summary.TotalCount, "half-open boundaries");
+                        Check.Equal(1L, summary.Buckets[0].Ok, "first bucket");
+                        Check.Equal(1L, summary.Buckets[1].Failed, "boundary goes to next bucket");
+                        Check.Equal(1L, summary.Buckets[count - 1].Ok, "last bucket");
+                        Check.Equal(2L, summary.TotalSuccess, "success total");
+                        Check.Equal(1L, summary.TotalFailure, "failure total");
+                    }
+                    Check.Throws<ArgumentException>(() => RequestHistorySummary.Create("invalid", end), "invalid window rejected");
+                }),
+                c.Async("HistorySummaryRoute", "History summaries expose complete windows and reject invalid timeframes", async ct =>
+                {
+                    using ServerFixture fixture = new ServerFixture();
+                    try
+                    {
+                        foreach (string timeframe in new[] { "hour", "day", "week", "month" })
+                        {
+                            using HttpResponseMessage response = await fixture.Client.GetAsync("/api/v1/history/summary?timeframe=" + timeframe, ct).ConfigureAwait(false);
+                            Check.Equal(HttpStatusCode.OK, response.StatusCode, timeframe + " route");
+                            using JsonDocument json = JsonDocument.Parse(await response.Content.ReadAsStringAsync(ct).ConfigureAwait(false));
+                            int count = timeframe switch { "hour" => 60, "day" => 96, "week" => 84, _ => 90 };
+                            Check.Equal(count, json.RootElement.GetProperty("buckets").GetArrayLength(), timeframe + " complete buckets");
+                        }
+                        using HttpResponseMessage invalid = await fixture.Client.GetAsync("/api/v1/history/summary?timeframe=invalid", ct).ConfigureAwait(false);
+                        Check.Equal(HttpStatusCode.BadRequest, invalid.StatusCode, "invalid timeframe");
+                    }
+                    finally { await fixture.StopAsync().ConfigureAwait(false); }
+                }),
+                c.Async("DurableRequestDetails", "Request details remain available after the summary cache evicts an entry", async ct =>
+                {
+                    string directory = Path.Combine(Path.GetTempPath(), "docmon-history-" + Guid.NewGuid().ToString("N"));
+                    try
+                    {
+                        using (RequestHistoryStore history = new RequestHistoryStore(directory, "test-token"))
+                        {
+                            RequestRecord first = new RequestRecord { Path = "/original", RequestBody = "original-body" };
+                            await history.AppendAsync(first, ct).ConfigureAwait(false);
+                            for (int i = 0; i < 1001; i++) await history.AppendAsync(new RequestRecord { Path = "/later" }, ct).ConfigureAwait(false);
+                            Check.False(history.ReadSummary().Any(record => record.Id == first.Id), "original evicted from summary cache");
+                            RequestRecord? retained = await history.ReadByIdAsync(first.Id, ct).ConfigureAwait(false);
+                            Check.Equal("original-body", retained?.RequestBody, "full details recovered from retained journal");
+                            Check.True(await history.ReadByIdAsync("missing", ct).ConfigureAwait(false) == null, "missing records remain missing");
+                            RequestHistorySummary summary = await history.SummarizeAsync("month", ct).ConfigureAwait(false);
+                            Check.Equal(1002L, summary.TotalCount, "summary includes journal records outside the cache");
+                            RequestRecord[] window = await history.ReadWindowAsync("month", ct).ConfigureAwait(false);
+                            Check.Equal(1002, window.Length, "timeframe list includes retained journal");
+                            Check.True(window.All(record => record.RequestBody == ""), "window list omits bodies");
+                        }
+                    }
+                    finally { if (Directory.Exists(directory)) Directory.Delete(directory, true); }
+                }),
                 c.Async("TerminalAuthentication", "Terminal rejects an invalid first-frame token before creating a Docker exec", async ct =>
                 {
                     using ServerFixture fixture = new ServerFixture();

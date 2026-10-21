@@ -2,6 +2,7 @@ namespace Docmon.Core.Services.Implementations
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Runtime.CompilerServices;
     using System.Text;
     using System.Threading;
@@ -365,6 +366,7 @@ namespace Docmon.Core.Services.Implementations
             info.Id = response.ID ?? string.Empty;
             info.SizeBytes = response.Size;
             info.CreatedUtc = DateTime.SpecifyKind(response.Created, DateTimeKind.Utc);
+            info.RepoTags = response.RepoTags?.Where(value => !string.IsNullOrWhiteSpace(value) && value != "<none>:<none>").ToArray() ?? Array.Empty<string>();
 
             if (response.RepoDigests != null)
                 info.RepoDigests = new List<string>(response.RepoDigests);
@@ -373,7 +375,7 @@ namespace Docmon.Core.Services.Implementations
             string tag = ImageInfo.NoneLabel;
             if (response.RepoTags != null && response.RepoTags.Count > 0 && !IsNoneTag(response.RepoTags))
             {
-                string primary = response.RepoTags[0];
+                string primary = info.RepoTags[0];
                 int lastColon = primary.LastIndexOf(':');
                 if (lastColon > 0 && primary.IndexOf('/', lastColon) < 0)
                 {
@@ -386,6 +388,11 @@ namespace Docmon.Core.Services.Implementations
                 }
             }
 
+            if (repository == ImageInfo.NoneLabel && response.RepoDigests != null)
+            {
+                string? digest = response.RepoDigests.FirstOrDefault(value => value.Contains('@'));
+                if (digest != null) repository = digest.Substring(0, digest.IndexOf('@'));
+            }
             info.Repository = repository;
             info.Tag = tag;
             return info;

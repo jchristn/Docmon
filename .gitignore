@@ -59,6 +59,7 @@ docmon.local.json
 **/.env.*
 !**/.env.example
 **/test-results/
+**/TestResults/
 **/playwright-report/
 
 # Durable local request history

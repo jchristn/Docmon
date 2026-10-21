@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Navigate,
   NavLink,
@@ -12,7 +12,7 @@ import { useAuth } from "./context/AuthContext";
 import { useTheme } from "./context/ThemeContext";
 import { useResource } from "./utils/useResource";
 import { useCatalog } from "./utils/useCatalog";
-import { ErrorBanner, LocaleSelector, Modal } from "./components/Common";
+import { ErrorBanner, LocaleSelector } from "./components/Common";
 import Overview from "./views/Overview";
 import Resources from "./views/Resources";
 import Explorer from "./views/Explorer";
@@ -123,7 +123,6 @@ function Layout() {
   const location = useLocation();
   const info = useResource("system/info");
   const { toggle } = useTheme();
-  const [tour, setTour] = useState(false);
   if (!token) return <Navigate to="/login" replace />;
   const current = location.pathname.split("/")[1] || "overview";
   return (
@@ -159,23 +158,6 @@ function Layout() {
           ))}
         </nav>
         <footer>
-          <button onClick={() => setTour(true)}>{t("onboarding")} ↗</button>
-          <div className="row">
-            <a
-              href="https://github.com/jchristn/Docmon"
-              target="_blank"
-              rel="noreferrer"
-            >
-              {t("github")} ↗
-            </a>
-            <a
-              href="https://discord.gg/tRAN8HgvK5"
-              target="_blank"
-              rel="noreferrer"
-            >
-              {t("discord")} ↗
-            </a>
-          </div>
           <small>
             v{info.data?.version || "0.1.1"} · {t("operator")}
           </small>
@@ -191,28 +173,58 @@ function Layout() {
             >
               <i />
               {t(info.error ? "disconnected" : "live")}
-              <small>{t("fullAccess")}</small>
             </span>
             <LocaleSelector />
             <button aria-label={t("theme")} title={t("theme")} onClick={toggle}>
               ◐
             </button>
-            <button onClick={logout}>{t("logout")}</button>
+            <a
+              className="social-link"
+              href="https://github.com/jchristn/Docmon"
+              target="_blank"
+              rel="noreferrer"
+              aria-label={t("github")}
+              title={t("github")}
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 .8a11.3 11.3 0 0 0-3.6 22c.6.1.8-.2.8-.5v-2c-3.3.7-4-1.4-4-1.4-.5-1.4-1.3-1.7-1.3-1.7-1.1-.8.1-.8.1-.8 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.6 1.3 3.3 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.4-1.3-5.4-5.6 0-1.2.4-2.2 1.2-3-.1-.3-.5-1.5.1-3 0 0 1-.3 3.1 1.2a10.7 10.7 0 0 1 5.7 0C16.8 5.1 17.8 5.4 17.8 5.4c.6 1.5.2 2.7.1 3 .8.8 1.2 1.8 1.2 3 0 4.3-2.8 5.3-5.4 5.6.4.4.8 1.1.8 2.2v3.1c0 .3.2.6.8.5A11.3 11.3 0 0 0 12 .8Z" />
+              </svg>
+            </a>
+            <a
+              className="social-link"
+              href="https://discord.gg/tRAN8HgvK5"
+              target="_blank"
+              rel="noreferrer"
+              aria-label={t("discord")}
+              title={t("discord")}
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M20.3 4.5a20 20 0 0 0-4.9-1.5l-.6 1.2a18 18 0 0 0-5.6 0L8.6 3a20 20 0 0 0-4.9 1.5C.6 9 .1 13.5.4 18a20 20 0 0 0 6 3l1.2-2a12 12 0 0 1-1.9-.9l.5-.4a14.4 14.4 0 0 0 11.6 0l.5.4-1.9.9 1.2 2a20 20 0 0 0 6-3c.4-5.2-.8-9.6-3.3-13.5ZM8.3 15.3c-1.1 0-1.9-1-1.9-2.2s.8-2.2 1.9-2.2 1.9 1 1.9 2.2-.8 2.2-1.9 2.2Zm7.4 0c-1.1 0-1.9-1-1.9-2.2s.8-2.2 1.9-2.2 1.9 1 1.9 2.2-.8 2.2-1.9 2.2Z" />
+              </svg>
+            </a>
+            <button
+              className="icon-button"
+              onClick={logout}
+              aria-label={t("logout")}
+              title={t("logout")}
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  d="M10 4H4v16h6M14 8l4 4-4 4M8 12h12"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
           </div>
         </header>
         <main className="content">
           <Outlet />
         </main>
       </div>
-      {tour && (
-        <Modal title={t("onboarding")} onClose={() => setTour(false)}>
-          <p>{t("onboardingHelp")}</p>
-          <p className="muted">{t("transportHelp")}</p>
-          <button className="primary" onClick={() => setTour(false)}>
-            {t("close")}
-          </button>
-        </Modal>
-      )}
     </div>
   );
 }
@@ -230,7 +242,7 @@ function ConsoleRoutes() {
             element={<Resources key={kind} kind={kind} catalog={operations} />}
           />
         ))}
-        <Route path="metrics" element={<Metrics catalog={operations} />} />
+        <Route path="metrics" element={<Metrics />} />
         <Route path="explorer" element={<Explorer catalog={operations} />} />
         <Route path="settings" element={<Settings />} />
         <Route path="*" element={<Navigate to="/" replace />} />
@@ -239,6 +251,12 @@ function ConsoleRoutes() {
   );
 }
 export default function App() {
+  const { t } = useTranslation();
+  const location = useLocation();
+  const page = location.pathname.split("/")[1] || "overview";
+  useEffect(() => {
+    document.title = `Docmon · ${t(page === "login" ? "connect" : page)}`;
+  }, [page, t]);
   return (
     <Routes>
       <Route path="/login" element={<Login />} />

@@ -44,3 +44,32 @@ describe("API authentication and routing", () => {
     expect(JSON.parse(fetch.mock.calls[0][1].body).force).toBe(false);
   });
 });
+it("follows enumeration tokens without truncating collections", async () => {
+  const fetch = vi
+    .fn()
+    .mockResolvedValueOnce(
+      new Response(
+        JSON.stringify({
+          objects: [{ id: 1 }],
+          endOfResults: false,
+          continuationToken: "cursor+encoded=",
+        }),
+      ),
+    )
+    .mockResolvedValueOnce(
+      new Response(
+        JSON.stringify({
+          objects: [{ id: 2 }],
+          endOfResults: true,
+          continuationToken: null,
+        }),
+      ),
+    );
+  vi.stubGlobal("fetch", fetch);
+  const rows = await new ApiClient("token").enumerate("images");
+  expect(rows).toEqual([{ id: 1 }, { id: 2 }]);
+  expect(fetch.mock.calls[1][0]).toContain(
+    "continuationToken=cursor%2Bencoded%3D",
+  );
+  expect(fetch.mock.calls[0][1].headers["Accept-Language"]).toBeTruthy();
+});

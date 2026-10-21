@@ -10,7 +10,7 @@ All JSON uses camelCase and string enums. Encode IDs and path/query values with 
 
 Errors use `{ "code": "invalid_request", "message": "...", "requestId": "..." }`. Common statuses: 400 invalid input; 401 invalid/missing bearer token; 404 missing Docker/resource record; 409 Docker conflict; 502 Docker/MCP unavailable; 504 REST timeout. Docker may return other 4xx statuses. `X-Request-Id` correlates normal JSON operations with durable history.
 
-Lists return JSON arrays of current Docker resources. Events retain at most 1000 records; metric history retains at most 10000 samples; request history returns at most 1000 summaries, newest first. Query `/history/{id}` for a redacted full record. Durable history uses daily JSONL files with 30-day retention in `DOCMON_DATA_DIRECTORY` (default `./data`), redacted auth headers and sensitive JSON keys, and 4096-character body limits. History responses and MCP payloads are excluded from body capture to avoid recursive and token-bearing payloads.
+Collection reads return `EnumerationResult<T>` objects: `success`, `maxResults`, `totalRecords`, `recordsRemaining`, `continuationToken`, `endOfResults`, `objects`, and `totalMs`. This replaces the previous bare-array response, including logs and registry tags. Supply `EnumerationQuery` fields as REST query parameters or MCP arguments: `maxResults` (1–1000, default 100), `continuationToken`, `search`, `sortBy` (scalar camelCase property; `value` for string lists), `ordering` (`Ascending` or `Descending`), `containerIdFilter`, `startUtc`, `endUtc`, and `filters` (a JSON object of scalar field substring filters in REST). Filters and ordering run before paging; `totalRecords` counts matches. Continue with the returned token and the same query until `endOfResults` is true. Tokens are bound to the resource and query, including page size; changing filters requires restarting enumeration. Collections are live views, not snapshots, so changes between pages can affect offsets. Detail reads and mutations keep their typed resource or operation-result contracts. Events retain at most 1000 records; metric history retains at most 10000 samples; request history returns at most 1000 summaries, newest first. Query `/history/{id}` for a redacted full record, recovered from the retained journal even after it leaves the summary cache. Durable history uses daily JSONL files with 30-day retention in `DOCMON_DATA_DIRECTORY` (default `./data`), redacted auth headers and sensitive JSON keys, and 4096-character body limits. History responses and MCP payloads are excluded from body capture to avoid recursive and token-bearing payloads.
 
 Compose operations use discovered labels and require the original project files mounted at identical host paths. `containers_update` pulls the image and recreates a Compose service. For standalone containers it only pulls, matching the TUI; a restart does not switch an existing container to the new image.
 
@@ -31,6 +31,7 @@ Browser archive endpoints transfer tar files directly. Upload bodies are raw `ap
 | GET | `/api/v1/events` | Recent daemon events |
 | GET | `/api/v1/metrics/history` | Bounded recent container metric history |
 | GET | `/api/v1/metrics` | Latest live container metrics |
+| GET | `/api/v1/history/summary` | Request history time buckets across the retained journal |
 | GET | `/api/v1/history` | Recent API requests without credentials |
 | GET | `/api/v1/containers/{id}` | Inspect a container |
 | GET | `/api/v1/containers/{id}/logs` | Read container logs |
@@ -55,6 +56,10 @@ Browser archive endpoints transfer tar files directly. Upload bodies are raw `ap
 | GET | `/api/v1/history/{id}` | Inspect a redacted request record |
 | GET | `/api/v1/containers/{id}/archive` | Download a container path as a tar archive |
 | PUT | `/api/v1/containers/{id}/archive` | Upload a tar archive into a container directory |
+
+## Request history timeframes
+
+`GET /api/v1/history/summary?timeframe=hour|day|week|month` returns a single typed summary with complete, chronological, zero-filled buckets. Hour uses 60 one-minute buckets; day uses 96 fifteen-minute buckets; week uses 84 two-hour buckets; month is a rolling 30 days with 90 eight-hour buckets. Bounds are UTC, inclusive at the start and exclusive at the end. Counts come from all retained journal files, not the 1000-record memory cache. `GET /api/v1/history?timeframe=...` enumerates body-free records in the same rolling window. Without a timeframe, the list retains its recent-cache behavior. Both surfaces use the server clock; records captured concurrently may appear on the next refresh.
 
 ## Endpoint contracts
 
@@ -90,7 +95,15 @@ List all containers
 
 **Parameters:**
 
-None.
+- `maxResults` (query, integer, optional): EnumerationQuery MaxResults
+- `continuationToken` (query, string, optional): EnumerationQuery ContinuationToken
+- `search` (query, string, optional): EnumerationQuery Search
+- `sortBy` (query, string, optional): EnumerationQuery SortBy
+- `ordering` (query, string, optional): EnumerationQuery Ordering
+- `containerIdFilter` (query, string, optional): EnumerationQuery ContainerIdFilter
+- `startUtc` (query, string, optional): EnumerationQuery StartUtc
+- `endUtc` (query, string, optional): EnumerationQuery EndUtc
+- `filters` (query, string, optional): JSON object mapping scalar field names to substring filters.
 
 **Request body:**
 
@@ -114,7 +127,15 @@ List local images
 
 **Parameters:**
 
-None.
+- `maxResults` (query, integer, optional): EnumerationQuery MaxResults
+- `continuationToken` (query, string, optional): EnumerationQuery ContinuationToken
+- `search` (query, string, optional): EnumerationQuery Search
+- `sortBy` (query, string, optional): EnumerationQuery SortBy
+- `ordering` (query, string, optional): EnumerationQuery Ordering
+- `containerIdFilter` (query, string, optional): EnumerationQuery ContainerIdFilter
+- `startUtc` (query, string, optional): EnumerationQuery StartUtc
+- `endUtc` (query, string, optional): EnumerationQuery EndUtc
+- `filters` (query, string, optional): JSON object mapping scalar field names to substring filters.
 
 **Request body:**
 
@@ -187,7 +208,15 @@ Discover Compose projects
 
 **Parameters:**
 
-None.
+- `maxResults` (query, integer, optional): EnumerationQuery MaxResults
+- `continuationToken` (query, string, optional): EnumerationQuery ContinuationToken
+- `search` (query, string, optional): EnumerationQuery Search
+- `sortBy` (query, string, optional): EnumerationQuery SortBy
+- `ordering` (query, string, optional): EnumerationQuery Ordering
+- `containerIdFilter` (query, string, optional): EnumerationQuery ContainerIdFilter
+- `startUtc` (query, string, optional): EnumerationQuery StartUtc
+- `endUtc` (query, string, optional): EnumerationQuery EndUtc
+- `filters` (query, string, optional): JSON object mapping scalar field names to substring filters.
 
 **Request body:**
 
@@ -259,7 +288,15 @@ Recent daemon events
 
 **Parameters:**
 
-None.
+- `maxResults` (query, integer, optional): EnumerationQuery MaxResults
+- `continuationToken` (query, string, optional): EnumerationQuery ContinuationToken
+- `search` (query, string, optional): EnumerationQuery Search
+- `sortBy` (query, string, optional): EnumerationQuery SortBy
+- `ordering` (query, string, optional): EnumerationQuery Ordering
+- `containerIdFilter` (query, string, optional): EnumerationQuery ContainerIdFilter
+- `startUtc` (query, string, optional): EnumerationQuery StartUtc
+- `endUtc` (query, string, optional): EnumerationQuery EndUtc
+- `filters` (query, string, optional): JSON object mapping scalar field names to substring filters.
 
 **Request body:**
 
@@ -283,7 +320,15 @@ Bounded recent container metric history
 
 **Parameters:**
 
-None.
+- `maxResults` (query, integer, optional): EnumerationQuery MaxResults
+- `continuationToken` (query, string, optional): EnumerationQuery ContinuationToken
+- `search` (query, string, optional): EnumerationQuery Search
+- `sortBy` (query, string, optional): EnumerationQuery SortBy
+- `ordering` (query, string, optional): EnumerationQuery Ordering
+- `containerIdFilter` (query, string, optional): EnumerationQuery ContainerIdFilter
+- `startUtc` (query, string, optional): EnumerationQuery StartUtc
+- `endUtc` (query, string, optional): EnumerationQuery EndUtc
+- `filters` (query, string, optional): JSON object mapping scalar field names to substring filters.
 
 **Request body:**
 
@@ -307,7 +352,15 @@ Latest live container metrics
 
 **Parameters:**
 
-None.
+- `maxResults` (query, integer, optional): EnumerationQuery MaxResults
+- `continuationToken` (query, string, optional): EnumerationQuery ContinuationToken
+- `search` (query, string, optional): EnumerationQuery Search
+- `sortBy` (query, string, optional): EnumerationQuery SortBy
+- `ordering` (query, string, optional): EnumerationQuery Ordering
+- `containerIdFilter` (query, string, optional): EnumerationQuery ContainerIdFilter
+- `startUtc` (query, string, optional): EnumerationQuery StartUtc
+- `endUtc` (query, string, optional): EnumerationQuery EndUtc
+- `filters` (query, string, optional): JSON object mapping scalar field names to substring filters.
 
 **Request body:**
 
@@ -323,6 +376,30 @@ Response schemas are defined under this operation in [OpenAPI](assets/openapi.js
 curl -X GET 'http://127.0.0.1:8080/api/v1/metrics' -H "Authorization: Bearer $DOCMON_BEARER_TOKEN"
 ```
 
+### `GET /api/v1/history/summary`
+
+Request history time buckets across the retained journal
+
+**Authentication:** Bearer token required.
+
+**Parameters:**
+
+- `timeframe` (query, string, optional): Rolling window: hour (60 one-minute buckets), day (96 fifteen-minute buckets), week (84 two-hour buckets), month (90 eight-hour buckets over 30 days).
+
+**Request body:**
+
+None (or an empty JSON object for POST).
+
+**Responses:** `200` Completed request. Inspect exitCode for CLI and exec operations., `400` Structured error with code, message and requestId., `401` Structured error with code, message and requestId., `404` Structured error with code, message and requestId., `409` Structured error with code, message and requestId., `500` Structured error with code, message and requestId., `502` Structured error with code, message and requestId., `504` Structured error with code, message and requestId.
+
+Response schemas are defined under this operation in [OpenAPI](assets/openapi.json).
+
+**Example:**
+
+```bash
+curl -X GET 'http://127.0.0.1:8080/api/v1/history/summary' -H "Authorization: Bearer $DOCMON_BEARER_TOKEN"
+```
+
 ### `GET /api/v1/history`
 
 Recent API requests without credentials
@@ -331,7 +408,16 @@ Recent API requests without credentials
 
 **Parameters:**
 
-None.
+- `timeframe` (query, string, optional): Rolling window: hour (60 one-minute buckets), day (96 fifteen-minute buckets), week (84 two-hour buckets), month (90 eight-hour buckets over 30 days).
+- `maxResults` (query, integer, optional): EnumerationQuery MaxResults
+- `continuationToken` (query, string, optional): EnumerationQuery ContinuationToken
+- `search` (query, string, optional): EnumerationQuery Search
+- `sortBy` (query, string, optional): EnumerationQuery SortBy
+- `ordering` (query, string, optional): EnumerationQuery Ordering
+- `containerIdFilter` (query, string, optional): EnumerationQuery ContainerIdFilter
+- `startUtc` (query, string, optional): EnumerationQuery StartUtc
+- `endUtc` (query, string, optional): EnumerationQuery EndUtc
+- `filters` (query, string, optional): JSON object mapping scalar field names to substring filters.
 
 **Request body:**
 
@@ -381,6 +467,15 @@ Read container logs
 
 - `id` (path, string, required): Resource identifier
 - `tail` (query, integer, optional): Trailing log lines, from 1 through 10000. Default 200.
+- `maxResults` (query, integer, optional): EnumerationQuery MaxResults
+- `continuationToken` (query, string, optional): EnumerationQuery ContinuationToken
+- `search` (query, string, optional): EnumerationQuery Search
+- `sortBy` (query, string, optional): EnumerationQuery SortBy
+- `ordering` (query, string, optional): EnumerationQuery Ordering
+- `containerIdFilter` (query, string, optional): EnumerationQuery ContainerIdFilter
+- `startUtc` (query, string, optional): EnumerationQuery StartUtc
+- `endUtc` (query, string, optional): EnumerationQuery EndUtc
+- `filters` (query, string, optional): JSON object mapping scalar field names to substring filters.
 
 **Request body:**
 
@@ -719,6 +814,15 @@ Tags image
 **Parameters:**
 
 - `id` (path, string, required): Resource identifier
+- `maxResults` (query, integer, optional): EnumerationQuery MaxResults
+- `continuationToken` (query, string, optional): EnumerationQuery ContinuationToken
+- `search` (query, string, optional): EnumerationQuery Search
+- `sortBy` (query, string, optional): EnumerationQuery SortBy
+- `ordering` (query, string, optional): EnumerationQuery Ordering
+- `containerIdFilter` (query, string, optional): EnumerationQuery ContainerIdFilter
+- `startUtc` (query, string, optional): EnumerationQuery StartUtc
+- `endUtc` (query, string, optional): EnumerationQuery EndUtc
+- `filters` (query, string, optional): JSON object mapping scalar field names to substring filters.
 
 **Request body:**
 

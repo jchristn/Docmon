@@ -27,3 +27,34 @@ it("filters, sorts, paginates, and refreshes a dense resource list", () => {
   fireEvent.click(screen.getByText("Refresh"));
   expect(refresh).toHaveBeenCalledOnce();
 });
+it("toggles ascending and descending order and exposes sort state", () => {
+  render(
+    <DataTable
+      data={[{ name: "beta" }, { name: "alpha" }]}
+      columns={["name"]}
+    />,
+  );
+  const heading = screen.getByRole("columnheader", { name: /Name/ });
+  expect(heading).toHaveAttribute("aria-sort", "ascending");
+  fireEvent.click(screen.getByRole("button", { name: /Name/ }));
+  expect(heading).toHaveAttribute("aria-sort", "descending");
+  expect(screen.getAllByRole("row")[2]).toHaveTextContent("beta");
+  fireEvent.click(screen.getByRole("button", { name: /Name/ }));
+  expect(heading).toHaveAttribute("aria-sort", "ascending");
+  expect(screen.getAllByRole("row")[2]).toHaveTextContent("alpha");
+});
+it("keeps untagged image placeholders after named repositories in either direction", () => {
+  render(
+    <DataTable
+      data={[
+        { repository: "—", id: "sha256:abc" },
+        { repository: "nginx", id: "sha256:def" },
+      ]}
+      columns={["repository", "id"]}
+    />,
+  );
+  expect(screen.getAllByRole("row")[2]).toHaveTextContent("nginx");
+  fireEvent.click(screen.getByRole("button", { name: /Repository/ }));
+  expect(screen.getAllByRole("row")[2]).toHaveTextContent("nginx");
+  expect(screen.getByText("Untagged image")).toBeVisible();
+});

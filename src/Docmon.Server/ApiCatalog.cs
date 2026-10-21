@@ -37,6 +37,7 @@ namespace Docmon.Server
             new ApiOperation("events_list", "GET", "/events", "Recent daemon events"),
             new ApiOperation("metrics_history", "GET", "/metrics/history", "Bounded recent container metric history"),
             new ApiOperation("metrics_list", "GET", "/metrics", "Latest live container metrics"),
+            new ApiOperation("history_summary", "GET", "/history/summary", "Request history time buckets across the retained journal"),
             new ApiOperation("history_inspect", "GET", "/history/{id}", "Inspect a redacted request record", "id"),
             new ApiOperation("history_list", "GET", "/history", "Recent API requests without credentials"),
         };

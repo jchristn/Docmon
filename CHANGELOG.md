@@ -7,6 +7,7 @@ All notable changes to Docmon are documented here. The format follows
 ## [Unreleased]
 
 ### Added
+- Cross-platform source launchers (`go`, `run-tui`, `run-server`) and complete retained-journal request summaries for hour/day/week/30-day windows.
 - Watson 7 REST server with bearer authentication, typed route metadata, OpenAPI and Swagger.
 - Colocated Voltaic MCP gateway with the same Docker operations and authentication.
 - React operator dashboard with token login, resource control, live metrics, logs,
@@ -16,6 +17,16 @@ All notable changes to Docmon are documented here. The format follows
 - REST/MCP documentation, OpenAPI snapshot, Postman collections, backend and browser tests.
 
 ### Changed
+- Denser dashboard rows, icon-only sign out after the community links, no idle chart hint, 95% viewport request inspector, and explicit Docker workload metric scope.
+- Dashboard now uses Navy & Silver, compact navigation, topbar community links,
+  tabbed and labeled metrics charts, taller request charts, request detail inspection,
+  sortable tables, top-layer operation menus, and an endpoint dropdown above the API explorer.
+- All twelve target languages have complete lazy-loaded catalogs, with locale persistence,
+  RTL/pseudo-locale support, translation parity tests, and UI string checks.
+- Collection REST/MCP responses now use EnumerationQuery/EnumerationResult paging,
+  filtering, and ordering. Remote TUI, dashboard, OpenAPI, Postman, and docs follow the contract.
+- Images retain all valid tags, skip placeholder tags, recover digest-only repositories,
+  and show image IDs and explicit untagged labels in the dashboard.
 - Local TUI composition now reuses the core runtime and pins its default connection to
   the local socket/named pipe. Remote access requires the explicit `--server` option.
 - Docker image-pull progress reports synchronously so final progress messages are retained.

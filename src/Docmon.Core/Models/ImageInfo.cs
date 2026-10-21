@@ -35,6 +35,9 @@ namespace Docmon.Core.Models
         /// </summary>
         public IReadOnlyList<string> RepoDigests { get; set; } = new List<string>();
 
+        /// <summary>All non-placeholder Docker repository tags.</summary>
+        public IReadOnlyList<string> RepoTags { get; set; } = new List<string>();
+
         /// <summary>
         /// Gets or sets the on-disk size of the image, in bytes.
         /// </summary>

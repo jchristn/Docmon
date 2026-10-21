@@ -5,7 +5,38 @@
     "path": "/api/v1/containers",
     "summary": "List all containers",
     "required": [],
-    "properties": {}
+    "properties": {
+      "maxResults": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "continuationToken": {
+        "type": "string"
+      },
+      "search": {
+        "type": "string"
+      },
+      "sortBy": {
+        "type": "string"
+      },
+      "ordering": {
+        "type": "string"
+      },
+      "containerIdFilter": {
+        "type": "string"
+      },
+      "startUtc": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "endUtc": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "filters": {
+        "type": "string"
+      }
+    }
   },
   {
     "name": "images_list",
@@ -13,7 +44,38 @@
     "path": "/api/v1/images",
     "summary": "List local images",
     "required": [],
-    "properties": {}
+    "properties": {
+      "maxResults": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "continuationToken": {
+        "type": "string"
+      },
+      "search": {
+        "type": "string"
+      },
+      "sortBy": {
+        "type": "string"
+      },
+      "ordering": {
+        "type": "string"
+      },
+      "containerIdFilter": {
+        "type": "string"
+      },
+      "startUtc": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "endUtc": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "filters": {
+        "type": "string"
+      }
+    }
   },
   {
     "name": "images_pull",
@@ -44,7 +106,38 @@
     "path": "/api/v1/stacks",
     "summary": "Discover Compose projects",
     "required": [],
-    "properties": {}
+    "properties": {
+      "maxResults": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "continuationToken": {
+        "type": "string"
+      },
+      "search": {
+        "type": "string"
+      },
+      "sortBy": {
+        "type": "string"
+      },
+      "ordering": {
+        "type": "string"
+      },
+      "containerIdFilter": {
+        "type": "string"
+      },
+      "startUtc": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "endUtc": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "filters": {
+        "type": "string"
+      }
+    }
   },
   {
     "name": "system_usage",
@@ -68,7 +161,38 @@
     "path": "/api/v1/events",
     "summary": "Recent daemon events",
     "required": [],
-    "properties": {}
+    "properties": {
+      "maxResults": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "continuationToken": {
+        "type": "string"
+      },
+      "search": {
+        "type": "string"
+      },
+      "sortBy": {
+        "type": "string"
+      },
+      "ordering": {
+        "type": "string"
+      },
+      "containerIdFilter": {
+        "type": "string"
+      },
+      "startUtc": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "endUtc": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "filters": {
+        "type": "string"
+      }
+    }
   },
   {
     "name": "metrics_history",
@@ -76,7 +200,38 @@
     "path": "/api/v1/metrics/history",
     "summary": "Bounded recent container metric history",
     "required": [],
-    "properties": {}
+    "properties": {
+      "maxResults": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "continuationToken": {
+        "type": "string"
+      },
+      "search": {
+        "type": "string"
+      },
+      "sortBy": {
+        "type": "string"
+      },
+      "ordering": {
+        "type": "string"
+      },
+      "containerIdFilter": {
+        "type": "string"
+      },
+      "startUtc": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "endUtc": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "filters": {
+        "type": "string"
+      }
+    }
   },
   {
     "name": "metrics_list",
@@ -84,7 +239,50 @@
     "path": "/api/v1/metrics",
     "summary": "Latest live container metrics",
     "required": [],
-    "properties": {}
+    "properties": {
+      "maxResults": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "continuationToken": {
+        "type": "string"
+      },
+      "search": {
+        "type": "string"
+      },
+      "sortBy": {
+        "type": "string"
+      },
+      "ordering": {
+        "type": "string"
+      },
+      "containerIdFilter": {
+        "type": "string"
+      },
+      "startUtc": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "endUtc": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "filters": {
+        "type": "string"
+      }
+    }
+  },
+  {
+    "name": "history_summary",
+    "method": "GET",
+    "path": "/api/v1/history/summary",
+    "summary": "Request history time buckets across the retained journal",
+    "required": [],
+    "properties": {
+      "timeframe": {
+        "type": "string"
+      }
+    }
   },
   {
     "name": "history_list",
@@ -92,7 +290,41 @@
     "path": "/api/v1/history",
     "summary": "Recent API requests without credentials",
     "required": [],
-    "properties": {}
+    "properties": {
+      "timeframe": {
+        "type": "string"
+      },
+      "maxResults": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "continuationToken": {
+        "type": "string"
+      },
+      "search": {
+        "type": "string"
+      },
+      "sortBy": {
+        "type": "string"
+      },
+      "ordering": {
+        "type": "string"
+      },
+      "containerIdFilter": {
+        "type": "string"
+      },
+      "startUtc": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "endUtc": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "filters": {
+        "type": "string"
+      }
+    }
   },
   {
     "name": "containers_inspect",
@@ -123,6 +355,36 @@
       "tail": {
         "type": "integer",
         "format": "int32"
+      },
+      "maxResults": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "continuationToken": {
+        "type": "string"
+      },
+      "search": {
+        "type": "string"
+      },
+      "sortBy": {
+        "type": "string"
+      },
+      "ordering": {
+        "type": "string"
+      },
+      "containerIdFilter": {
+        "type": "string"
+      },
+      "startUtc": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "endUtc": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "filters": {
+        "type": "string"
       }
     }
   },
@@ -347,6 +609,36 @@
     ],
     "properties": {
       "id": {
+        "type": "string"
+      },
+      "maxResults": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "continuationToken": {
+        "type": "string"
+      },
+      "search": {
+        "type": "string"
+      },
+      "sortBy": {
+        "type": "string"
+      },
+      "ordering": {
+        "type": "string"
+      },
+      "containerIdFilter": {
+        "type": "string"
+      },
+      "startUtc": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "endUtc": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "filters": {
         "type": "string"
       }
     }

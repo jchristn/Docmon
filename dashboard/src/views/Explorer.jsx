@@ -1,10 +1,11 @@
+import { duration } from "../i18n/formatters";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../context/AuthContext";
 import { ErrorBanner, JsonView, Modal, CopyButton } from "../components/Common";
 export default function Explorer({ catalog }) {
   const { api } = useAuth();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [search, setSearch] = useState(""),
     [name, setName] = useState(""),
     [params, setParams] = useState({}),
@@ -23,7 +24,25 @@ export default function Explorer({ catalog }) {
       ),
     [catalog, search],
   );
-  const selected = catalog.find((op) => op.name === name) || operations[0];
+  const selected = operations.find((op) => op.name === name) || operations[0];
+  const label = (op) => {
+    const [group, ...parts] = op.name.split("_");
+    const action = parts.join("_");
+    const aliases = {
+      info: "serverInfo",
+      usage: "machineState",
+      archive_download: "downloadArchive",
+      archive_upload: "uploadArchive",
+    };
+    return t(
+      !action
+        ? "health"
+        : action === "list"
+          ? group
+          : aliases[action] || action,
+      { defaultValue: op.summary },
+    );
+  };
   let path = selected?.path || "";
   Object.entries(params).forEach(([key, value]) => {
     path = path.replace(`{${key}}`, encodeURIComponent(value));
@@ -101,39 +120,35 @@ export default function Explorer({ catalog }) {
         </a>
       </div>
       <div className="explorer-grid">
-        <section className="panel endpoint-list">
+        <section className="panel endpoint-picker">
           <input
             aria-label={t("search")}
             placeholder={t("search")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
-          {operations.map((op) => (
-            <button
-              key={op.name}
-              className={selected?.name === op.name ? "selected" : ""}
-              onClick={() => {
-                setName(op.name);
-                setParams({});
-                setBody("{}");
-                setResult(null);
-                setArchiveFile(null);
-              }}
-            >
-              <span className={`method ${op.method.toLowerCase()}`}>
-                {op.method}
-              </span>
-              <span>
-                {op.summary}
-                <code>{op.path}</code>
-              </span>
-            </button>
-          ))}
+          <select
+            aria-label={t("endpoint")}
+            value={selected?.name || ""}
+            onChange={(e) => {
+              setName(e.target.value);
+              setParams({});
+              setBody("{}");
+              setResult(null);
+              setArchiveFile(null);
+            }}
+          >
+            {operations.map((op) => (
+              <option key={op.name} value={op.name}>
+                {op.method} {op.path} · {label(op)}
+              </option>
+            ))}
+          </select>
         </section>
         <section className="panel">
           {selected && (
             <>
-              <h2>{selected.summary}</h2>
+              <h2>{label(selected)}</h2>
               <code className="endpoint">
                 {selected.method} {path}
               </code>
@@ -188,7 +203,8 @@ export default function Explorer({ catalog }) {
               {result && (
                 <>
                   <h3>
-                    {t("response")} · {result.status} · {result.elapsedMs} ms
+                    {t("response")} · {result.status} ·{" "}
+                    {duration(result.elapsedMs, i18n.language)}
                   </h3>
                   <JsonView value={result.body} />
                   <details>
@@ -198,7 +214,9 @@ export default function Explorer({ catalog }) {
                 </>
               )}
               <details>
-                <summary>{t("requestBody")} schema</summary>
+                <summary>
+                  {t("requestBody")} · {t("schema")}
+                </summary>
                 <JsonView value={selected.schema} />
               </details>
             </>

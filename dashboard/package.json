@@ -7,7 +7,7 @@
     "assets": "node scripts/assets.js",
     "dev": "npm run assets && vite --host 127.0.0.1",
     "build": "npm run assets && vite build",
-    "lint": "eslint src",
+    "lint": "eslint src && node scripts/check-i18n.js",
     "test": "vitest run",
     "test:e2e": "playwright test"
   },
@@ -22,6 +22,7 @@
     "react-router-dom": "^7.1.0"
   },
   "devDependencies": {
+    "@babel/parser": "7.29.9",
     "@playwright/test": "^1.51.0",
     "@testing-library/jest-dom": "^6.6.0",
     "@testing-library/react": "^16.2.0",

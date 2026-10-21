@@ -8,7 +8,9 @@ export function flattenOpenApi(spec) {
       )
       .map(([method, op]) => ({
         binary: !!op.requestBody?.content?.["application/x-tar"],
-        name: op.operationId,
+        name:
+          op.operationId ||
+          (path === "/health" ? "health" : `${method}_${path}`),
         method: method.toUpperCase(),
         path,
         summary: op.summary,

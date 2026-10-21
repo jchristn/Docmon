@@ -13,7 +13,18 @@ export function useResource(path, poll = true) {
       timer;
     async function load() {
       try {
-        const value = await api.get(path, controller.signal);
+        const collection = [
+          "containers",
+          "images",
+          "stacks",
+          "metrics",
+          "metrics/history",
+          "events",
+          "history",
+        ].includes(path.split("?")[0]);
+        const value = await (collection
+          ? api.enumerate(path, controller.signal)
+          : api.get(path, controller.signal));
         if (active) {
           setData(value);
           setError(null);

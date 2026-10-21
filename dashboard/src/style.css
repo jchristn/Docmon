@@ -8,14 +8,14 @@
     sans-serif;
   font-size: 14px;
   color-scheme: dark;
-  --bg: #0b1118;
-  --surface: #111b26;
-  --surface2: #162331;
-  --border: #263544;
-  --text: #e8eef4;
-  --muted: #91a4b6;
-  --accent: #4ee0b5;
-  --accent-text: #07241c;
+  --bg: #151e28;
+  --surface: #202d3b;
+  --surface2: #29394a;
+  --border: #3c4d5d;
+  --text: #edf2f6;
+  --muted: #b1bfcc;
+  --accent: #83bde4;
+  --accent-text: #172c40;
   --danger: #ff8184;
   --shadow: 0 20px 80px #0005;
   color: var(--text);
@@ -23,13 +23,13 @@
 }
 :root[data-theme="light"] {
   color-scheme: light;
-  --bg: #f3f6f8;
+  --bg: #f3f5f7;
   --surface: #fff;
-  --surface2: #eaf0f3;
-  --border: #d6e0e6;
-  --text: #132b3a;
-  --muted: #586f80;
-  --accent: #007e61;
+  --surface2: #e9eef2;
+  --border: #d0d9e1;
+  --text: #172c40;
+  --muted: #596b7a;
+  --accent: #276d9e;
   --accent-text: #fff;
   --danger: #ba3443;
   --shadow: 0 20px 80px #18304025;
@@ -243,7 +243,7 @@ small {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 11px 13px;
+  padding: 5.5px 6.5px;
   margin: 3px 0;
   border-radius: 6px;
   color: var(--muted);
@@ -742,7 +742,7 @@ dialog::backdrop {
 .terminal {
   height: 420px;
   padding: 12px;
-  background: #0b1118;
+  background: #151e28;
   border-radius: 7px;
   margin-top: 16px;
 }
@@ -812,12 +812,12 @@ dialog::backdrop {
 }
 .login-story {
   background:
-    radial-gradient(ellipse at 10% 90%, #16564b55, transparent 60%), #0e1b26;
+    radial-gradient(ellipse at 10% 90%, #347fb655, transparent 60%), #172c40;
   padding: 45px clamp(30px, 5vw, 80px);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  color: #e8eef4;
+  color: #edf2f6;
   gap: 60px;
 }
 .login-story .brand {
@@ -831,7 +831,7 @@ dialog::backdrop {
   margin: 22px 0;
 }
 .login-story p:not(.eyebrow) {
-  color: #91a4b6;
+  color: #b1bfcc;
   max-width: 480px;
   font-size: 14px;
   line-height: 1.9;
@@ -843,17 +843,17 @@ dialog::backdrop {
   flex-wrap: wrap;
 }
 .login-tags span {
-  border: 1px solid #2c4b51;
+  border: 1px solid #3c4d5d;
   border-radius: 5px;
   padding: 9px 13px;
-  color: #8baea9;
+  color: #b1bfcc;
   font-size: 11px;
   font-family: "IBM Plex Mono", monospace;
 }
 .login-story > .row {
   justify-content: flex-start;
   gap: 30px;
-  color: #91a4b6;
+  color: #b1bfcc;
   font-size: 12px;
 }
 .login-form {
@@ -957,7 +957,7 @@ details.columns > summary {
     margin-top: 28px;
   }
   .nav-group a {
-    padding: 9px;
+    padding: 4.5px;
     font-size: 11px;
     gap: 7px;
   }
@@ -1044,7 +1044,7 @@ details.columns > summary {
     margin: 0;
     font-size: 10px;
     min-height: 35px;
-    padding: 6px 8px;
+    padding: 3px 4px;
     gap: 5px;
   }
   .nav-group a > span {
@@ -1194,4 +1194,211 @@ td {
 }
 .column-filters th {
   padding: 6px 12px;
+}
+
+/* Navy & Silver and compact navigation. */
+.nav-group a {
+  min-height: 0;
+}
+.nav-group > p {
+  padding-inline: 6.5px;
+}
+.social-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 6px;
+  color: var(--muted);
+}
+.social-link:hover {
+  color: var(--accent);
+  background: var(--surface2);
+}
+.social-link svg {
+  width: 19px;
+  height: 19px;
+  fill: currentColor;
+}
+.explorer-grid {
+  display: flex;
+  flex-direction: column;
+}
+.endpoint-picker {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.endpoint-picker input {
+  flex: 1;
+}
+.endpoint-picker select {
+  flex: 3;
+  min-width: 0;
+  max-width: 100%;
+}
+.chart svg {
+  height: 249px;
+}
+.chart text,
+.metric-chart text {
+  fill: var(--muted);
+  font-size: 12px;
+}
+.metric-chart {
+  position: relative;
+  width: 100%;
+}
+.metric-chart svg {
+  width: 100%;
+  height: 390px;
+  display: block;
+}
+.chart-hover {
+  outline: none;
+}
+.chart-hover:hover,
+.chart-hover:focus {
+  fill: var(--text);
+  stroke: var(--text);
+}
+.chart-tooltip {
+  padding: 8px 12px;
+  background: var(--surface2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  min-height: 38px;
+  font-size: 12px;
+}
+.metric-tabs {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.metric-tabs [aria-selected="true"] {
+  color: var(--accent-text);
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.operation-menu {
+  position: fixed;
+  margin: 0;
+  padding: 5px;
+  max-width: calc(100vw - 16px);
+  max-height: calc(100dvh - 16px);
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow);
+  min-width: 180px;
+}
+.operation-menu button {
+  display: flex;
+  width: 100%;
+  justify-content: flex-start;
+  border: 0;
+  background: transparent;
+  text-align: start;
+}
+.operation-menu button:hover,
+.operation-menu button:focus {
+  background: var(--surface2);
+  color: var(--accent);
+}
+.request-inspector .request-summary {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+.request-inspector .request-blocks {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.request-inspector .request-blocks section {
+  min-width: 0;
+}
+.request-inspector pre {
+  max-height: 300px;
+  overflow: auto;
+}
+@media (max-width: 700px) {
+  .request-inspector .request-blocks {
+    grid-template-columns: 1fr;
+  }
+  .metric-chart svg {
+    height: 300px;
+  }
+}
+
+/* Compact resource rows and a nearly full-screen request inspector. */
+td {
+  padding: 4px 10px;
+  line-height: 1.35;
+}
+th {
+  padding: 5px 10px;
+}
+td button {
+  min-height: 28px;
+  padding: 4px 8px;
+}
+th button {
+  min-height: 20px;
+}
+.badge {
+  padding-block: 2px;
+}
+.icon-button {
+  width: 34px;
+  min-width: 34px;
+  padding: 6px;
+}
+.icon-button svg {
+  width: 19px;
+  height: 19px;
+}
+dialog.request-details {
+  width: 95vw;
+  max-width: 95vw;
+  height: 95dvh;
+  max-height: 95dvh;
+}
+dialog.request-details[open] {
+  display: flex;
+  flex-direction: column;
+}
+dialog.request-details .modal-body {
+  flex: 1;
+  min-height: 0;
+  max-height: none;
+  overflow: auto;
+}
+dialog.request-details .modal-head {
+  flex-shrink: 0;
+}
+.history-timeframe {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 14px 0;
+}
+.chart,
+.metric-chart {
+  position: relative;
+}
+.chart-tooltip {
+  position: absolute;
+  inset-block-start: 8px;
+  inset-inline-end: 8px;
+  max-width: calc(100% - 16px);
+  min-height: 0;
+  pointer-events: none;
+  z-index: 1;
 }

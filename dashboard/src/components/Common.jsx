@@ -40,22 +40,48 @@ export function ErrorBanner({ error, retry }) {
   return (
     <div className="error" role="alert">
       <span>
-        {error.message} {error.requestId && <code>{error.requestId}</code>}
+        {t(error.code || (error.status === 401 ? "authExpired" : "failed"), {
+          defaultValue: t("failed"),
+        })}{" "}
+        <details>
+          <summary>{t("details")}</summary>
+          <code>{error.message}</code>
+        </details>{" "}
+        {error.requestId && <code>{error.requestId}</code>}
       </span>
       {retry && <button onClick={retry}>{t("retry")}</button>}
     </div>
   );
 }
 export function Badge({ value }) {
+  const { t } = useTranslation();
+  const key = String(value).replace(/^./, (c) => c.toLowerCase());
+  const labels = {
+    running: "runningCount",
+    stopped: "exited",
+    unknown: "unknown",
+    upToDate: "upToDate",
+    updateAvailable: "updateAvailable",
+    unsupported: "notSupported",
+    current: "upToDate",
+    checking: "working",
+    error: "failed",
+  };
   return (
     <span
       className={`badge ${/running|healthy|200|201|204|start/i.test(String(value)) ? "good" : /exited|unhealthy|dead|[45]\d\d|kill/i.test(String(value)) ? "bad" : ""}`}
     >
-      {String(value)}
+      {t(labels[key] || key, { defaultValue: String(value) })}
     </span>
   );
 }
-export function Modal({ title, children, onClose, wide = false }) {
+export function Modal({
+  title,
+  children,
+  onClose,
+  wide = false,
+  fullscreen = false,
+}) {
   const { t } = useTranslation();
   const dialog = useRef(null);
   useEffect(() => {
@@ -68,7 +94,7 @@ export function Modal({ title, children, onClose, wide = false }) {
   return (
     <dialog
       ref={dialog}
-      className={wide ? "wide" : ""}
+      className={fullscreen ? "request-details" : wide ? "wide" : ""}
       onCancel={(e) => {
         e.preventDefault();
         onClose();
@@ -99,49 +125,5 @@ export function JsonView({ value }) {
       </div>
       <pre>{text}</pre>
     </section>
-  );
-}
-export function ActivityChart({ data = [] }) {
-  const { t } = useTranslation();
-  const buckets = Array.from({ length: 30 }, () => ({ ok: 0, failed: 0 }));
-  const now = Date.now();
-  data.forEach((r) => {
-    const i = 29 - Math.floor((now - new Date(r.atUtc).getTime()) / 60000);
-    if (i >= 0 && i < 30) buckets[i][r.status < 400 ? "ok" : "failed"]++;
-  });
-  const max = Math.max(1, ...buckets.map((b) => b.ok + b.failed));
-  return (
-    <div className="chart">
-      <svg viewBox="0 0 900 130" role="img" aria-label={t("activity")}>
-        {buckets.map((b, i) => (
-          <g key={i}>
-            <title>{`${b.ok} ${t("successes")}, ${b.failed} ${t("failures")}`}</title>
-            <rect
-              x={i * 30 + 2}
-              y={115 - (b.ok / max) * 100}
-              width="22"
-              height={Math.max(2, (b.ok / max) * 100)}
-              fill="var(--accent)"
-              rx="2"
-            />
-            <rect
-              x={i * 30 + 2}
-              y={115 - ((b.ok + b.failed) / max) * 100}
-              width="22"
-              height={(b.failed / max) * 100}
-              fill="var(--danger)"
-              rx="2"
-            />
-          </g>
-        ))}
-      </svg>
-      <div className="row muted small">
-        <span>−30 min</span>
-        <span>
-          {t("successes")} / {t("failures")}
-        </span>
-        <span>0 min</span>
-      </div>
-    </div>
   );
 }

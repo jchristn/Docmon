@@ -59,7 +59,7 @@
         "method": "GET",
         "header": [],
         "url": "{{baseUrl}}/api/v1/containers",
-        "description": "List all containers.\n\n"
+        "description": "List all containers.\n\n- `maxResults` (query, integer, optional): EnumerationQuery MaxResults\n- `continuationToken` (query, string, optional): EnumerationQuery ContinuationToken\n- `search` (query, string, optional): EnumerationQuery Search\n- `sortBy` (query, string, optional): EnumerationQuery SortBy\n- `ordering` (query, string, optional): EnumerationQuery Ordering\n- `containerIdFilter` (query, string, optional): EnumerationQuery ContainerIdFilter\n- `startUtc` (query, string, optional): EnumerationQuery StartUtc\n- `endUtc` (query, string, optional): EnumerationQuery EndUtc\n- `filters` (query, string, optional): JSON object mapping scalar field names to substring filters."
       },
       "event": [
         {
@@ -69,7 +69,8 @@
             "exec": [
               "pm.test(\"Successful HTTP status\", () => pm.expect(pm.response.code).to.be.within(200, 299));",
               "pm.test(\"JSON response\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
-              "pm.test(\"No reported operation failure\", () => { const b = pm.response.json(); if (b.exitCode !== undefined) pm.expect(b.exitCode).to.equal(0); });"
+              "pm.test(\"No reported operation failure\", () => { const b = pm.response.json(); if (b.exitCode !== undefined) pm.expect(b.exitCode).to.equal(0); });",
+              "pm.test(\"EnumerationResult paging contract\", () => { const b = pm.response.json(); pm.expect(b.success).to.equal(true); pm.expect(b.objects).to.be.an(\"array\"); pm.expect(b.maxResults).to.be.within(1,1000); pm.expect(b.objects.length).to.be.at.most(b.maxResults); pm.expect(b.totalRecords).to.be.at.least(b.objects.length); pm.expect(b.recordsRemaining).to.be.at.least(0); pm.expect(b.endOfResults).to.equal(b.recordsRemaining === 0); if (!b.endOfResults) pm.expect(b.continuationToken).to.be.a(\"string\").and.not.empty; });"
             ]
           }
         }
@@ -81,7 +82,7 @@
         "method": "GET",
         "header": [],
         "url": "{{baseUrl}}/api/v1/images",
-        "description": "List local images.\n\n"
+        "description": "List local images.\n\n- `maxResults` (query, integer, optional): EnumerationQuery MaxResults\n- `continuationToken` (query, string, optional): EnumerationQuery ContinuationToken\n- `search` (query, string, optional): EnumerationQuery Search\n- `sortBy` (query, string, optional): EnumerationQuery SortBy\n- `ordering` (query, string, optional): EnumerationQuery Ordering\n- `containerIdFilter` (query, string, optional): EnumerationQuery ContainerIdFilter\n- `startUtc` (query, string, optional): EnumerationQuery StartUtc\n- `endUtc` (query, string, optional): EnumerationQuery EndUtc\n- `filters` (query, string, optional): JSON object mapping scalar field names to substring filters."
       },
       "event": [
         {
@@ -91,7 +92,8 @@
             "exec": [
               "pm.test(\"Successful HTTP status\", () => pm.expect(pm.response.code).to.be.within(200, 299));",
               "pm.test(\"JSON response\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
-              "pm.test(\"No reported operation failure\", () => { const b = pm.response.json(); if (b.exitCode !== undefined) pm.expect(b.exitCode).to.equal(0); });"
+              "pm.test(\"No reported operation failure\", () => { const b = pm.response.json(); if (b.exitCode !== undefined) pm.expect(b.exitCode).to.equal(0); });",
+              "pm.test(\"EnumerationResult paging contract\", () => { const b = pm.response.json(); pm.expect(b.success).to.equal(true); pm.expect(b.objects).to.be.an(\"array\"); pm.expect(b.maxResults).to.be.within(1,1000); pm.expect(b.objects.length).to.be.at.most(b.maxResults); pm.expect(b.totalRecords).to.be.at.least(b.objects.length); pm.expect(b.recordsRemaining).to.be.at.least(0); pm.expect(b.endOfResults).to.equal(b.recordsRemaining === 0); if (!b.endOfResults) pm.expect(b.continuationToken).to.be.a(\"string\").and.not.empty; });"
             ]
           }
         }
@@ -103,7 +105,7 @@
         "method": "GET",
         "header": [],
         "url": "{{baseUrl}}/api/v1/stacks",
-        "description": "Discover Compose projects.\n\n"
+        "description": "Discover Compose projects.\n\n- `maxResults` (query, integer, optional): EnumerationQuery MaxResults\n- `continuationToken` (query, string, optional): EnumerationQuery ContinuationToken\n- `search` (query, string, optional): EnumerationQuery Search\n- `sortBy` (query, string, optional): EnumerationQuery SortBy\n- `ordering` (query, string, optional): EnumerationQuery Ordering\n- `containerIdFilter` (query, string, optional): EnumerationQuery ContainerIdFilter\n- `startUtc` (query, string, optional): EnumerationQuery StartUtc\n- `endUtc` (query, string, optional): EnumerationQuery EndUtc\n- `filters` (query, string, optional): JSON object mapping scalar field names to substring filters."
       },
       "event": [
         {
@@ -113,7 +115,8 @@
             "exec": [
               "pm.test(\"Successful HTTP status\", () => pm.expect(pm.response.code).to.be.within(200, 299));",
               "pm.test(\"JSON response\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
-              "pm.test(\"No reported operation failure\", () => { const b = pm.response.json(); if (b.exitCode !== undefined) pm.expect(b.exitCode).to.equal(0); });"
+              "pm.test(\"No reported operation failure\", () => { const b = pm.response.json(); if (b.exitCode !== undefined) pm.expect(b.exitCode).to.equal(0); });",
+              "pm.test(\"EnumerationResult paging contract\", () => { const b = pm.response.json(); pm.expect(b.success).to.equal(true); pm.expect(b.objects).to.be.an(\"array\"); pm.expect(b.maxResults).to.be.within(1,1000); pm.expect(b.objects.length).to.be.at.most(b.maxResults); pm.expect(b.totalRecords).to.be.at.least(b.objects.length); pm.expect(b.recordsRemaining).to.be.at.least(0); pm.expect(b.endOfResults).to.equal(b.recordsRemaining === 0); if (!b.endOfResults) pm.expect(b.continuationToken).to.be.a(\"string\").and.not.empty; });"
             ]
           }
         }
@@ -169,7 +172,7 @@
         "method": "GET",
         "header": [],
         "url": "{{baseUrl}}/api/v1/events",
-        "description": "Recent daemon events.\n\n"
+        "description": "Recent daemon events.\n\n- `maxResults` (query, integer, optional): EnumerationQuery MaxResults\n- `continuationToken` (query, string, optional): EnumerationQuery ContinuationToken\n- `search` (query, string, optional): EnumerationQuery Search\n- `sortBy` (query, string, optional): EnumerationQuery SortBy\n- `ordering` (query, string, optional): EnumerationQuery Ordering\n- `containerIdFilter` (query, string, optional): EnumerationQuery ContainerIdFilter\n- `startUtc` (query, string, optional): EnumerationQuery StartUtc\n- `endUtc` (query, string, optional): EnumerationQuery EndUtc\n- `filters` (query, string, optional): JSON object mapping scalar field names to substring filters."
       },
       "event": [
         {
@@ -179,7 +182,8 @@
             "exec": [
               "pm.test(\"Successful HTTP status\", () => pm.expect(pm.response.code).to.be.within(200, 299));",
               "pm.test(\"JSON response\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
-              "pm.test(\"No reported operation failure\", () => { const b = pm.response.json(); if (b.exitCode !== undefined) pm.expect(b.exitCode).to.equal(0); });"
+              "pm.test(\"No reported operation failure\", () => { const b = pm.response.json(); if (b.exitCode !== undefined) pm.expect(b.exitCode).to.equal(0); });",
+              "pm.test(\"EnumerationResult paging contract\", () => { const b = pm.response.json(); pm.expect(b.success).to.equal(true); pm.expect(b.objects).to.be.an(\"array\"); pm.expect(b.maxResults).to.be.within(1,1000); pm.expect(b.objects.length).to.be.at.most(b.maxResults); pm.expect(b.totalRecords).to.be.at.least(b.objects.length); pm.expect(b.recordsRemaining).to.be.at.least(0); pm.expect(b.endOfResults).to.equal(b.recordsRemaining === 0); if (!b.endOfResults) pm.expect(b.continuationToken).to.be.a(\"string\").and.not.empty; });"
             ]
           }
         }
@@ -191,7 +195,7 @@
         "method": "GET",
         "header": [],
         "url": "{{baseUrl}}/api/v1/metrics/history",
-        "description": "Bounded recent container metric history.\n\n"
+        "description": "Bounded recent container metric history.\n\n- `maxResults` (query, integer, optional): EnumerationQuery MaxResults\n- `continuationToken` (query, string, optional): EnumerationQuery ContinuationToken\n- `search` (query, string, optional): EnumerationQuery Search\n- `sortBy` (query, string, optional): EnumerationQuery SortBy\n- `ordering` (query, string, optional): EnumerationQuery Ordering\n- `containerIdFilter` (query, string, optional): EnumerationQuery ContainerIdFilter\n- `startUtc` (query, string, optional): EnumerationQuery StartUtc\n- `endUtc` (query, string, optional): EnumerationQuery EndUtc\n- `filters` (query, string, optional): JSON object mapping scalar field names to substring filters."
       },
       "event": [
         {
@@ -201,7 +205,8 @@
             "exec": [
               "pm.test(\"Successful HTTP status\", () => pm.expect(pm.response.code).to.be.within(200, 299));",
               "pm.test(\"JSON response\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
-              "pm.test(\"No reported operation failure\", () => { const b = pm.response.json(); if (b.exitCode !== undefined) pm.expect(b.exitCode).to.equal(0); });"
+              "pm.test(\"No reported operation failure\", () => { const b = pm.response.json(); if (b.exitCode !== undefined) pm.expect(b.exitCode).to.equal(0); });",
+              "pm.test(\"EnumerationResult paging contract\", () => { const b = pm.response.json(); pm.expect(b.success).to.equal(true); pm.expect(b.objects).to.be.an(\"array\"); pm.expect(b.maxResults).to.be.within(1,1000); pm.expect(b.objects.length).to.be.at.most(b.maxResults); pm.expect(b.totalRecords).to.be.at.least(b.objects.length); pm.expect(b.recordsRemaining).to.be.at.least(0); pm.expect(b.endOfResults).to.equal(b.recordsRemaining === 0); if (!b.endOfResults) pm.expect(b.continuationToken).to.be.a(\"string\").and.not.empty; });"
             ]
           }
         }
@@ -213,7 +218,7 @@
         "method": "GET",
         "header": [],
         "url": "{{baseUrl}}/api/v1/metrics",
-        "description": "Latest live container metrics.\n\n"
+        "description": "Latest live container metrics.\n\n- `maxResults` (query, integer, optional): EnumerationQuery MaxResults\n- `continuationToken` (query, string, optional): EnumerationQuery ContinuationToken\n- `search` (query, string, optional): EnumerationQuery Search\n- `sortBy` (query, string, optional): EnumerationQuery SortBy\n- `ordering` (query, string, optional): EnumerationQuery Ordering\n- `containerIdFilter` (query, string, optional): EnumerationQuery ContainerIdFilter\n- `startUtc` (query, string, optional): EnumerationQuery StartUtc\n- `endUtc` (query, string, optional): EnumerationQuery EndUtc\n- `filters` (query, string, optional): JSON object mapping scalar field names to substring filters."
       },
       "event": [
         {
@@ -223,7 +228,31 @@
             "exec": [
               "pm.test(\"Successful HTTP status\", () => pm.expect(pm.response.code).to.be.within(200, 299));",
               "pm.test(\"JSON response\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
-              "pm.test(\"No reported operation failure\", () => { const b = pm.response.json(); if (b.exitCode !== undefined) pm.expect(b.exitCode).to.equal(0); });"
+              "pm.test(\"No reported operation failure\", () => { const b = pm.response.json(); if (b.exitCode !== undefined) pm.expect(b.exitCode).to.equal(0); });",
+              "pm.test(\"EnumerationResult paging contract\", () => { const b = pm.response.json(); pm.expect(b.success).to.equal(true); pm.expect(b.objects).to.be.an(\"array\"); pm.expect(b.maxResults).to.be.within(1,1000); pm.expect(b.objects.length).to.be.at.most(b.maxResults); pm.expect(b.totalRecords).to.be.at.least(b.objects.length); pm.expect(b.recordsRemaining).to.be.at.least(0); pm.expect(b.endOfResults).to.equal(b.recordsRemaining === 0); if (!b.endOfResults) pm.expect(b.continuationToken).to.be.a(\"string\").and.not.empty; });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "history_summary",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/v1/history/summary",
+        "description": "Request history time buckets across the retained journal.\n\n- `timeframe` (query, string, optional): Rolling window: hour (60 one-minute buckets), day (96 fifteen-minute buckets), week (84 two-hour buckets), month (90 eight-hour buckets over 30 days)."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Successful HTTP status\", () => pm.expect(pm.response.code).to.be.within(200, 299));",
+              "pm.test(\"JSON response\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+              "pm.test(\"No reported operation failure\", () => { const b = pm.response.json(); if (b.exitCode !== undefined) pm.expect(b.exitCode).to.equal(0); });",
+              "pm.test(\"History bucket contract\", () => { const b=pm.response.json(); const counts={hour:60,day:96,week:84,month:90}; pm.expect(b.buckets.length).to.equal(counts[b.timeframe]); pm.expect(b.totalCount).to.equal(b.totalSuccess+b.totalFailure); pm.expect(b.buckets.reduce((n,x)=>n+x.ok+x.failed,0)).to.equal(b.totalCount); });"
             ]
           }
         }
@@ -235,7 +264,7 @@
         "method": "GET",
         "header": [],
         "url": "{{baseUrl}}/api/v1/history",
-        "description": "Recent API requests without credentials.\n\n"
+        "description": "Recent API requests without credentials.\n\n- `timeframe` (query, string, optional): Rolling window: hour (60 one-minute buckets), day (96 fifteen-minute buckets), week (84 two-hour buckets), month (90 eight-hour buckets over 30 days).\n- `maxResults` (query, integer, optional): EnumerationQuery MaxResults\n- `continuationToken` (query, string, optional): EnumerationQuery ContinuationToken\n- `search` (query, string, optional): EnumerationQuery Search\n- `sortBy` (query, string, optional): EnumerationQuery SortBy\n- `ordering` (query, string, optional): EnumerationQuery Ordering\n- `containerIdFilter` (query, string, optional): EnumerationQuery ContainerIdFilter\n- `startUtc` (query, string, optional): EnumerationQuery StartUtc\n- `endUtc` (query, string, optional): EnumerationQuery EndUtc\n- `filters` (query, string, optional): JSON object mapping scalar field names to substring filters."
       },
       "event": [
         {
@@ -245,7 +274,8 @@
             "exec": [
               "pm.test(\"Successful HTTP status\", () => pm.expect(pm.response.code).to.be.within(200, 299));",
               "pm.test(\"JSON response\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
-              "pm.test(\"No reported operation failure\", () => { const b = pm.response.json(); if (b.exitCode !== undefined) pm.expect(b.exitCode).to.equal(0); });"
+              "pm.test(\"No reported operation failure\", () => { const b = pm.response.json(); if (b.exitCode !== undefined) pm.expect(b.exitCode).to.equal(0); });",
+              "pm.test(\"EnumerationResult paging contract\", () => { const b = pm.response.json(); pm.expect(b.success).to.equal(true); pm.expect(b.objects).to.be.an(\"array\"); pm.expect(b.maxResults).to.be.within(1,1000); pm.expect(b.objects.length).to.be.at.most(b.maxResults); pm.expect(b.totalRecords).to.be.at.least(b.objects.length); pm.expect(b.recordsRemaining).to.be.at.least(0); pm.expect(b.endOfResults).to.equal(b.recordsRemaining === 0); if (!b.endOfResults) pm.expect(b.continuationToken).to.be.a(\"string\").and.not.empty; });"
             ]
           }
         }

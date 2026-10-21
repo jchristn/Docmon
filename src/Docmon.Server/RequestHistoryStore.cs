@@ -6,6 +6,7 @@ namespace Docmon.Server
     using System.Collections.Specialized;
     using System.IO;
     using System.Linq;
+    using System.Runtime.CompilerServices;
     using System.Text.Json;
     using System.Text.Json.Nodes;
     using System.Text.RegularExpressions;
@@ -35,6 +36,72 @@ namespace Docmon.Server
         internal RequestRecord[] ReadSummary() => _Records.Reverse().Select(record => new RequestRecord
         { Id = record.Id, AtUtc = record.AtUtc, Method = record.Method, Path = record.Path, Status = record.Status, ElapsedMs = record.ElapsedMs, PrincipalName = record.PrincipalName, Truncated = record.Truncated }).ToArray();
         internal RequestRecord[] Read() => _Records.Reverse().ToArray();
+        internal async Task<RequestRecord?> ReadByIdAsync(string id, CancellationToken token)
+        {
+            RequestRecord? cached = _Records.FirstOrDefault(record => record.Id == id);
+            if (cached != null) return cached;
+            foreach (string file in Directory.EnumerateFiles(_Directory, "requests-*.jsonl").OrderByDescending(path => path))
+            {
+                token.ThrowIfCancellationRequested();
+                if (File.GetLastWriteTimeUtc(file) < DateTime.UtcNow.AddDays(-30)) continue;
+                try
+                {
+                    using (FileStream stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete, 81920, FileOptions.Asynchronous))
+                    using (StreamReader reader = new StreamReader(stream))
+                    {
+                        string? line;
+                        while ((line = await reader.ReadLineAsync(token).ConfigureAwait(false)) != null)
+                        {
+                            try
+                            {
+                                RequestRecord? record = JsonSerializer.Deserialize<RequestRecord>(line, DocmonServer.Json);
+                                if (record?.Id == id) return record;
+                            }
+                            catch (JsonException) { /* Ignore incomplete or corrupt journal entries. */ }
+                        }
+                    }
+                }
+                catch (FileNotFoundException) { /* Retention may remove a file while it is being opened. */ }
+            }
+            return null;
+        }
+        internal async IAsyncEnumerable<RequestRecord> ReadRangeAsync(DateTime start, DateTime end, [EnumeratorCancellation] CancellationToken token)
+        {
+            foreach (string file in Directory.EnumerateFiles(_Directory, "requests-*.jsonl").OrderBy(path => path))
+            {
+                string day = Path.GetFileNameWithoutExtension(file).Substring("requests-".Length);
+                if (!DateTime.TryParseExact(day, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.AssumeUniversal | System.Globalization.DateTimeStyles.AdjustToUniversal, out DateTime date) || date.AddDays(1) <= start || date > end) continue;
+                FileStream stream;
+                try { stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete, 81920, FileOptions.Asynchronous); }
+                catch (FileNotFoundException) { continue; }
+                using (stream)
+                using (StreamReader reader = new StreamReader(stream))
+                {
+                    string? line;
+                    while ((line = await reader.ReadLineAsync(token).ConfigureAwait(false)) != null)
+                    {
+                        RequestRecord? record;
+                        try { record = JsonSerializer.Deserialize<RequestRecord>(line, DocmonServer.Json); }
+                        catch (JsonException) { continue; }
+                        if (record != null && record.AtUtc >= start && record.AtUtc < end) yield return record;
+                    }
+                }
+            }
+        }
+        internal async Task<RequestHistorySummary> SummarizeAsync(string? timeframe, CancellationToken token)
+        {
+            RequestHistorySummary summary = RequestHistorySummary.Create(timeframe, DateTime.UtcNow);
+            await foreach (RequestRecord record in ReadRangeAsync(summary.StartUtc, summary.EndUtc, token).ConfigureAwait(false)) summary.Add(record);
+            return summary;
+        }
+        internal async Task<RequestRecord[]> ReadWindowAsync(string timeframe, CancellationToken token)
+        {
+            RequestHistorySummary window = RequestHistorySummary.Create(timeframe, DateTime.UtcNow);
+            List<RequestRecord> records = new List<RequestRecord>();
+            await foreach (RequestRecord record in ReadRangeAsync(window.StartUtc, window.EndUtc, token).ConfigureAwait(false))
+                records.Add(new RequestRecord { Id = record.Id, AtUtc = record.AtUtc, Method = record.Method, Path = record.Path, Status = record.Status, ElapsedMs = record.ElapsedMs, PrincipalName = record.PrincipalName, Truncated = record.Truncated });
+            return records.OrderByDescending(record => record.AtUtc).ToArray();
+        }
         internal async Task AppendAsync(RequestRecord record, CancellationToken token)
         {
             Enqueue(record);

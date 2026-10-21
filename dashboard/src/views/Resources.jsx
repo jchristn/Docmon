@@ -1,3 +1,6 @@
+import RequestActivity from "../components/RequestActivity";
+import OperationMenu from "../components/OperationMenu";
+import RequestDetails from "../components/RequestDetails";
 import { lazy, Suspense, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../context/AuthContext";
@@ -7,7 +10,6 @@ import {
   Modal,
   ErrorBanner,
   JsonView,
-  ActivityChart,
   CopyButton,
   Badge,
 } from "../components/Common";
@@ -37,7 +39,7 @@ const configuration = {
     ],
   },
   images: {
-    columns: ["repository", "tag", "sizeBytes", "createdUtc", "status"],
+    columns: ["repository", "tag", "id", "sizeBytes", "createdUtc", "status"],
     actions: ["pull", "check", "tags", "remove"],
   },
   stacks: {
@@ -62,7 +64,12 @@ const configuration = {
 export default function Resources({ kind, catalog }) {
   const { api } = useAuth();
   const { t } = useTranslation();
-  const resource = useResource(kind);
+  const [timeframe, setTimeframe] = useState(
+    () => localStorage.getItem("docmon.history.timeframe") || "hour",
+  );
+  const resource = useResource(
+    kind === "history" ? `history?timeframe=${timeframe}` : kind,
+  );
   const config = configuration[kind];
   const [operation, setOperation] = useState(null),
     [initial, setInitial] = useState({}),
@@ -121,7 +128,13 @@ export default function Resources({ kind, catalog }) {
       {kind === "history" && (
         <section className="panel">
           <h2>{t("activity")}</h2>
-          <ActivityChart data={resource.data || []} />
+          <RequestActivity
+            timeframe={timeframe}
+            onTimeframeChange={(value) => {
+              setTimeframe(value);
+              localStorage.setItem("docmon.history.timeframe", value);
+            }}
+          />
         </section>
       )}
       <DataTable
@@ -133,24 +146,19 @@ export default function Resources({ kind, catalog }) {
         actions={
           config.actions
             ? (row) => (
-                <select
-                  className="row-actions"
-                  aria-label={`${t("operations")} ${row.name || row.repository || row.project}`}
-                  value=""
-                  onChange={(e) => choose(e.target.value, row)}
-                >
-                  <option value="">{t("operations")}</option>
-                  {config.actions.map((action) => (
-                    <option key={action} value={action}>
-                      {t(action)}
-                    </option>
-                  ))}
-                </select>
+                <OperationMenu
+                  actions={config.actions}
+                  label={`${t("operations")} ${row.name || row.repository || row.project}`}
+                  onChoose={(action) => choose(action, row)}
+                />
               )
             : undefined
         }
       />
-      {inspect && (
+      {inspect && kind === "history" && (
+        <RequestDetails record={inspect} onClose={() => setInspect(null)} />
+      )}
+      {inspect && kind !== "history" && (
         <Modal
           title={`${t("inspect")} · ${inspect.name || inspect.repository || inspect.project || inspect.id || t(kind)}`}
           onClose={() => setInspect(null)}
