@@ -176,8 +176,11 @@ for capture behavior and limits.
   editing, tar upload/download support, response/header inspection, and request
   copying in the API explorer.
 - Navy & Silver light/dark themes, with the dark palette also used by the TUI,
-  responsive layouts, project branding, and
-  GitHub/Discord links in the topbar.
+  responsive layouts, and project branding. GitHub/Discord icons sit between the
+  language and theme controls, followed by icon-only sign out.
+- A monospace server URL in the topbar with a copy control. It uses the browser
+  origin, preserving HTTP/HTTPS, localhost or remote hostnames/IPs, IPv6, and ports.
+  Copy supports secure contexts and an HTTP fallback.
 - Twelve languages: English, Spanish, Brazilian Portuguese, French, Italian,
   German, Simplified Chinese, Arabic, Russian, Malay, Hindi, and Japanese.
   Language selection works before and after login, with locale-aware formatting,

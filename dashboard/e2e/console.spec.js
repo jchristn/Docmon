@@ -334,7 +334,7 @@ test("history timeframes, compact rows, toolbar order, and viewport-sized inspec
     .evaluateAll((nodes) =>
       nodes.map((node) => node.getAttribute("aria-label")),
     );
-  expect(order).toEqual(["Toggle theme", "GitHub", "Discord", "Sign out"]);
+  expect(order).toEqual(["GitHub", "Discord", "Toggle theme", "Sign out"]);
   expect(
     await page
       .getByRole("button", { name: "Sign out", exact: true })
@@ -406,4 +406,26 @@ test("metric history switches all windows and scopes across all six charts", asy
   const live = page.waitForResponse((r) => r.url().includes("/metrics/history") && r.status() === 200);
   await timeframe.selectOption("live");
   await live;
+});
+
+test("topbar shows a copyable origin and ordered icon controls", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await login(page);
+  const origin = new URL(page.url()).origin;
+  await expect(page.locator(".server-address code")).toHaveText(origin);
+  await expect(page.locator(".sidebar footer")).not.toContainText("Machine operator");
+  const controls = await page.locator(".topbar-actions > select, .topbar-actions > a, .topbar-actions > button")
+    .evaluateAll((nodes) => nodes.map((node) => node.getAttribute("aria-label")));
+  expect(controls).toEqual(["Language", "GitHub", "Discord", "Toggle theme", "Sign out"]);
+  await expect(page.getByRole("button", { name: "Sign out", exact: true })).toHaveText("");
+  await page.evaluate(() => Object.defineProperty(navigator, "clipboard", { configurable: true, value: undefined }));
+  await page.locator(".server-address").getByRole("button", { name: "Copy", exact: true }).click();
+  await expect(page.locator(".server-address").getByRole("button", { name: "Copied", exact: true })).toBeVisible();
+  await page.goto("/containers");
+  await expect(page.locator(".server-address code")).toHaveText(origin);
+  for (const width of [390, 1440]) {
+    await page.setViewportSize({ width, height: 1000 });
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBeTruthy();
+    await page.screenshot({ path: `test-results/topbar-${width}.png`, fullPage: true });
+  }
 });

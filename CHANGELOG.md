@@ -19,6 +19,7 @@ All notable changes to Docmon are documented here. The format follows
 - REST/MCP documentation, OpenAPI snapshot, Postman collections, backend and browser tests.
 
 ### Changed
+- Dashboard footer shows only the version; topbar community icons follow language selection, followed by theme and icon-only sign out. The page-name label is replaced with a monospace server URL and copy control supporting HTTPS and remote HTTP origins.
 - Metrics uses `[` for previous host/container scope and `]` for next, with explicit key hints.
 - TUI pull-and-apply now shows pull and Compose progress in a modal, reports failures and standalone limitations, handles Shift+u, and preserves status visibility with long shortcuts.
 - TUI Metrics now matches all six dashboard metric charts, with full-width tabs, direct host/container selection, time/value axes, and keyboard sample inspection.

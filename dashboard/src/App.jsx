@@ -12,7 +12,7 @@ import { useAuth } from "./context/AuthContext";
 import { useTheme } from "./context/ThemeContext";
 import { useResource } from "./utils/useResource";
 import { useCatalog } from "./utils/useCatalog";
-import { ErrorBanner, LocaleSelector } from "./components/Common";
+import { CopyButton, ErrorBanner, LocaleSelector } from "./components/Common";
 import Overview from "./views/Overview";
 import Resources from "./views/Resources";
 import Explorer from "./views/Explorer";
@@ -120,11 +120,10 @@ function Login() {
 function Layout() {
   const { t } = useTranslation();
   const { token, logout } = useAuth();
-  const location = useLocation();
   const info = useResource("system/info");
   const { toggle } = useTheme();
   if (!token) return <Navigate to="/login" replace />;
-  const current = location.pathname.split("/")[1] || "overview";
+  const serverUrl = window.location.origin;
   return (
     <div className="app-shell">
       <aside className="sidebar">
@@ -159,13 +158,16 @@ function Layout() {
         </nav>
         <footer>
           <small>
-            v{info.data?.version || "0.1.1"} · {t("operator")}
+            v{info.data?.version || "0.1.1"}
           </small>
         </footer>
       </aside>
       <div className="workspace">
         <header className="topbar">
-          <strong>{t(current)}</strong>
+          <div className="server-address">
+            <code dir="ltr" title={serverUrl}>{serverUrl}</code>
+            <CopyButton value={serverUrl} iconOnly />
+          </div>
           <div className="topbar-actions">
             <span
               className={`connection ${info.error ? "offline" : ""}`}
@@ -175,9 +177,6 @@ function Layout() {
               {t(info.error ? "disconnected" : "live")}
             </span>
             <LocaleSelector />
-            <button aria-label={t("theme")} title={t("theme")} onClick={toggle}>
-              ◐
-            </button>
             <a
               className="social-link"
               href="https://github.com/jchristn/Docmon"
@@ -202,6 +201,9 @@ function Layout() {
                 <path d="M20.3 4.5a20 20 0 0 0-4.9-1.5l-.6 1.2a18 18 0 0 0-5.6 0L8.6 3a20 20 0 0 0-4.9 1.5C.6 9 .1 13.5.4 18a20 20 0 0 0 6 3l1.2-2a12 12 0 0 1-1.9-.9l.5-.4a14.4 14.4 0 0 0 11.6 0l.5.4-1.9.9 1.2 2a20 20 0 0 0 6-3c.4-5.2-.8-9.6-3.3-13.5ZM8.3 15.3c-1.1 0-1.9-1-1.9-2.2s.8-2.2 1.9-2.2 1.9 1 1.9 2.2-.8 2.2-1.9 2.2Zm7.4 0c-1.1 0-1.9-1-1.9-2.2s.8-2.2 1.9-2.2 1.9 1 1.9 2.2-.8 2.2-1.9 2.2Z" />
               </svg>
             </a>
+            <button aria-label={t("theme")} title={t("theme")} onClick={toggle}>
+              ◐
+            </button>
             <button
               className="icon-button"
               onClick={logout}

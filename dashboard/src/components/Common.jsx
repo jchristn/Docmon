@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { copyText } from "../utils/clipboard";
 import { locales } from "../i18n/localeRegistry";
 export function LocaleSelector() {
   const { t, i18n } = useTranslation();
@@ -18,19 +19,33 @@ export function LocaleSelector() {
     </select>
   );
 }
-export function CopyButton({ value }) {
+export function CopyButton({ value, iconOnly = false }) {
   const { t } = useTranslation();
-  const [copied, setCopied] = useState(false);
+  const [status, setStatus] = useState("copy");
+  const timer = useRef(null);
+  useEffect(() => () => clearTimeout(timer.current), []);
   return (
     <button
-      className="subtle"
+      type="button"
+      className={iconOnly ? "subtle icon-button" : "subtle"}
+      aria-label={t(status)}
+      title={t(status)}
       onClick={async () => {
-        await navigator.clipboard.writeText(value);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 1500);
+        clearTimeout(timer.current);
+        try {
+          await copyText(value);
+          setStatus("copied");
+        } catch {
+          setStatus("failed");
+        }
+        timer.current = setTimeout(() => setStatus("copy"), 1500);
       }}
     >
-      {t(copied ? "copied" : "copy")}
+      {iconOnly ? (
+        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          {status === "copied" ? <path d="m5 12 4 4L19 6" /> : status === "failed" ? <path d="m6 6 12 12M18 6 6 18" /> : <><rect x="8" y="8" width="12" height="12" rx="2" /><path d="M16 8V4H4v12h4" /></>}
+        </svg>
+      ) : t(status)}
     </button>
   );
 }

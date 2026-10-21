@@ -297,8 +297,23 @@ small {
   top: 0;
   z-index: 3;
 }
-.topbar > strong {
-  font-size: 13px;
+.server-address {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex: 1;
+}
+.server-address code {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+.server-address button {
+  flex-shrink: 0;
 }
 .topbar-actions {
   display: flex;
@@ -1060,8 +1075,17 @@ details.columns > summary {
     gap: 8px;
     align-items: center;
   }
-  .topbar > strong {
+  .topbar {
+    flex-wrap: wrap;
+  }
+  .server-address {
+    flex-basis: 100%;
+  }
+  .server-address code {
     font-size: 11px;
+  }
+  .topbar-actions {
+    width: 100%;
   }
   .topbar-actions button,
   .topbar-actions select {
