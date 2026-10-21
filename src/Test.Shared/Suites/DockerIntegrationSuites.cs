@@ -3,6 +3,7 @@ namespace Test.Shared.Suites
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Linq;
     using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
@@ -596,6 +597,46 @@ namespace Test.Shared.Suites
 
                             Directory.Delete(directory, true);
                         }
+                    }
+                }),
+                c.Async("PullApplyVerification", "Pull and apply recreates a changed disposable service, preserves its neighbor, and reports real Compose failures", async ct =>
+                {
+                    using DockerClientProvider provider = DockerFixture.CreateProvider();
+                    await DockerFixture.EnsureImageAsync(provider, ct).ConfigureAwait(false);
+                    string project = DockerFixture.UniqueName("pullapply");
+                    string directory = Path.Combine(Path.GetTempPath(), project);
+                    Directory.CreateDirectory(directory);
+                    string file = Path.Combine(directory, "compose.yaml");
+                    string yaml = ComposeYaml();
+                    File.WriteAllText(file, yaml);
+                    ComposeService compose = new ComposeService(provider.Client);
+                    DockerService docker = new DockerService(provider.Client);
+                    List<string> lines = new List<string>();
+                    CallbackProgress<string> output = new CallbackProgress<string>(line => { lock (lines) lines.Add(line); });
+                    try
+                    {
+                        Check.Equal(0, await compose.UpAsync(project, file, null, output, ct).ConfigureAwait(false), "initial up");
+                        IReadOnlyList<ContainerInfo> before = await docker.ListContainersAsync(true, ct).ConfigureAwait(false);
+                        ContainerInfo api = before.Single(row => row.ComposeProject == project && row.ComposeService == "api");
+                        string workerId = before.Single(row => row.ComposeProject == project && row.ComposeService == "worker").Id;
+                        // Change just the selected service's configuration to make recreation observable.
+                        File.WriteAllText(file, yaml.Replace("  api:\n", "  api:\n    environment:\n      DOCMON_UPDATE_TEST: applied\n", StringComparison.Ordinal));
+                        string summary = await new ContainerUpdater(docker, compose).UpdateAsync(api, output, ct).ConfigureAwait(false);
+                        IReadOnlyList<ContainerInfo> after = await docker.ListContainersAsync(true, ct).ConfigureAwait(false);
+                        ContainerInfo updated = after.Single(row => row.ComposeProject == project && row.ComposeService == "api");
+                        Check.False(api.Id == updated.Id, "selected service recreated");
+                        Check.Equal(workerId, after.Single(row => row.ComposeProject == project && row.ComposeService == "worker").Id, "neighbor unchanged");
+                        Check.True((await docker.InspectAsync(updated.Id, ct).ConfigureAwait(false)).Environment.Contains("DOCMON_UPDATE_TEST=applied"), "new config applied");
+                        Check.True(summary.Contains(project + "/api"), "completion identifies service");
+                        File.WriteAllText(file, "services: [invalid compose configuration]");
+                        await Check.ThrowsAsync<InvalidOperationException>(() => new ContainerUpdater(docker, compose).UpdateAsync(updated, output, ct), "real nonzero Compose exit").ConfigureAwait(false);
+                        Check.Equal(updated.Id, (await docker.ListContainersAsync(true, ct).ConfigureAwait(false)).Single(row => row.ComposeProject == project && row.ComposeService == "api").Id, "failed update preserved container");
+                    }
+                    finally
+                    {
+                        File.WriteAllText(file, yaml);
+                        await compose.DownAsync(project, file, output, CancellationToken.None).ConfigureAwait(false);
+                        Directory.Delete(directory, true);
                     }
                 }),
                 c.Async("InvalidComposeFile", "A malformed compose file yields a non-zero exit code and error output", async ct =>

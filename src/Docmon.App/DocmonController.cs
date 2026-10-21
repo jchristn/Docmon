@@ -13,6 +13,7 @@ namespace Docmon.App
     using Docmon.Core.Helpers;
     using Docmon.Core.Models;
     using Docmon.Core.Monitoring;
+    using Docmon.Core.Services;
     using Docmon.Core.Services.Interfaces;
     using TUIKit.Hosting;
     using TUIKit.Input;
@@ -253,6 +254,7 @@ namespace Docmon.App
             if (key.Code == KeyCode.Character)
             {
                 char c = (char)key.Rune;
+                if ((key.Modifiers & KeyModifiers.Shift) != 0) c = char.ToUpperInvariant(c);
                 if (c >= '1' && c <= '6')
                 {
                     SwitchTo((ScreenId)(c - '1'));
@@ -823,28 +825,26 @@ namespace Docmon.App
 
         private async Task PullApplyAsync(ContainerInfo container)
         {
-            await PullImageAsync(container.Image).ConfigureAwait(false);
-
-            if (container.ComposeProject.Length > 0)
+            if (_App == null) return;
+            using CancellationTokenSource cts = CancellationTokenSource.CreateLinkedTokenSource(_Lifetime.Token);
+            PullProgressModal modal = new PullProgressModal("Pull and apply: " + container.Name, () => cts.Cancel(), "updating...");
+            Task<object?> shown = _App.ShowAsync(modal);
+            try
             {
-                string configFile = await ResolveComposeFileAsync(container.ComposeProject).ConfigureAwait(false);
-                DelegateProgress<string> progress = new DelegateProgress<string>(line => Post(() => SetStatus("compose: " + line)));
-                await _Compose.UpAsync(container.ComposeProject, configFile, container.ComposeService, progress, _Lifetime.Token).ConfigureAwait(false);
-                SetStatus("Recreated " + container.ComposeService + " with the new image.");
+                ContainerUpdater updater = new ContainerUpdater(_Docker, _Compose);
+                DelegateProgress<string> progress = new DelegateProgress<string>(line => Post(() => modal.Append(line)));
+                string summary = await updater.UpdateAsync(container, progress, cts.Token).ConfigureAwait(false);
+                Post(() => { modal.MarkDone(summary); SetStatus(summary); });
             }
-            else
+            catch (OperationCanceledException)
             {
-                await NotifyAsync("Image pulled", "Recreate the container to apply the update (compose recommended for standalone containers).").ConfigureAwait(false);
+                Post(() => { modal.Append("Update cancelled. Inspect the container before retrying; completed changes are not rolled back."); modal.MarkDone("Update cancelled.", false); SetStatus("Update cancelled."); });
             }
-        }
-
-        private async Task PullImageAsync(string image)
-        {
-            SetStatus("Pulling " + image + "…");
-            await foreach (string line in _Docker.PullAsync(image, _Lifetime.Token).ConfigureAwait(false))
-                Post(() => SetStatus("pull " + image + ": " + line));
-
-            SetStatus("Pulled " + image);
+            catch (Exception ex)
+            {
+                Post(() => { modal.Append("Update failed: " + ex.Message); modal.MarkDone("Update failed: " + ex.Message, false); SetStatus("Update failed: " + ex.Message); });
+            }
+            await shown.ConfigureAwait(false);
         }
 
         private async Task RecheckAllImagesAsync()
@@ -893,12 +893,12 @@ namespace Docmon.App
             }
             catch (OperationCanceledException)
             {
-                Post(() => modal.MarkDone("Pull cancelled."));
+                Post(() => modal.MarkDone("Pull cancelled.", false));
                 SetStatus("Pull of " + image + " cancelled.");
             }
             catch (Exception ex)
             {
-                Post(() => modal.MarkDone("Pull failed: " + ex.Message));
+                Post(() => modal.MarkDone("Pull failed: " + ex.Message, false));
                 SetStatus("Pull of " + image + " failed: " + ex.Message);
             }
             finally
@@ -1001,18 +1001,6 @@ namespace Docmon.App
             }
 
             return null;
-        }
-
-        private async Task<string> ResolveComposeFileAsync(string project)
-        {
-            IReadOnlyList<ComposeStack> stacks = await _Compose.DiscoverAsync(_Lifetime.Token).ConfigureAwait(false);
-            foreach (ComposeStack stack in stacks)
-            {
-                if (string.Equals(stack.Project, project, StringComparison.Ordinal))
-                    return stack.ConfigFilePath;
-            }
-
-            return string.Empty;
         }
 
         private void Launch(Func<Task> action)

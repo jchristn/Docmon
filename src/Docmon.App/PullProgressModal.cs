@@ -19,6 +19,8 @@ namespace Docmon.App
         private const int _MaxLines = 400;
 
         private readonly string _Title;
+        private readonly string _Activity;
+        private bool _Succeeded = true;
         private readonly Action? _OnCancel;
         private readonly List<string> _Lines = new List<string>();
         private bool _Done;
@@ -30,9 +32,11 @@ namespace Docmon.App
         /// </summary>
         /// <param name="title">The box title.</param>
         /// <param name="onCancel">An action invoked when the user presses Escape while the pull runs, or null.</param>
-        public PullProgressModal(string title, Action? onCancel)
+        /// <param name="activity">Busy footer text. Defaults to pulling.</param>
+        public PullProgressModal(string title, Action? onCancel, string activity = "pulling...")
         {
             _Title = title ?? string.Empty;
+            _Activity = activity ?? string.Empty;
             _OnCancel = onCancel;
         }
 
@@ -52,10 +56,13 @@ namespace Docmon.App
         /// the next keypress.
         /// </summary>
         /// <param name="summary">The completion summary shown in the footer.</param>
-        public void MarkDone(string summary)
+        /// <param name="succeeded">True for success; false uses the error color.</param>
+        public void MarkDone(string summary, bool succeeded = true)
         {
             _Done = true;
+            _Succeeded = succeeded;
             _Summary = summary ?? string.Empty;
+            if (_Lines.Count == 0 || _Lines[_Lines.Count - 1] != _Summary) Append(_Summary);
         }
 
         /// <inheritdoc/>
@@ -102,27 +109,29 @@ namespace Docmon.App
             int footerRow = boxY + boxHeight - 2;
             int viewport = Math.Max(1, footerRow - firstRow);
 
-            int start = Math.Max(0, _Lines.Count - viewport);
-            CellStyle textStyle = DocmonPalette.BaseStyle.WithForeground(DocmonPalette.Text);
-            for (int i = 0; i < viewport; i++)
+            if (contentWidth <= 0) return;
+            List<string> wrapped = new List<string>();
+            foreach (string line in _Lines)
             {
-                int lineIndex = start + i;
-                if (lineIndex >= _Lines.Count)
-                    break;
-
-                Draw.Text(surface, contentX, firstRow + i, _Lines[lineIndex], textStyle, contentWidth);
+                if (line.Length == 0) wrapped.Add(string.Empty);
+                for (int offset = 0; offset < line.Length; offset += contentWidth)
+                    wrapped.Add(line.Substring(offset, Math.Min(contentWidth, line.Length - offset)));
             }
+            int start = Math.Max(0, wrapped.Count - viewport);
+            CellStyle textStyle = DocmonPalette.BaseStyle.WithForeground(DocmonPalette.Text);
+            for (int i = 0; i < viewport && start + i < wrapped.Count; i++)
+                Draw.Text(surface, contentX, firstRow + i, wrapped[start + i], textStyle, contentWidth);
 
             string hint;
             CellStyle hintStyle;
             if (_Done)
             {
                 hint = _Summary + "   ·   press any key to close";
-                hintStyle = DocmonPalette.BaseStyle.WithForeground(DocmonPalette.Success);
+                hintStyle = DocmonPalette.BaseStyle.WithForeground(_Succeeded ? DocmonPalette.Success : DocmonPalette.Error);
             }
             else
             {
-                hint = "pulling…   ·   Esc to cancel";
+                hint = _Activity + "   ·   Esc to cancel";
                 hintStyle = DocmonPalette.BaseStyle.WithForeground(DocmonPalette.Muted);
             }
 

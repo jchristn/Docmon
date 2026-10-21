@@ -160,7 +160,17 @@ namespace Docmon.Core.Services.Implementations
 
                 process.BeginOutputReadLine();
                 process.BeginErrorReadLine();
-                await process.WaitForExitAsync(token).ConfigureAwait(false);
+                try
+                {
+                    await process.WaitForExitAsync(token).ConfigureAwait(false);
+                }
+                catch (OperationCanceledException) when (token.IsCancellationRequested)
+                {
+                    try { if (!process.HasExited) process.Kill(true); }
+                    catch (InvalidOperationException) { /* The process exited while cancellation was being handled. */ }
+                    await process.WaitForExitAsync(CancellationToken.None).ConfigureAwait(false);
+                    throw;
+                }
                 return process.ExitCode;
             }
         }

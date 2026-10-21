@@ -48,17 +48,11 @@ namespace Docmon.App.Widgets
                 return;
 
             surface.Fill(new Rect(0, 0, width, surface.Size.Height), Cell.Blank(DocmonPalette.SurfaceStyle));
-            Draw.Text(surface, 0, 0, _Hints, DocmonPalette.SurfaceStyle.WithForeground(DocmonPalette.Dim), width);
-
-            if (_Message.Length > 0)
-            {
-                int messageWidth = Math.Min(_Message.Length, Math.Max(0, width - _Hints.Length - 2));
-                if (messageWidth > 0)
-                {
-                    int x = width - messageWidth;
-                    Draw.Text(surface, x, 0, _Message, DocmonPalette.SurfaceStyle.WithForeground(DocmonPalette.Accent2), messageWidth);
-                }
-            }
+            int messageWidth = _Message.Length == 0 ? 0 : Math.Min(_Message.Length, Math.Max(1, width * 2 / 3));
+            int hintsWidth = messageWidth == 0 ? width : Math.Max(0, width - messageWidth - 2);
+            Draw.Text(surface, 0, 0, _Hints, DocmonPalette.SurfaceStyle.WithForeground(DocmonPalette.Dim), hintsWidth);
+            if (messageWidth > 0)
+                Draw.Text(surface, width - messageWidth, 0, _Message, DocmonPalette.SurfaceStyle.WithForeground(DocmonPalette.Accent2), messageWidth);
         }
     }
 }

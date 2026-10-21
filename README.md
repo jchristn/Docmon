@@ -434,6 +434,15 @@ r S K p            restart / stop / kill / pause  u / U check updates / pull+app
 t                  transfer files                Ctrl+Q quit
 ```
 
+On the Containers screen, uppercase `U` opens a progress modal for the entire
+pull-and-apply operation. For Compose containers, it pulls the selected image and
+runs `compose up -d` for that service, recreating it when its image or configuration
+has changed. An already-current service can remain running unchanged. Missing
+Compose metadata, pull errors, and nonzero Compose exits appear in the modal;
+the result stays visible until dismissed. For standalone containers, only the
+image is pulled and the modal explains that recreation is still needed. Escape
+requests cancellation; completed Docker changes are not rolled back.
+
 ## How it works
 
 Docmon talks to Docker two ways. Most data and control goes through the Docker

@@ -10,6 +10,7 @@ namespace Test.Shared.Suites
     using Docmon.Core.Models;
     using Test.Shared.Infrastructure;
     using Touchstone.Core;
+    using TUIKit;
     using TUIKit.Input;
     using TUIKit.Testing;
 
@@ -65,6 +66,22 @@ namespace Test.Shared.Suites
                     status.Message = null!;
                     Check.Equal(string.Empty, status.Message, "null message coerced to empty");
                     Check.False(Snapshot.RenderWidget(status, 80, 1).Contains("Pulled"), "message cleared");
+                }),
+                c.Sync("StatusWithLongHints", "Operation feedback remains visible when the container shortcuts exceed terminal width", () =>
+                {
+                    StatusBar bar = new StatusBar { Hints = new ContainersScreen().KeyHints, Message = "Pull failed: access denied" };
+                    Check.True(Snapshot.RenderWidget(bar, 80, 1).Contains("Pull failed: access denied"), "status never hidden by long hints");
+                    Check.True(Snapshot.RenderWidget(bar, 40, 1).Contains("Pull failed"), "status visible in narrow terminal");
+                    PullProgressModal modal = new PullProgressModal("Pull and apply: api", null, "updating...");
+                    modal.Append("Applying image to project/api...");
+                    CellBuffer buffer = new CellBuffer(100, 22);
+                    modal.Render(new BufferSurface(buffer));
+                    Check.True(Snapshot.ToText(buffer).Contains("Applying image"), "apply phase progress");
+                    modal.Append(new string('x', 120) + " final-error-detail");
+                    modal.MarkDone("Compose up failed with exit code 17", false);
+                    modal.Render(new BufferSurface(buffer));
+                    Check.True(Snapshot.ToText(buffer).Contains("exit code 17"), "failure remains visible until dismissed");
+                    Check.True(Snapshot.ToText(buffer).Contains("final-error-detail"), "long output wraps instead of hiding its tail");
                 }),
                 c.Sync("ContainersScreen", "The containers screen lists containers with a detail pane for the selection", () =>
                 {
