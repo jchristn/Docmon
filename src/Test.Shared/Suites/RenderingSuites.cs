@@ -153,6 +153,13 @@ namespace Test.Shared.Suites
                     Check.True(Snapshot.RenderWidget(screen, 100, 22).Contains("Host: all Docker workloads"), "wrap to host");
                     tester.Press(KeyEvent.Char('o'));
                     Check.True(Snapshot.RenderWidget(screen, 100, 22).Contains("Scope: web-api"), "selected container shortcut");
+                    tester.Press(KeyEvent.Char('/'));
+                    Check.True(tester.LastKeyHandled, "slash is handled");
+                    Check.Equal(containers[1].Id, screen.TargetId, "slash advances to next container");
+                    tester.Press(KeyEvent.Char('/'));
+                    Check.Equal(string.Empty, screen.TargetId, "slash wraps to host");
+                    tester.Press(KeyEvent.Char('['));
+                    Check.Equal(containers[1].Id, screen.TargetId, "bracket navigates backward");
                     screen.SetContainers(Array.Empty<ContainerInfo>());
                     Check.True(Snapshot.RenderWidget(screen, 100, 22).Contains("Host: all Docker workloads"), "removed selection falls back to host");
                 }),
@@ -174,8 +181,8 @@ namespace Test.Shared.Suites
                     DateTime at = DateTime.UtcNow;
                     screen.SetHistoricalData("month", "", new[] { new MetricHistoryBucket { AtUtc = at, EndUtc = at.AddHours(8), HasData = false } });
                     Check.True(Snapshot.RenderWidget(screen, 100, 22).Contains("No observations"), "gap detail");
-                    tester.Press(KeyEvent.Char(']'));
-                    Check.True(Snapshot.RenderWidget(screen, 100, 22).Contains("Loading historical"), "scope change clears old data");
+                    tester.Press(KeyEvent.Char('/'));
+                    Check.True(Snapshot.RenderWidget(screen, 100, 22).Contains("Loading historical"), "slash scope change clears old data");
                     screen.SetHistoricalData("month", "a", null, "History unavailable");
                     Check.True(Snapshot.RenderWidget(screen, 100, 22).Contains("History unavailable"), "remote error is visible");
                 }),

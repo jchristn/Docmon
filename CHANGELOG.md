@@ -19,6 +19,7 @@ All notable changes to Docmon are documented here. The format follows
 - REST/MCP documentation, OpenAPI snapshot, Postman collections, backend and browser tests.
 
 ### Changed
+- Metrics now accepts `/` to advance host/container scope and shows explicit next/previous key hints.
 - TUI pull-and-apply now shows pull and Compose progress in a modal, reports failures and standalone limitations, handles Shift+u, and preserves status visibility with long shortcuts.
 - TUI Metrics now matches all six dashboard metric charts, with full-width tabs, direct host/container selection, time/value axes, and keyboard sample inspection.
 - TUI colors, explicit backgrounds, splash, dialogs, and status indicators now match the dashboard’s dark Navy & Silver palette.
