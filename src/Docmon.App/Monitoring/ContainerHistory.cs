@@ -4,8 +4,8 @@ namespace Docmon.App.Monitoring
     using Docmon.Core.Models;
 
     /// <summary>
-    /// Rolling metric history for a single container: CPU, memory, and derived network and block-I/O
-    /// rates. Cumulative counters from Docker are converted into per-second rates as samples arrive.
+    /// Rolling metric history for a single container: timestamped CPU, memory, cumulative network
+    /// and block-I/O counters, plus derived per-second rates for inline container charts.
     /// </summary>
     public sealed class ContainerHistory
     {
@@ -21,6 +21,11 @@ namespace Docmon.App.Monitoring
         /// <param name="capacity">The number of samples each series retains.</param>
         public ContainerHistory(int capacity)
         {
+            SampleTimes = new MetricSeries(capacity);
+            NetworkRxBytes = new MetricSeries(capacity);
+            NetworkTxBytes = new MetricSeries(capacity);
+            BlockReadBytes = new MetricSeries(capacity);
+            BlockWriteBytes = new MetricSeries(capacity);
             Cpu = new MetricSeries(capacity);
             MemoryPercent = new MetricSeries(capacity);
             MemoryUsage = new MetricSeries(capacity);
@@ -28,6 +33,21 @@ namespace Docmon.App.Monitoring
             NetTxRate = new MetricSeries(capacity);
             DiskRate = new MetricSeries(capacity);
         }
+
+        /// <summary>Gets sample timestamps as UTC ticks, oldest first.</summary>
+        public MetricSeries SampleTimes { get; }
+
+        /// <summary>Gets cumulative network bytes received.</summary>
+        public MetricSeries NetworkRxBytes { get; }
+
+        /// <summary>Gets cumulative network bytes transmitted.</summary>
+        public MetricSeries NetworkTxBytes { get; }
+
+        /// <summary>Gets cumulative block-device bytes read.</summary>
+        public MetricSeries BlockReadBytes { get; }
+
+        /// <summary>Gets cumulative block-device bytes written.</summary>
+        public MetricSeries BlockWriteBytes { get; }
 
         /// <summary>Gets the CPU-percentage series.</summary>
         public MetricSeries Cpu { get; }
@@ -58,6 +78,11 @@ namespace Docmon.App.Monitoring
         {
             if (sample == null) throw new ArgumentNullException(nameof(sample));
 
+            SampleTimes.Add(sample.AtUtc.Ticks);
+            NetworkRxBytes.Add(sample.NetworkRxBytes);
+            NetworkTxBytes.Add(sample.NetworkTxBytes);
+            BlockReadBytes.Add(sample.BlockReadBytes);
+            BlockWriteBytes.Add(sample.BlockWriteBytes);
             Cpu.Add(sample.CpuPercent);
             MemoryPercent.Add(sample.MemoryPercent);
             MemoryUsage.Add(sample.MemoryUsage);

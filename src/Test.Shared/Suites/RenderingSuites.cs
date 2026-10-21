@@ -105,18 +105,39 @@ namespace Test.Shared.Suites
                     Check.True(text.Contains("Containers (0)"), "zero count");
                     Check.Null(screen.SelectedTag, "no selection");
                 }),
-                c.Sync("MetricsScreen", "The metrics screen renders all four charts", () =>
+                c.Sync("MetricsScreen", "All six dashboard charts support axes and keyboard sample details", () =>
                 {
                     StatsHistory history = new StatsHistory(120);
                     List<ContainerInfo> containers = SampleContainers();
                     Populate(history, containers);
                     MetricsScreen screen = new MetricsScreen();
                     screen.SetData(history, containers[0].Id, containers[0].Name);
-                    string text = Snapshot.RenderWidget(screen, 100, 22);
-                    Check.True(text.Contains("CPU %"), "CPU chart");
-                    Check.True(text.Contains("Memory"), "memory chart");
-                    Check.True(text.Contains("Network"), "network chart");
-                    Check.True(text.Contains("Block I/O"), "block I/O chart");
+                    screen.SetContainers(containers);
+                    WidgetTester tester = WidgetTester.For(screen, 100, 22);
+                    string[] titles = { "CPU %", "Memory", "Network received", "Network transmitted", "Block read", "Block written" };
+                    foreach (string title in titles)
+                    {
+                        string text = Snapshot.RenderWidget(screen, 100, 22);
+                        Check.True(text.Contains(title), title);
+                        Check.True(text.Contains("Time (UTC)"), "time axis");
+                        Check.True(text.Contains("Host: all Docker workloads"), "host scope");
+                        tester.Press(KeyCode.Right);
+                    }
+                    tester.Press(KeyCode.Up);
+                    Check.True(Snapshot.RenderWidget(screen, 100, 22).Contains("sample detail"), "keyboard sample inspection");
+                    tester.Press(KeyCode.End);
+                    Check.True(Snapshot.RenderWidget(screen, 100, 22).Contains("live"), "return to live");
+                    tester.Press(KeyEvent.Char(']'));
+                    Check.True(Snapshot.RenderWidget(screen, 100, 22).Contains("Scope: web-api"), "first container");
+                    tester.Press(KeyEvent.Char(']'));
+                    Check.True(Snapshot.RenderWidget(screen, 100, 22).Contains("Scope: redis"), "second container");
+                    Check.True(Snapshot.RenderWidget(screen, 100, 22).Contains("No live data"), "stopped container empty state");
+                    tester.Press(KeyEvent.Char(']'));
+                    Check.True(Snapshot.RenderWidget(screen, 100, 22).Contains("Host: all Docker workloads"), "wrap to host");
+                    tester.Press(KeyEvent.Char('o'));
+                    Check.True(Snapshot.RenderWidget(screen, 100, 22).Contains("Scope: web-api"), "selected container shortcut");
+                    screen.SetContainers(Array.Empty<ContainerInfo>());
+                    Check.True(Snapshot.RenderWidget(screen, 100, 22).Contains("Host: all Docker workloads"), "removed selection falls back to host");
                 }),
                 c.Sync("TinySurface", "Widgets render into a very small surface without throwing", () =>
                 {

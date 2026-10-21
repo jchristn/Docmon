@@ -466,6 +466,7 @@ namespace Docmon.App
                 _StacksScreen.SetStacks(stacks);
                 _ImagesScreen.SetImages(images);
                 _ToolsScreen.SetUsage(usage);
+                _MetricsScreen.SetContainers(containers);
                 UpdateMetricsTarget();
 
                 if (_Content != null)

@@ -21,11 +21,15 @@ namespace Docmon.App.Monitoring
         public StatsHistory(int capacity)
         {
             _Capacity = Math.Max(1, capacity);
+            Overall = new ContainerHistory(_Capacity);
             OverallCpu = new MetricSeries(_Capacity);
             OverallMemory = new MetricSeries(_Capacity);
             OverallNetRate = new MetricSeries(_Capacity);
             OverallDiskRate = new MetricSeries(_Capacity);
         }
+
+        /// <summary>Gets all six dashboard metric series aggregated across Docker workloads.</summary>
+        public ContainerHistory Overall { get; }
 
         /// <summary>Gets the deployment-wide CPU-percentage series (sum across containers).</summary>
         public MetricSeries OverallCpu { get; }
@@ -78,14 +82,22 @@ namespace Docmon.App.Monitoring
             double net = 0.0;
             double disk = 0.0;
 
+            ContainerStatsSample aggregate = new ContainerStatsSample { AtUtc = DateTime.UtcNow };
             foreach (ContainerHistory history in _Containers.Values)
             {
+                aggregate.NetworkRxBytes += (long)history.NetworkRxBytes.Latest;
+                aggregate.NetworkTxBytes += (long)history.NetworkTxBytes.Latest;
+                aggregate.BlockReadBytes += (long)history.BlockReadBytes.Latest;
+                aggregate.BlockWriteBytes += (long)history.BlockWriteBytes.Latest;
                 cpu += history.Cpu.Latest;
                 memory += history.MemoryUsage.Latest;
                 net += history.NetRxRate.Latest + history.NetTxRate.Latest;
                 disk += history.DiskRate.Latest;
             }
 
+            aggregate.CpuPercent = cpu;
+            aggregate.MemoryUsage = (long)memory;
+            Overall.Add(aggregate);
             OverallCpu.Add(cpu);
             OverallMemory.Add(memory);
             OverallNetRate.Add(net);

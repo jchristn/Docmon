@@ -94,8 +94,9 @@ matching host paths. See [Compose project access](docker/README.md#compose-proje
 - View individual-container metrics or aggregate all Docker container workloads.
   The aggregate excludes unrelated host OS processes. Network and disk values
   are cumulative byte counters.
-- Show live charts in the TUI and one full-width chart per metric tab in the web
-  dashboard, with time/value axes and hover or keyboard-focus details.
+- Show the same six full-width metric tabs in the TUI and web dashboard: CPU,
+  memory, network received/transmitted, and block read/written. Both show labeled
+  time/value axes and sample details (keyboard inspection in the TUI).
 - Read the latest metrics and recent metric history through REST and MCP.
 - Monitor Docker daemon events with timestamps, event types, actions, and actors.
 - Report Docker Engine version/OS, container and running counts, image and
@@ -285,10 +286,19 @@ the number keys `1`–`6`:
 |---|---|---|
 | 1 | **Containers** | The master table plus a live detail pane with inline CPU/memory charts |
 | 2 | **Stacks** | Compose projects, their services, and stack-level actions |
-| 3 | **Metrics** | Full-size CPU / memory / network / disk charts, overall or per container |
+| 3 | **Metrics** | Six full-width dashboard-equivalent metric tabs, host Docker workloads or any container |
 | 4 | **Images** | Local images, registry digests, and update status |
 | 5 | **Events** | A live stream of Docker daemon events |
 | 6 | **Tools** | Engine/OS information, resource counts, image storage, and dangling-image pruning |
+
+In **Metrics**, use Left/Right to select a chart and `[` / `]` to cycle between
+host Docker workloads and individual containers, including stopped containers
+(which show no live data). Press `o` to switch between host workloads and the
+container selected in the Containers screen. Up/Down inspect older/newer samples;
+End returns to live values. Network and block charts use cumulative byte counters,
+matching the dashboard. The TUI retains the latest 120 samples for each series;
+charts span the entire retained window at any terminal width. Host scope sums
+Docker container workloads and excludes unrelated host OS processes.
 
 ## Requirements
 

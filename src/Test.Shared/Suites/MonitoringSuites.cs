@@ -87,6 +87,27 @@ namespace Test.Shared.Suites
                     Check.Close(0.0, history.NetRxRate.Latest, 0.0, "rx rate");
                     Check.Close(0.0, history.DiskRate.Latest, 0.0, "disk rate");
                 }),
+                c.Sync("DashboardCounters", "Cumulative dashboard counters and timestamps retain aligned bounded history and host sums", () =>
+                {
+                    StatsHistory stats = new StatsHistory(2);
+                    for (int i = 0; i < 3; i++)
+                    {
+                        stats.AddSample(Sample("a", i, rx: 100 + i, tx: 200 + i, read: 300 + i, write: 400 + i));
+                        stats.AddSample(Sample("b", i, rx: 10, tx: 20, read: 30, write: 40));
+                        stats.TickOverall();
+                    }
+                    ContainerHistory history = stats.Get("a")!;
+                    Check.SequenceEqual(new List<double> { 101, 102 }, history.NetworkRxBytes.Snapshot(), "cumulative rx after eviction");
+                    Check.Equal(2, history.SampleTimes.Snapshot().Count, "timestamps bounded");
+                    Check.Close(Sample("a", 2).AtUtc.Ticks, history.SampleTimes.Latest, 0, "sample time");
+                    Check.Close(112, stats.Overall.NetworkRxBytes.Latest, 0, "host rx");
+                    Check.Close(222, stats.Overall.NetworkTxBytes.Latest, 0, "host tx");
+                    Check.Close(332, stats.Overall.BlockReadBytes.Latest, 0, "host reads");
+                    Check.Close(442, stats.Overall.BlockWriteBytes.Latest, 0, "host writes");
+                    stats.Prune(new List<string> { "a" });
+                    stats.TickOverall();
+                    Check.Close(102, stats.Overall.NetworkRxBytes.Latest, 0, "pruned host rx");
+                }),
                 c.Sync("HistoryRates", "Subsequent samples compute per-second network and disk rates", () =>
                 {
                     ContainerHistory history = new ContainerHistory(10);
