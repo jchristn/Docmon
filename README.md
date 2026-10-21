@@ -143,7 +143,8 @@ for capture behavior and limits.
 - OpenAPI-driven endpoint selection, path/query parameter inputs, JSON request
   editing, tar upload/download support, response/header inspection, and request
   copying in the API explorer.
-- Navy & Silver light/dark themes, responsive layouts, project branding, and
+- Navy & Silver light/dark themes, with the dark palette also used by the TUI,
+  responsive layouts, project branding, and
   GitHub/Discord links in the topbar.
 - Twelve languages: English, Spanish, Brazilian Portuguese, French, Italian,
   German, Simplified Chinese, Arabic, Russian, Malay, Hindi, and Japanese.

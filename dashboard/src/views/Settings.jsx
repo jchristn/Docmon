@@ -32,11 +32,6 @@ export default function Settings() {
         </div>
       </section>
       <section className="panel">
-        <h2>{t("token")}</h2>
-        <p>{t("tokenHelp")}</p>
-        <p className="muted">{t("securityHelp")}</p>
-      </section>
-      <section className="panel">
         <h2>{t("language")}</h2>
         <LocaleSelector />
       </section>

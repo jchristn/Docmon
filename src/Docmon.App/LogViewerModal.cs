@@ -99,8 +99,8 @@ namespace Docmon.App
             int boxHeight = screenHeight - (2 * _MarginY);
             Rect box = new Rect(boxX, boxY, boxWidth, boxHeight);
 
-            surface.Fill(box, Cell.Blank(CellStyle.Default));
-            surface.DrawBox(box, CellStyle.Default.WithForeground(DocmonPalette.Accent), _Title);
+            surface.Fill(box, Cell.Blank(DocmonPalette.SurfaceStyle));
+            surface.DrawBox(box, DocmonPalette.SurfaceStyle.WithForeground(DocmonPalette.Accent), _Title);
 
             int contentX = boxX + 2;
             int contentWidth = boxWidth - 4;
@@ -110,7 +110,7 @@ namespace Docmon.App
 
             ClampScroll();
 
-            CellStyle textStyle = CellStyle.Default.WithForeground(DocmonPalette.Text);
+            CellStyle textStyle = DocmonPalette.SurfaceStyle.WithForeground(DocmonPalette.Text);
             for (int i = 0; i < _ViewportHeight; i++)
             {
                 int lineIndex = _ScrollTop + i;
@@ -126,8 +126,8 @@ namespace Docmon.App
             if (_Copied)
                 hint = "copied to clipboard   ·   " + hint;
 
-            Draw.Text(surface, contentX, footerRow, hint, CellStyle.Default.WithForeground(DocmonPalette.Dim), Math.Max(0, contentWidth - position.Length - 1));
-            Draw.Text(surface, contentX + contentWidth - position.Length, footerRow, position, CellStyle.Default.WithForeground(DocmonPalette.Muted), position.Length);
+            Draw.Text(surface, contentX, footerRow, hint, DocmonPalette.SurfaceStyle.WithForeground(DocmonPalette.Dim), Math.Max(0, contentWidth - position.Length - 1));
+            Draw.Text(surface, contentX + contentWidth - position.Length, footerRow, position, DocmonPalette.SurfaceStyle.WithForeground(DocmonPalette.Muted), position.Length);
         }
 
         private void Scroll(int delta)

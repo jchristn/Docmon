@@ -68,7 +68,7 @@ namespace Docmon.App.Screens
 
             string scope = overall ? "overall deployment" : (_TargetName.Length > 0 ? _TargetName : "container");
             string modeLine = "Scope: " + scope + "   (press 'o' to toggle)";
-            Draw.Text(surface, 0, 0, modeLine, CellStyle.Default.WithForeground(DocmonPalette.Muted), width);
+            Draw.Text(surface, 0, 0, modeLine, DocmonPalette.BaseStyle.WithForeground(DocmonPalette.Muted), width);
 
             int gridY = 1;
             int gridH = height - 1;
@@ -97,38 +97,38 @@ namespace Docmon.App.Screens
             }
             else
             {
-                Draw.Text(surface, 0, gridY + 1, "No live data for the selected container.", CellStyle.Default.WithForeground(DocmonPalette.Dim), width);
+                Draw.Text(surface, 0, gridY + 1, "No live data for the selected container.", DocmonPalette.BaseStyle.WithForeground(DocmonPalette.Dim), width);
             }
         }
 
         private static void DrawArea(ISurface surface, Rect rect, string title, MetricSeries series, double max, string valueLabel, Color color)
         {
-            Rect inner = Draw.Panel(surface, rect, title, CellStyle.Default.WithForeground(DocmonPalette.Dim));
+            Rect inner = Draw.Panel(surface, rect, title, DocmonPalette.BaseStyle.WithForeground(DocmonPalette.Dim));
             if (inner.Width <= 0 || inner.Height <= 0)
                 return;
 
             string label = valueLabel ?? string.Empty;
             int labelX = inner.X + Math.Max(0, inner.Width - label.Length);
-            Draw.Text(surface, labelX, inner.Y, label, CellStyle.Default.WithForeground(color).WithAttribute(CellAttributes.Bold, true), label.Length);
+            Draw.Text(surface, labelX, inner.Y, label, DocmonPalette.BaseStyle.WithForeground(color).WithAttribute(CellAttributes.Bold, true), label.Length);
 
             Rect plot = new Rect(inner.X, inner.Y + 1, inner.Width, Math.Max(1, inner.Height - 1));
-            Draw.AreaChart(surface, plot, series.Snapshot(), max, CellStyle.Default.WithForeground(color));
+            Draw.AreaChart(surface, plot, series.Snapshot(), max, DocmonPalette.BaseStyle.WithForeground(color));
         }
 
         private static void DrawDualNet(ISurface surface, Rect rect, ContainerHistory container)
         {
-            Rect inner = Draw.Panel(surface, rect, "Network ↓rx ↑tx", CellStyle.Default.WithForeground(DocmonPalette.Dim));
+            Rect inner = Draw.Panel(surface, rect, "Network ↓rx ↑tx", DocmonPalette.BaseStyle.WithForeground(DocmonPalette.Dim));
             if (inner.Width <= 0 || inner.Height <= 0)
                 return;
 
             string label = "↓" + ByteFormatter.FormatRate(container.NetRxRate.Latest) + " ↑" + ByteFormatter.FormatRate(container.NetTxRate.Latest);
             int labelX = inner.X + Math.Max(0, inner.Width - label.Length);
-            Draw.Text(surface, labelX, inner.Y, label, CellStyle.Default.WithForeground(DocmonPalette.Success).WithAttribute(CellAttributes.Bold, true), label.Length);
+            Draw.Text(surface, labelX, inner.Y, label, DocmonPalette.BaseStyle.WithForeground(DocmonPalette.Success).WithAttribute(CellAttributes.Bold, true), label.Length);
 
             Rect plot = new Rect(inner.X, inner.Y + 1, inner.Width, Math.Max(1, inner.Height - 1));
             double max = Math.Max(container.NetRxRate.Max, container.NetTxRate.Max);
-            Draw.AreaChart(surface, plot, container.NetRxRate.Snapshot(), max, CellStyle.Default.WithForeground(DocmonPalette.Success));
-            Draw.LineSeries(surface, plot, container.NetTxRate.Snapshot(), max, CellStyle.Default.WithForeground(DocmonPalette.Warning), "•");
+            Draw.AreaChart(surface, plot, container.NetRxRate.Snapshot(), max, DocmonPalette.BaseStyle.WithForeground(DocmonPalette.Success));
+            Draw.LineSeries(surface, plot, container.NetTxRate.Snapshot(), max, DocmonPalette.BaseStyle.WithForeground(DocmonPalette.Warning), "•");
         }
 
         private static System.Globalization.CultureInfo Culture()

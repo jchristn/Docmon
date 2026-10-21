@@ -74,7 +74,7 @@ namespace Docmon.App.Widgets
 
             int x = System.Math.Max(0, (width - _LoadingMessage.Length) / 2);
             int y = height / 2;
-            Draw.Text(surface, x, y, _LoadingMessage, CellStyle.Default.WithForeground(DocmonPalette.Muted), width);
+            Draw.Text(surface, x, y, _LoadingMessage, DocmonPalette.BaseStyle.WithForeground(DocmonPalette.Muted), width);
         }
 
         /// <inheritdoc/>

@@ -2,6 +2,7 @@ namespace Docmon.App
 {
     using System;
     using System.Collections.Generic;
+    using Docmon.App.Theming;
     using TUIKit;
     using TUIKit.Input;
     using TUIKit.Modals;
@@ -78,8 +79,8 @@ namespace Docmon.App
             int boxY = Math.Max(0, (screenHeight - boxHeight) / 2);
             Rect box = new Rect(boxX, boxY, boxWidth, boxHeight);
 
-            surface.Fill(box, Cell.Blank(CellStyle.Default));
-            surface.DrawBox(box, CellStyle.Default.WithForeground(Color.FromPalette(6)), _Title);
+            surface.Fill(box, Cell.Blank(DocmonPalette.SurfaceStyle));
+            surface.DrawBox(box, DocmonPalette.SurfaceStyle.WithForeground(DocmonPalette.Accent), _Title);
 
             int contentX = boxX + 1 + _PadX;
             int firstRow = boxY + 1 + _PadY;
@@ -90,14 +91,14 @@ namespace Docmon.App
                 int row = firstRow + i;
                 if (row > lastContentRow)
                     break;
-                surface.DrawText(LineX(contentX, contentWidth, _Lines[i]), row, _Lines[i], CellStyle.Default.WithForeground(Color.FromPalette(6)));
+                surface.DrawText(LineX(contentX, contentWidth, _Lines[i]), row, _Lines[i], DocmonPalette.SurfaceStyle.WithForeground(DocmonPalette.Accent));
             }
 
             if (_Hint.Length > 0)
             {
                 int hintRow = lastContentRow;
                 if (hintRow > firstRow + _Lines.Count - 1)
-                    surface.DrawText(LineX(contentX, contentWidth, _Hint), hintRow, _Hint, CellStyle.Default.WithForeground(Color.FromPalette(8)));
+                    surface.DrawText(LineX(contentX, contentWidth, _Hint), hintRow, _Hint, DocmonPalette.SurfaceStyle.WithForeground(DocmonPalette.Muted));
             }
         }
 

@@ -76,12 +76,12 @@ namespace Docmon.App.Screens
                 return;
 
             int topHeight = Math.Max(4, height * 55 / 100);
-            CellStyle border = CellStyle.Default.WithForeground(Focused ? DocmonPalette.Accent : DocmonPalette.Dim);
+            CellStyle border = DocmonPalette.BaseStyle.WithForeground(Focused ? DocmonPalette.Accent : DocmonPalette.Dim);
 
             Rect tableInner = Draw.Panel(surface, new Rect(0, 0, width, topHeight), "Stacks (" + _Count + ")", border);
             _Table.Render(surface, tableInner, _Headers, _Weights, Focused, "No compose stacks found.");
 
-            Rect servicesInner = Draw.Panel(surface, new Rect(0, topHeight, width, height - topHeight), "Services", CellStyle.Default.WithForeground(DocmonPalette.Dim));
+            Rect servicesInner = Draw.Panel(surface, new Rect(0, topHeight, width, height - topHeight), "Services", DocmonPalette.BaseStyle.WithForeground(DocmonPalette.Dim));
             RenderServices(surface, servicesInner);
         }
 
@@ -93,11 +93,11 @@ namespace Docmon.App.Screens
             ComposeStack? stack = _Table.SelectedTag as ComposeStack;
             if (stack == null)
             {
-                Draw.Text(surface, area.X, area.Y, "Select a stack.", CellStyle.Default.WithForeground(DocmonPalette.Dim), area.Width);
+                Draw.Text(surface, area.X, area.Y, "Select a stack.", DocmonPalette.BaseStyle.WithForeground(DocmonPalette.Dim), area.Width);
                 return;
             }
 
-            CellStyle header = CellStyle.Default.WithForeground(DocmonPalette.Muted).WithAttribute(CellAttributes.Bold, true);
+            CellStyle header = DocmonPalette.BaseStyle.WithForeground(DocmonPalette.Muted).WithAttribute(CellAttributes.Bold, true);
             Draw.Text(surface, area.X, area.Y, "SERVICE".PadRight(18) + "IMAGE".PadRight(30) + "STATE", header, area.Width);
 
             int y = area.Y + 1;
@@ -107,7 +107,7 @@ namespace Docmon.App.Screens
                     break;
 
                 string line = service.Name.PadRight(18) + Draw.Clip(service.RunningImage, 28).PadRight(30) + service.State.ToString().ToLowerInvariant();
-                Draw.Text(surface, area.X, y, line, CellStyle.Default.WithForeground(StatusColors.ForState(service.State)), area.Width);
+                Draw.Text(surface, area.X, y, line, DocmonPalette.BaseStyle.WithForeground(StatusColors.ForState(service.State)), area.Width);
                 y += 1;
             }
         }

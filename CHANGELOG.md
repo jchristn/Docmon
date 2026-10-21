@@ -18,6 +18,7 @@ All notable changes to Docmon are documented here. The format follows
 - REST/MCP documentation, OpenAPI snapshot, Postman collections, backend and browser tests.
 
 ### Changed
+- TUI colors, explicit backgrounds, splash, dialogs, and status indicators now match the dashboard’s dark Navy & Silver palette.
 - Denser dashboard rows, icon-only sign out after the community links, no idle chart hint, 95% viewport request inspector, and explicit Docker workload metric scope.
 - Dashboard now uses Navy & Silver, compact navigation, topbar community links,
   tabbed and labeled metrics charts, taller request charts, request detail inspection,

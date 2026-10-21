@@ -93,8 +93,8 @@ namespace Docmon.App
             int boxHeight = screenHeight - (2 * _MarginY);
             Rect box = new Rect(boxX, boxY, boxWidth, boxHeight);
 
-            surface.Fill(box, Cell.Blank(CellStyle.Default));
-            surface.DrawBox(box, CellStyle.Default.WithForeground(DocmonPalette.Accent), _Title);
+            surface.Fill(box, Cell.Blank(DocmonPalette.BaseStyle));
+            surface.DrawBox(box, DocmonPalette.BaseStyle.WithForeground(DocmonPalette.Accent), _Title);
 
             int contentX = boxX + 2;
             int contentWidth = boxWidth - 4;
@@ -103,7 +103,7 @@ namespace Docmon.App
             int viewport = Math.Max(1, footerRow - firstRow);
 
             int start = Math.Max(0, _Lines.Count - viewport);
-            CellStyle textStyle = CellStyle.Default.WithForeground(DocmonPalette.Text);
+            CellStyle textStyle = DocmonPalette.BaseStyle.WithForeground(DocmonPalette.Text);
             for (int i = 0; i < viewport; i++)
             {
                 int lineIndex = start + i;
@@ -118,12 +118,12 @@ namespace Docmon.App
             if (_Done)
             {
                 hint = _Summary + "   ·   press any key to close";
-                hintStyle = CellStyle.Default.WithForeground(DocmonPalette.Success);
+                hintStyle = DocmonPalette.BaseStyle.WithForeground(DocmonPalette.Success);
             }
             else
             {
                 hint = "pulling…   ·   Esc to cancel";
-                hintStyle = CellStyle.Default.WithForeground(DocmonPalette.Muted);
+                hintStyle = DocmonPalette.BaseStyle.WithForeground(DocmonPalette.Muted);
             }
 
             Draw.Text(surface, contentX, footerRow, hint, hintStyle, contentWidth);

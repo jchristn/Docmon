@@ -90,8 +90,8 @@ namespace Docmon.App.Rendering
             if (rect.Width <= 0 || rect.Height <= 0)
                 return;
 
-            CellStyle headerStyle = CellStyle.Default.WithForeground(DocmonPalette.Muted).WithAttribute(CellAttributes.Bold, true);
-            CellStyle textStyle = CellStyle.Default.WithForeground(DocmonPalette.Text);
+            CellStyle headerStyle = DocmonPalette.BaseStyle.WithForeground(DocmonPalette.Muted).WithAttribute(CellAttributes.Bold, true);
+            CellStyle textStyle = DocmonPalette.BaseStyle.WithForeground(DocmonPalette.Text);
 
             int[] widths = ComputeWidths(weights, rect.Width);
 
@@ -107,7 +107,7 @@ namespace Docmon.App.Rendering
 
             if (_Rows.Count == 0)
             {
-                Draw.Text(surface, rect.X, firstDataRow, emptyMessage, CellStyle.Default.WithForeground(DocmonPalette.Dim), rect.Width);
+                Draw.Text(surface, rect.X, firstDataRow, emptyMessage, DocmonPalette.BaseStyle.WithForeground(DocmonPalette.Dim), rect.Width);
                 return;
             }
 
@@ -127,7 +127,7 @@ namespace Docmon.App.Rendering
                 {
                     CellStyle selectionStyle = focused
                         ? new CellStyle(DocmonPalette.SelectionForeground, DocmonPalette.Accent)
-                        : CellStyle.Default.WithForeground(DocmonPalette.Accent).WithAttribute(CellAttributes.Bold, true);
+                        : DocmonPalette.BaseStyle.WithForeground(DocmonPalette.Accent).WithAttribute(CellAttributes.Bold, true);
 
                     if (focused)
                         surface.Fill(new Rect(rect.X, y, rect.Width, 1), Cell.Blank(selectionStyle));
@@ -136,7 +136,7 @@ namespace Docmon.App.Rendering
                 }
                 else
                 {
-                    CellStyle style = row.Color.HasValue ? CellStyle.Default.WithForeground(row.Color.Value) : textStyle;
+                    CellStyle style = row.Color.HasValue ? DocmonPalette.BaseStyle.WithForeground(row.Color.Value) : textStyle;
                     DrawRow(surface, rect.X, y, widths, row.Cells, style);
                 }
             }

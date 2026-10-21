@@ -39,12 +39,12 @@ namespace Docmon.App.Screens
             if (width < 8 || height < 6)
                 return;
 
-            Rect inner = Draw.Panel(surface, new Rect(0, 0, width, height), "Tools · System usage", CellStyle.Default.WithForeground(DocmonPalette.Dim));
+            Rect inner = Draw.Panel(surface, new Rect(0, 0, width, height), "Tools · System usage", DocmonPalette.BaseStyle.WithForeground(DocmonPalette.Dim));
             if (inner.Width <= 2 || inner.Height <= 1)
                 return;
 
-            CellStyle label = CellStyle.Default.WithForeground(DocmonPalette.Muted);
-            CellStyle value = CellStyle.Default.WithForeground(DocmonPalette.Text);
+            CellStyle label = DocmonPalette.BaseStyle.WithForeground(DocmonPalette.Muted);
+            CellStyle value = DocmonPalette.BaseStyle.WithForeground(DocmonPalette.Text);
             int x = inner.X;
             int y = inner.Y;
 
@@ -55,7 +55,7 @@ namespace Docmon.App.Screens
             Field(surface, x, ref y, inner.Width, "Volumes", _Usage.VolumeCount.ToString(System.Globalization.CultureInfo.InvariantCulture), label, value);
 
             y += 1;
-            Draw.Text(surface, x, y, "Press 'x' to prune dangling images and reclaim space.", CellStyle.Default.WithForeground(DocmonPalette.Dim), inner.Width);
+            Draw.Text(surface, x, y, "Press 'x' to prune dangling images and reclaim space.", DocmonPalette.BaseStyle.WithForeground(DocmonPalette.Dim), inner.Width);
         }
 
         private static void Field(ISurface surface, int x, ref int y, int width, string name, string text, CellStyle labelStyle, CellStyle valueStyle)

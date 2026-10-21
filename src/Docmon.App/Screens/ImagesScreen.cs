@@ -76,7 +76,7 @@ namespace Docmon.App.Screens
             if (width < 8 || height < 4)
                 return;
 
-            CellStyle border = CellStyle.Default.WithForeground(Focused ? DocmonPalette.Accent : DocmonPalette.Dim);
+            CellStyle border = DocmonPalette.BaseStyle.WithForeground(Focused ? DocmonPalette.Accent : DocmonPalette.Dim);
             Rect inner = Draw.Panel(surface, new Rect(0, 0, width, height), "Images (" + _Count + ")", border);
             _Table.Render(surface, inner, _Headers, _Weights, Focused, "No images found.");
         }

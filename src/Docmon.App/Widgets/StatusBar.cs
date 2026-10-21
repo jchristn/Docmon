@@ -47,8 +47,8 @@ namespace Docmon.App.Widgets
             if (width < 2)
                 return;
 
-            surface.Fill(new Rect(0, 0, width, surface.Size.Height), Cell.Blank(CellStyle.Default));
-            Draw.Text(surface, 0, 0, _Hints, CellStyle.Default.WithForeground(DocmonPalette.Dim), width);
+            surface.Fill(new Rect(0, 0, width, surface.Size.Height), Cell.Blank(DocmonPalette.SurfaceStyle));
+            Draw.Text(surface, 0, 0, _Hints, DocmonPalette.SurfaceStyle.WithForeground(DocmonPalette.Dim), width);
 
             if (_Message.Length > 0)
             {
@@ -56,7 +56,7 @@ namespace Docmon.App.Widgets
                 if (messageWidth > 0)
                 {
                     int x = width - messageWidth;
-                    Draw.Text(surface, x, 0, _Message, CellStyle.Default.WithForeground(DocmonPalette.Accent2), messageWidth);
+                    Draw.Text(surface, x, 0, _Message, DocmonPalette.SurfaceStyle.WithForeground(DocmonPalette.Accent2), messageWidth);
                 }
             }
         }

@@ -4,8 +4,7 @@ namespace Docmon.App.Theming
     using TUIKit.Theming;
 
     /// <summary>
-    /// Builds the Docmon theme. The background is left at the terminal default so Docmon blends into the
-    /// user's terminal rather than painting its own backdrop.
+    /// Builds the Navy and Silver theme using the dashboard's dark colors and an explicit navy backdrop.
     /// </summary>
     public static class DocmonTheme
     {
@@ -15,10 +14,10 @@ namespace Docmon.App.Theming
         /// <returns>The theme.</returns>
         public static Theme Create()
         {
-            CellStyle text = CellStyle.Default.WithForeground(DocmonPalette.Text);
-            CellStyle accent = CellStyle.Default.WithForeground(DocmonPalette.Accent);
-            CellStyle border = CellStyle.Default.WithForeground(DocmonPalette.Dim);
-            CellStyle muted = CellStyle.Default.WithForeground(DocmonPalette.Muted);
+            CellStyle text = DocmonPalette.BaseStyle.WithForeground(DocmonPalette.Text);
+            CellStyle accent = DocmonPalette.BaseStyle.WithForeground(DocmonPalette.Accent);
+            CellStyle border = DocmonPalette.BaseStyle.WithForeground(DocmonPalette.Border);
+            CellStyle muted = DocmonPalette.BaseStyle.WithForeground(DocmonPalette.Muted);
 
             return new Theme(
                 "docmon",
@@ -27,10 +26,10 @@ namespace Docmon.App.Theming
                 border,
                 muted,
                 false,
-                CellStyle.Default.WithForeground(DocmonPalette.Success),
-                CellStyle.Default.WithForeground(DocmonPalette.Warning),
-                CellStyle.Default.WithForeground(DocmonPalette.Error),
-                CellStyle.Default.WithForeground(DocmonPalette.Accent2),
+                DocmonPalette.BaseStyle.WithForeground(DocmonPalette.Success),
+                DocmonPalette.BaseStyle.WithForeground(DocmonPalette.Warning),
+                DocmonPalette.BaseStyle.WithForeground(DocmonPalette.Error),
+                DocmonPalette.BaseStyle.WithForeground(DocmonPalette.Accent2),
                 new CellStyle(DocmonPalette.SelectionForeground, DocmonPalette.Accent),
                 muted.WithAttribute(CellAttributes.Dim, true));
         }

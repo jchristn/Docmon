@@ -96,8 +96,8 @@ namespace Docmon.App.Screens
             int topHeight = height - hostHeight;
             int leftWidth = Math.Max(34, width * 55 / 100);
 
-            CellStyle tableBorder = CellStyle.Default.WithForeground(Focused ? DocmonPalette.Accent : DocmonPalette.Dim);
-            CellStyle detailBorder = CellStyle.Default.WithForeground(DocmonPalette.Dim);
+            CellStyle tableBorder = DocmonPalette.BaseStyle.WithForeground(Focused ? DocmonPalette.Accent : DocmonPalette.Dim);
+            CellStyle detailBorder = DocmonPalette.BaseStyle.WithForeground(DocmonPalette.Dim);
 
             Rect tableInner = Draw.Panel(surface, new Rect(0, 0, leftWidth, topHeight), "Containers (" + _Containers.Count + ")", tableBorder);
             _Table.Render(surface, tableInner, _Headers, _Weights, Focused, "No containers found.");
@@ -117,12 +117,12 @@ namespace Docmon.App.Screens
             ContainerInfo? container = _Table.SelectedTag as ContainerInfo;
             if (container == null)
             {
-                Draw.Text(surface, area.X, area.Y, "Select a container.", CellStyle.Default.WithForeground(DocmonPalette.Dim), area.Width);
+                Draw.Text(surface, area.X, area.Y, "Select a container.", DocmonPalette.BaseStyle.WithForeground(DocmonPalette.Dim), area.Width);
                 return;
             }
 
-            CellStyle label = CellStyle.Default.WithForeground(DocmonPalette.Muted);
-            CellStyle value = CellStyle.Default.WithForeground(DocmonPalette.Text);
+            CellStyle label = DocmonPalette.BaseStyle.WithForeground(DocmonPalette.Muted);
+            CellStyle value = DocmonPalette.BaseStyle.WithForeground(DocmonPalette.Text);
             int x = area.X;
             int y = area.Y;
             int right = area.Width;
@@ -130,7 +130,7 @@ namespace Docmon.App.Screens
             DrawField(surface, x, ref y, right, "Name", container.Name, label, value);
             DrawField(surface, x, ref y, right, "Image", container.Image, label, value);
             DrawField(surface, x, ref y, right, "ID", container.ShortId, label, value);
-            DrawField(surface, x, ref y, right, "State", container.State.ToString(), label, CellStyle.Default.WithForeground(StatusColors.ForState(container.State)));
+            DrawField(surface, x, ref y, right, "State", container.State.ToString(), label, DocmonPalette.BaseStyle.WithForeground(StatusColors.ForState(container.State)));
             if (container.Health.Length > 0)
                 DrawField(surface, x, ref y, right, "Health", container.Health, label, value);
             DrawField(surface, x, ref y, right, "Status", container.Status, label, value);
@@ -158,7 +158,7 @@ namespace Docmon.App.Screens
                 Draw.Text(surface, x, y, "CPU  " + cpu.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture) + "%", label, right);
                 y += 1;
                 string spark = Draw.Sparkline(history.Cpu.Snapshot(), Math.Min(right, 40), Math.Max(100.0, history.Cpu.Max));
-                Draw.Text(surface, x, y, spark, CellStyle.Default.WithForeground(DocmonPalette.Accent), right);
+                Draw.Text(surface, x, y, spark, DocmonPalette.BaseStyle.WithForeground(DocmonPalette.Accent), right);
                 y += 2;
 
                 long memUsage = (long)history.MemoryUsage.Latest;
@@ -166,7 +166,7 @@ namespace Docmon.App.Screens
                 double memFraction = memLimit > 0 ? (double)memUsage / memLimit : 0.0;
                 Draw.Text(surface, x, y, "MEM  " + ByteFormatter.Format(memUsage) + " / " + ByteFormatter.Format(memLimit), label, right);
                 y += 1;
-                Draw.Bar(surface, x, y, Math.Min(right, 40), memFraction, CellStyle.Default.WithForeground(DocmonPalette.Accent2), CellStyle.Default.WithForeground(DocmonPalette.Dim));
+                Draw.Bar(surface, x, y, Math.Min(right, 40), memFraction, DocmonPalette.BaseStyle.WithForeground(DocmonPalette.Accent2), DocmonPalette.BaseStyle.WithForeground(DocmonPalette.Dim));
             }
         }
 
@@ -193,7 +193,7 @@ namespace Docmon.App.Screens
                 + "   DISK " + ByteFormatter.FormatRate(disk)
                 + "   " + running + "/" + _Containers.Count + " running";
 
-            Draw.Text(surface, area.X, area.Y, summary, CellStyle.Default.WithForeground(DocmonPalette.Text), area.Width);
+            Draw.Text(surface, area.X, area.Y, summary, DocmonPalette.BaseStyle.WithForeground(DocmonPalette.Text), area.Width);
         }
 
         private static void DrawField(ISurface surface, int x, ref int y, int width, string name, string text, CellStyle labelStyle, CellStyle valueStyle)

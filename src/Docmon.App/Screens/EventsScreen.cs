@@ -54,7 +54,7 @@ namespace Docmon.App.Screens
             if (width < 8 || height < 3)
                 return;
 
-            Rect inner = Draw.Panel(surface, new Rect(0, 0, width, height), "Events (" + _Events.Count + ")", CellStyle.Default.WithForeground(DocmonPalette.Dim));
+            Rect inner = Draw.Panel(surface, new Rect(0, 0, width, height), "Events (" + _Events.Count + ")", DocmonPalette.BaseStyle.WithForeground(DocmonPalette.Dim));
             if (inner.Height <= 0)
                 return;
 
@@ -74,13 +74,13 @@ namespace Docmon.App.Screens
                     break;
 
                 string line = TimeFormatter.FormatClock(info.TimeUtc) + "  " + info.Type.PadRight(9) + " " + info.Action.PadRight(14) + " " + info.Actor;
-                Draw.Text(surface, inner.X, y, line, CellStyle.Default.WithForeground(ColorFor(info.Action)), inner.Width);
+                Draw.Text(surface, inner.X, y, line, DocmonPalette.BaseStyle.WithForeground(ColorFor(info.Action)), inner.Width);
                 y += 1;
                 index++;
             }
 
             if (_Events.Count == 0)
-                Draw.Text(surface, inner.X, inner.Y, "Waiting for events…", CellStyle.Default.WithForeground(DocmonPalette.Dim), inner.Width);
+                Draw.Text(surface, inner.X, inner.Y, "Waiting for events…", DocmonPalette.BaseStyle.WithForeground(DocmonPalette.Dim), inner.Width);
         }
 
         private static Color ColorFor(string action)

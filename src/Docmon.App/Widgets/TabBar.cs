@@ -49,11 +49,11 @@ namespace Docmon.App.Widgets
             if (width < 2)
                 return;
 
-            surface.Fill(new Rect(0, 0, width, surface.Size.Height), Cell.Blank(CellStyle.Default));
+            surface.Fill(new Rect(0, 0, width, surface.Size.Height), Cell.Blank(DocmonPalette.SurfaceStyle));
 
             CellStyle active = new CellStyle(DocmonPalette.SelectionForeground, DocmonPalette.Accent).WithAttribute(CellAttributes.Bold, true);
-            CellStyle inactive = CellStyle.Default.WithForeground(DocmonPalette.Muted);
-            CellStyle separator = CellStyle.Default.WithForeground(DocmonPalette.Dim);
+            CellStyle inactive = DocmonPalette.SurfaceStyle.WithForeground(DocmonPalette.Muted);
+            CellStyle separator = DocmonPalette.SurfaceStyle.WithForeground(DocmonPalette.Dim);
 
             int x = 0;
             for (int i = 0; i < _Tabs.Length; i++)
