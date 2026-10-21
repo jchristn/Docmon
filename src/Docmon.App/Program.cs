@@ -42,13 +42,22 @@ namespace Docmon.App
             bool showSplash = !HasFlag(args, "--no-splash");
 
             int serverFlag = Array.IndexOf(args, "--server");
+            int tokenFlag = Array.IndexOf(args, "--token");
+            if (tokenFlag >= 0 && serverFlag < 0)
+            {
+                Console.Error.WriteLine("--token requires --server."); return 1;
+            }
+            if (tokenFlag >= 0 && (tokenFlag + 1 >= args.Length || string.IsNullOrWhiteSpace(args[tokenFlag + 1]) || args[tokenFlag + 1].StartsWith("--", StringComparison.Ordinal)))
+            {
+                Console.Error.WriteLine("--token requires a nonempty bearer token."); return 1;
+            }
             if (serverFlag >= 0)
             {
                 if (serverFlag + 1 >= args.Length || !Uri.TryCreate(args[serverFlag + 1], UriKind.Absolute, out Uri? endpoint))
                 {
                     Console.Error.WriteLine("--server requires an HTTP(S) Docmon server URL."); return 1;
                 }
-                string token = Environment.GetEnvironmentVariable("DOCMON_BEARER_TOKEN") ?? string.Empty;
+                string token = tokenFlag >= 0 ? args[tokenFlag + 1] : Environment.GetEnvironmentVariable("DOCMON_BEARER_TOKEN") ?? string.Empty;
                 try
                 {
                     using RemoteDocmonClient remote = new RemoteDocmonClient(endpoint, token);
@@ -132,14 +141,15 @@ namespace Docmon.App
         {
             Console.WriteLine("docmon " + Version() + " - a terminal UI for managing and monitoring your Docker stack.");
             Console.WriteLine();
-            Console.WriteLine("Remote: docmon --server https://your-host (DOCMON_BEARER_TOKEN required)");
+            Console.WriteLine("Remote: docmon --server https://your-host --token <bearer-token>");
+            Console.WriteLine("  --token overrides DOCMON_BEARER_TOKEN; the environment variable is the fallback.");
             Console.WriteLine("Usage:");
             Console.WriteLine("  docmon               Connect to the local Docker daemon and open the TUI.");
             Console.WriteLine("  docmon --no-splash   Skip the startup splash screen.");
             Console.WriteLine("  docmon --version     Print the version and exit.");
             Console.WriteLine("  docmon --help        Print this help and exit.");
             Console.WriteLine();
-            Console.WriteLine("Docker endpoint: " + DockerClientProvider.ResolveEndpoint() + " (override with DOCKER_HOST).");
+            Console.WriteLine("Local Docker endpoint: " + (OperatingSystem.IsWindows() ? "npipe://./pipe/docker_engine" : "unix:///var/run/docker.sock") + " (local TUI ignores DOCKER_HOST).");
         }
 
         private static void TrySetUtf8()

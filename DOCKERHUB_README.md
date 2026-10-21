@@ -127,9 +127,10 @@ docmon
 The local TUI connects only to the local Docker daemon and requires no authentication. To connect it to a remote Docmon server:
 
 ```bash
-export DOCMON_BEARER_TOKEN=docmonadmin
-docmon --server https://docmon.example.com
+docmon --server https://docmon.example.com --token "your-remote-machine-token"
 ```
+
+The `--token` option overrides `DOCMON_BEARER_TOKEN`, which remains available as a fallback.
 
 ## Links
 

@@ -29,7 +29,7 @@ namespace Docmon.Core.Services
         {
             ArgumentNullException.ThrowIfNull(endpoint);
             if (!endpoint.IsAbsoluteUri || (endpoint.Scheme != "http" && endpoint.Scheme != "https") || !string.IsNullOrEmpty(endpoint.UserInfo) || !string.IsNullOrEmpty(endpoint.Query) || !string.IsNullOrEmpty(endpoint.Fragment)) throw new ArgumentException("A valid HTTP(S) server URL without credentials, query, or fragment is required.", nameof(endpoint));
-            if (string.IsNullOrWhiteSpace(token)) throw new ArgumentException("DOCMON_BEARER_TOKEN is required for remote TUI access.", nameof(token));
+            if (string.IsNullOrWhiteSpace(token)) throw new ArgumentException("A bearer token is required for remote TUI access. Use --token or DOCMON_BEARER_TOKEN.", nameof(token));
             _Http = new HttpClient(new HttpClientHandler { AllowAutoRedirect = false }) { BaseAddress = new Uri(endpoint.ToString().TrimEnd('/') + "/"), Timeout = TimeSpan.FromMinutes(30) };
             _Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
         }

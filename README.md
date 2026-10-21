@@ -102,9 +102,11 @@ bearer token and no dependency on the web server. It deliberately ignores
 `DOCKER_HOST` in local TUI mode. Opt in to remote access explicitly:
 
 ```bash
-export DOCMON_BEARER_TOKEN="your-remote-machine-token"
-docmon --server https://your-machine
+docmon --server https://your-machine --token "your-remote-machine-token"
 ```
+
+The `--token` option overrides `DOCMON_BEARER_TOKEN`. You can still set that
+environment variable and omit `--token`. Local TUI mode needs no token.
 
 Remote mode implements the same service interfaces through the authenticated
 API, including archive transfers and interactive WebSocket shells. Transfers use

@@ -7,6 +7,7 @@ All notable changes to Docmon are documented here. The format follows
 ## [Unreleased]
 
 ### Added
+- Remote TUI `--token` option, with precedence over the existing environment-variable fallback.
 - Cross-platform source launchers (`go`, `run-tui`, `run-server`) and complete retained-journal request summaries for hour/day/week/30-day windows.
 - Watson 7 REST server with bearer authentication, typed route metadata, OpenAPI and Swagger.
 - Colocated Voltaic MCP gateway with the same Docker operations and authentication.
