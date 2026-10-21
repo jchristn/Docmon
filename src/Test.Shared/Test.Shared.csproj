@@ -12,6 +12,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Docmon.Server\Docmon.Server.csproj" />
     <ProjectReference Include="..\Docmon.Core\Docmon.Core.csproj" />
     <ProjectReference Include="..\Docmon.App\Docmon.App.csproj" />
   </ItemGroup>

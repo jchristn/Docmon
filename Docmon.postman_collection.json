@@ -1,0 +1,1145 @@
+{
+  "info": {
+    "name": "Docmon API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Docmon single-machine monitoring and full Docker control. Set baseUrl and bearerToken in a local environment. No real credentials are committed. The complete collection includes destructive requests; select individual requests or use the read-only smoke collection. Generated from live Watson OpenAPI metadata by scripts/export-api.py."
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{bearerToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://127.0.0.1:8080"
+    },
+    {
+      "key": "bearerToken",
+      "value": ""
+    },
+    {
+      "key": "containerId",
+      "value": ""
+    },
+    {
+      "key": "imageId",
+      "value": ""
+    },
+    {
+      "key": "image",
+      "value": "alpine:3.20"
+    },
+    {
+      "key": "project",
+      "value": ""
+    },
+    {
+      "key": "service",
+      "value": ""
+    },
+    {
+      "key": "hostPath",
+      "value": "/tmp"
+    },
+    {
+      "key": "requestId",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "system",
+      "description": "System resources and lifecycle operations. Mutations require machine-operator bearer access. Inspect required variables before running.",
+      "item": [
+        {
+          "name": "health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/health",
+            "description": "Docker daemon readiness.\n\n",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Successful HTTP status\", () => pm.expect(pm.response.code).to.be.within(200, 299));",
+                  "pm.test(\"JSON response\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"No reported operation failure\", () => { const b = pm.response.json(); if (b.exitCode !== undefined) pm.expect(b.exitCode).to.equal(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "system_usage",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/system/usage",
+            "description": "Docker disk and resource usage.\n\n"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Successful HTTP status\", () => pm.expect(pm.response.code).to.be.within(200, 299));",
+                  "pm.test(\"JSON response\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"No reported operation failure\", () => { const b = pm.response.json(); if (b.exitCode !== undefined) pm.expect(b.exitCode).to.equal(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "system_info",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/system/info",
+            "description": "Server connection and version.\n\n"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Successful HTTP status\", () => pm.expect(pm.response.code).to.be.within(200, 299));",
+                  "pm.test(\"JSON response\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"No reported operation failure\", () => { const b = pm.response.json(); if (b.exitCode !== undefined) pm.expect(b.exitCode).to.equal(0); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "containers",
+      "description": "Containers resources and lifecycle operations. Mutations require machine-operator bearer access. Inspect required variables before running.",
+      "item": [
+        {
+          "name": "containers_list",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/containers",
+            "description": "List all containers.\n\n"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Successful HTTP status\", () => pm.expect(pm.response.code).to.be.within(200, 299));",
+                  "pm.test(\"JSON response\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"No reported operation failure\", () => { const b = pm.response.json(); if (b.exitCode !== undefined) pm.expect(b.exitCode).to.equal(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "containers_inspect",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/containers/{{containerId}}",
+            "description": "Inspect a container.\n\n- `id` (path, string, required): Resource identifier"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Successful HTTP status\", () => pm.expect(pm.response.code).to.be.within(200, 299));",
+                  "pm.test(\"JSON response\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"No reported operation failure\", () => { const b = pm.response.json(); if (b.exitCode !== undefined) pm.expect(b.exitCode).to.equal(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "containers_logs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/containers/{{containerId}}/logs",
+            "description": "Read container logs.\n\n- `id` (path, string, required): Resource identifier\n- `tail` (query, integer, optional): Trailing log lines, from 1 through 10000. Default 200."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Successful HTTP status\", () => pm.expect(pm.response.code).to.be.within(200, 299));",
+                  "pm.test(\"JSON response\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"No reported operation failure\", () => { const b = pm.response.json(); if (b.exitCode !== undefined) pm.expect(b.exitCode).to.equal(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "containers_start",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/containers/{{containerId}}/start",
+            "description": "Start container.\n\n- `id` (path, string, required): Resource identifier\n\nChanges Docker state. Use disposable resources when testing mutation requests. A completed CLI/exec operation may return a nonzero exitCode with HTTP 200.",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Successful HTTP status\", () => pm.expect(pm.response.code).to.be.within(200, 299));",
+                  "pm.test(\"JSON response\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"No reported operation failure\", () => { const b = pm.response.json(); if (b.exitCode !== undefined) pm.expect(b.exitCode).to.equal(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "containers_stop",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/containers/{{containerId}}/stop",
+            "description": "Stop container.\n\n- `id` (path, string, required): Resource identifier\n\nChanges Docker state. Use disposable resources when testing mutation requests. A completed CLI/exec operation may return a nonzero exitCode with HTTP 200.",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Successful HTTP status\", () => pm.expect(pm.response.code).to.be.within(200, 299));",
+                  "pm.test(\"JSON response\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"No reported operation failure\", () => { const b = pm.response.json(); if (b.exitCode !== undefined) pm.expect(b.exitCode).to.equal(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "containers_restart",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/containers/{{containerId}}/restart",
+            "description": "Restart container.\n\n- `id` (path, string, required): Resource identifier\n\nChanges Docker state. Use disposable resources when testing mutation requests. A completed CLI/exec operation may return a nonzero exitCode with HTTP 200.",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Successful HTTP status\", () => pm.expect(pm.response.code).to.be.within(200, 299));",
+                  "pm.test(\"JSON response\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"No reported operation failure\", () => { const b = pm.response.json(); if (b.exitCode !== undefined) pm.expect(b.exitCode).to.equal(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "containers_kill",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/containers/{{containerId}}/kill",
+            "description": "Kill container.\n\n- `id` (path, string, required): Resource identifier\n\nChanges Docker state. Use disposable resources when testing mutation requests. A completed CLI/exec operation may return a nonzero exitCode with HTTP 200.",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Successful HTTP status\", () => pm.expect(pm.response.code).to.be.within(200, 299));",
+                  "pm.test(\"JSON response\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"No reported operation failure\", () => { const b = pm.response.json(); if (b.exitCode !== undefined) pm.expect(b.exitCode).to.equal(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "containers_pause",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/containers/{{containerId}}/pause",
+            "description": "Pause container.\n\n- `id` (path, string, required): Resource identifier\n\nChanges Docker state. Use disposable resources when testing mutation requests. A completed CLI/exec operation may return a nonzero exitCode with HTTP 200.",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Successful HTTP status\", () => pm.expect(pm.response.code).to.be.within(200, 299));",
+                  "pm.test(\"JSON response\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"No reported operation failure\", () => { const b = pm.response.json(); if (b.exitCode !== undefined) pm.expect(b.exitCode).to.equal(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "containers_unpause",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/containers/{{containerId}}/unpause",
+            "description": "Unpause container.\n\n- `id` (path, string, required): Resource identifier\n\nChanges Docker state. Use disposable resources when testing mutation requests. A completed CLI/exec operation may return a nonzero exitCode with HTTP 200.",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Successful HTTP status\", () => pm.expect(pm.response.code).to.be.within(200, 299));",
+                  "pm.test(\"JSON response\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"No reported operation failure\", () => { const b = pm.response.json(); if (b.exitCode !== undefined) pm.expect(b.exitCode).to.equal(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "containers_remove",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/containers/{{containerId}}/remove",
+            "description": "Remove container.\n\n- `id` (path, string, required): Resource identifier\n\nChanges Docker state. Use disposable resources when testing mutation requests. A completed CLI/exec operation may return a nonzero exitCode with HTTP 200.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"force\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Successful HTTP status\", () => pm.expect(pm.response.code).to.be.within(200, 299));",
+                  "pm.test(\"JSON response\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"No reported operation failure\", () => { const b = pm.response.json(); if (b.exitCode !== undefined) pm.expect(b.exitCode).to.equal(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "containers_exec",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/containers/{{containerId}}/exec",
+            "description": "Exec container.\n\n- `id` (path, string, required): Resource identifier\n\nChanges Docker state. Use disposable resources when testing mutation requests. A completed CLI/exec operation may return a nonzero exitCode with HTTP 200.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"command\": [\n    \"/bin/sh\",\n    \"-c\",\n    \"echo hello\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Successful HTTP status\", () => pm.expect(pm.response.code).to.be.within(200, 299));",
+                  "pm.test(\"JSON response\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"No reported operation failure\", () => { const b = pm.response.json(); if (b.exitCode !== undefined) pm.expect(b.exitCode).to.equal(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "containers_copy_in",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/containers/{{containerId}}/copy-in",
+            "description": "Copy in container.\n\n- `id` (path, string, required): Resource identifier\n\nChanges Docker state. Use disposable resources when testing mutation requests. A completed CLI/exec operation may return a nonzero exitCode with HTTP 200.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"hostPath\": \"{{hostPath}}\",\n  \"path\": \"/tmp\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Successful HTTP status\", () => pm.expect(pm.response.code).to.be.within(200, 299));",
+                  "pm.test(\"JSON response\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"No reported operation failure\", () => { const b = pm.response.json(); if (b.exitCode !== undefined) pm.expect(b.exitCode).to.equal(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "containers_copy_out",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/containers/{{containerId}}/copy-out",
+            "description": "Copy out container.\n\n- `id` (path, string, required): Resource identifier\n\nChanges Docker state. Use disposable resources when testing mutation requests. A completed CLI/exec operation may return a nonzero exitCode with HTTP 200.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"hostPath\": \"{{hostPath}}\",\n  \"path\": \"/tmp\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Successful HTTP status\", () => pm.expect(pm.response.code).to.be.within(200, 299));",
+                  "pm.test(\"JSON response\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"No reported operation failure\", () => { const b = pm.response.json(); if (b.exitCode !== undefined) pm.expect(b.exitCode).to.equal(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "containers_update",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/containers/{{containerId}}/update",
+            "description": "Update container.\n\n- `id` (path, string, required): Resource identifier\n\nChanges Docker state. Use disposable resources when testing mutation requests. A completed CLI/exec operation may return a nonzero exitCode with HTTP 200.",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Successful HTTP status\", () => pm.expect(pm.response.code).to.be.within(200, 299));",
+                  "pm.test(\"JSON response\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"No reported operation failure\", () => { const b = pm.response.json(); if (b.exitCode !== undefined) pm.expect(b.exitCode).to.equal(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "containers_archive_download",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/containers/{{containerId}}/archive?path=/tmp",
+            "description": "Download a container path as a tar archive.\n\n- `id` (path, string, required): Container ID\n- `path` (query, string, required): Absolute path inside container"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Successful HTTP status\", () => pm.expect(pm.response.code).to.be.within(200, 299));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "containers_archive_upload",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-tar"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/containers/{{containerId}}/archive?path=/tmp",
+            "description": "Upload a tar archive into a container directory.\n\n- `id` (path, string, required): Container ID\n- `path` (query, string, required): Absolute path inside container\n\nChanges Docker state. Use disposable resources when testing mutation requests. A completed CLI/exec operation may return a nonzero exitCode with HTTP 200.",
+            "body": {
+              "mode": "file",
+              "file": {
+                "src": ""
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Successful HTTP status\", () => pm.expect(pm.response.code).to.be.within(200, 299));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "images",
+      "description": "Images resources and lifecycle operations. Mutations require machine-operator bearer access. Inspect required variables before running.",
+      "item": [
+        {
+          "name": "images_list",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/images",
+            "description": "List local images.\n\n"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Successful HTTP status\", () => pm.expect(pm.response.code).to.be.within(200, 299));",
+                  "pm.test(\"JSON response\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"No reported operation failure\", () => { const b = pm.response.json(); if (b.exitCode !== undefined) pm.expect(b.exitCode).to.equal(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "images_pull",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/images/pull",
+            "description": "Pull an image by name/tag or existing image ID.\n\n\n\nChanges Docker state. Use disposable resources when testing mutation requests. A completed CLI/exec operation may return a nonzero exitCode with HTTP 200.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"image\": \"{{image}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Successful HTTP status\", () => pm.expect(pm.response.code).to.be.within(200, 299));",
+                  "pm.test(\"JSON response\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"No reported operation failure\", () => { const b = pm.response.json(); if (b.exitCode !== undefined) pm.expect(b.exitCode).to.equal(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "images_prune",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/images/prune",
+            "description": "Prune dangling images.\n\n\n\nChanges Docker state. Use disposable resources when testing mutation requests. A completed CLI/exec operation may return a nonzero exitCode with HTTP 200.",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Successful HTTP status\", () => pm.expect(pm.response.code).to.be.within(200, 299));",
+                  "pm.test(\"JSON response\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"No reported operation failure\", () => { const b = pm.response.json(); if (b.exitCode !== undefined) pm.expect(b.exitCode).to.equal(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "images_remove",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/images/{{imageId}}/remove",
+            "description": "Remove image.\n\n- `id` (path, string, required): Resource identifier\n\nChanges Docker state. Use disposable resources when testing mutation requests. A completed CLI/exec operation may return a nonzero exitCode with HTTP 200.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"force\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Successful HTTP status\", () => pm.expect(pm.response.code).to.be.within(200, 299));",
+                  "pm.test(\"JSON response\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"No reported operation failure\", () => { const b = pm.response.json(); if (b.exitCode !== undefined) pm.expect(b.exitCode).to.equal(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "images_check",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/images/{{imageId}}/check",
+            "description": "Check image.\n\n- `id` (path, string, required): Resource identifier\n\nChanges Docker state. Use disposable resources when testing mutation requests. A completed CLI/exec operation may return a nonzero exitCode with HTTP 200.",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Successful HTTP status\", () => pm.expect(pm.response.code).to.be.within(200, 299));",
+                  "pm.test(\"JSON response\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"No reported operation failure\", () => { const b = pm.response.json(); if (b.exitCode !== undefined) pm.expect(b.exitCode).to.equal(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "images_tags",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/images/{{imageId}}/tags",
+            "description": "Tags image.\n\n- `id` (path, string, required): Resource identifier"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Successful HTTP status\", () => pm.expect(pm.response.code).to.be.within(200, 299));",
+                  "pm.test(\"JSON response\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"No reported operation failure\", () => { const b = pm.response.json(); if (b.exitCode !== undefined) pm.expect(b.exitCode).to.equal(0); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "stacks",
+      "description": "Stacks resources and lifecycle operations. Mutations require machine-operator bearer access. Inspect required variables before running.",
+      "item": [
+        {
+          "name": "stacks_list",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/stacks",
+            "description": "Discover Compose projects.\n\n"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Successful HTTP status\", () => pm.expect(pm.response.code).to.be.within(200, 299));",
+                  "pm.test(\"JSON response\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"No reported operation failure\", () => { const b = pm.response.json(); if (b.exitCode !== undefined) pm.expect(b.exitCode).to.equal(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "stacks_up",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/stacks/{{project}}/up",
+            "description": "Up Compose project.\n\n- `project` (path, string, required): Resource identifier\n\nChanges Docker state. Use disposable resources when testing mutation requests. A completed CLI/exec operation may return a nonzero exitCode with HTTP 200.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"service\": \"{{service}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Successful HTTP status\", () => pm.expect(pm.response.code).to.be.within(200, 299));",
+                  "pm.test(\"JSON response\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"No reported operation failure\", () => { const b = pm.response.json(); if (b.exitCode !== undefined) pm.expect(b.exitCode).to.equal(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "stacks_down",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/stacks/{{project}}/down",
+            "description": "Down Compose project.\n\n- `project` (path, string, required): Resource identifier\n\nChanges Docker state. Use disposable resources when testing mutation requests. A completed CLI/exec operation may return a nonzero exitCode with HTTP 200.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"service\": \"{{service}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Successful HTTP status\", () => pm.expect(pm.response.code).to.be.within(200, 299));",
+                  "pm.test(\"JSON response\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"No reported operation failure\", () => { const b = pm.response.json(); if (b.exitCode !== undefined) pm.expect(b.exitCode).to.equal(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "stacks_restart",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/stacks/{{project}}/restart",
+            "description": "Restart Compose project.\n\n- `project` (path, string, required): Resource identifier\n\nChanges Docker state. Use disposable resources when testing mutation requests. A completed CLI/exec operation may return a nonzero exitCode with HTTP 200.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"service\": \"{{service}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Successful HTTP status\", () => pm.expect(pm.response.code).to.be.within(200, 299));",
+                  "pm.test(\"JSON response\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"No reported operation failure\", () => { const b = pm.response.json(); if (b.exitCode !== undefined) pm.expect(b.exitCode).to.equal(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "stacks_pull",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/stacks/{{project}}/pull",
+            "description": "Pull Compose project.\n\n- `project` (path, string, required): Resource identifier\n\nChanges Docker state. Use disposable resources when testing mutation requests. A completed CLI/exec operation may return a nonzero exitCode with HTTP 200.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"service\": \"{{service}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Successful HTTP status\", () => pm.expect(pm.response.code).to.be.within(200, 299));",
+                  "pm.test(\"JSON response\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"No reported operation failure\", () => { const b = pm.response.json(); if (b.exitCode !== undefined) pm.expect(b.exitCode).to.equal(0); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "events",
+      "description": "Events resources and lifecycle operations. Mutations require machine-operator bearer access. Inspect required variables before running.",
+      "item": [
+        {
+          "name": "events_list",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/events",
+            "description": "Recent daemon events.\n\n"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Successful HTTP status\", () => pm.expect(pm.response.code).to.be.within(200, 299));",
+                  "pm.test(\"JSON response\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"No reported operation failure\", () => { const b = pm.response.json(); if (b.exitCode !== undefined) pm.expect(b.exitCode).to.equal(0); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "metrics",
+      "description": "Metrics resources and lifecycle operations. Mutations require machine-operator bearer access. Inspect required variables before running.",
+      "item": [
+        {
+          "name": "metrics_history",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/metrics/history",
+            "description": "Bounded recent container metric history.\n\n"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Successful HTTP status\", () => pm.expect(pm.response.code).to.be.within(200, 299));",
+                  "pm.test(\"JSON response\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"No reported operation failure\", () => { const b = pm.response.json(); if (b.exitCode !== undefined) pm.expect(b.exitCode).to.equal(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "metrics_list",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/metrics",
+            "description": "Latest live container metrics.\n\n"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Successful HTTP status\", () => pm.expect(pm.response.code).to.be.within(200, 299));",
+                  "pm.test(\"JSON response\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"No reported operation failure\", () => { const b = pm.response.json(); if (b.exitCode !== undefined) pm.expect(b.exitCode).to.equal(0); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "history",
+      "description": "History resources and lifecycle operations. Mutations require machine-operator bearer access. Inspect required variables before running.",
+      "item": [
+        {
+          "name": "history_list",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/history",
+            "description": "Recent API requests without credentials.\n\n"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Successful HTTP status\", () => pm.expect(pm.response.code).to.be.within(200, 299));",
+                  "pm.test(\"JSON response\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"No reported operation failure\", () => { const b = pm.response.json(); if (b.exitCode !== undefined) pm.expect(b.exitCode).to.equal(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "history_inspect",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/history/{{requestId}}",
+            "description": "Inspect a redacted request record.\n\n- `id` (path, string, required): Resource identifier"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Successful HTTP status\", () => pm.expect(pm.response.code).to.be.within(200, 299));",
+                  "pm.test(\"JSON response\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"No reported operation failure\", () => { const b = pm.response.json(); if (b.exitCode !== undefined) pm.expect(b.exitCode).to.equal(0); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

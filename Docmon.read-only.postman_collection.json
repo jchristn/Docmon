@@ -1,0 +1,255 @@
+{
+  "info": {
+    "name": "Docmon read-only smoke",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Docmon single-machine monitoring and full Docker control. Set baseUrl and bearerToken in a local environment. No real credentials are committed. The complete collection includes destructive requests; select individual requests or use the read-only smoke collection. Generated from live Watson OpenAPI metadata by scripts/export-api.py."
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{bearerToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://127.0.0.1:8080"
+    },
+    {
+      "key": "bearerToken",
+      "value": ""
+    },
+    {
+      "key": "containerId",
+      "value": ""
+    },
+    {
+      "key": "imageId",
+      "value": ""
+    },
+    {
+      "key": "image",
+      "value": "alpine:3.20"
+    },
+    {
+      "key": "project",
+      "value": ""
+    },
+    {
+      "key": "service",
+      "value": ""
+    },
+    {
+      "key": "hostPath",
+      "value": "/tmp"
+    },
+    {
+      "key": "requestId",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "containers_list",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/v1/containers",
+        "description": "List all containers.\n\n"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Successful HTTP status\", () => pm.expect(pm.response.code).to.be.within(200, 299));",
+              "pm.test(\"JSON response\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+              "pm.test(\"No reported operation failure\", () => { const b = pm.response.json(); if (b.exitCode !== undefined) pm.expect(b.exitCode).to.equal(0); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "images_list",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/v1/images",
+        "description": "List local images.\n\n"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Successful HTTP status\", () => pm.expect(pm.response.code).to.be.within(200, 299));",
+              "pm.test(\"JSON response\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+              "pm.test(\"No reported operation failure\", () => { const b = pm.response.json(); if (b.exitCode !== undefined) pm.expect(b.exitCode).to.equal(0); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "stacks_list",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/v1/stacks",
+        "description": "Discover Compose projects.\n\n"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Successful HTTP status\", () => pm.expect(pm.response.code).to.be.within(200, 299));",
+              "pm.test(\"JSON response\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+              "pm.test(\"No reported operation failure\", () => { const b = pm.response.json(); if (b.exitCode !== undefined) pm.expect(b.exitCode).to.equal(0); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "system_usage",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/v1/system/usage",
+        "description": "Docker disk and resource usage.\n\n"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Successful HTTP status\", () => pm.expect(pm.response.code).to.be.within(200, 299));",
+              "pm.test(\"JSON response\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+              "pm.test(\"No reported operation failure\", () => { const b = pm.response.json(); if (b.exitCode !== undefined) pm.expect(b.exitCode).to.equal(0); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "system_info",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/v1/system/info",
+        "description": "Server connection and version.\n\n"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Successful HTTP status\", () => pm.expect(pm.response.code).to.be.within(200, 299));",
+              "pm.test(\"JSON response\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+              "pm.test(\"No reported operation failure\", () => { const b = pm.response.json(); if (b.exitCode !== undefined) pm.expect(b.exitCode).to.equal(0); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "events_list",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/v1/events",
+        "description": "Recent daemon events.\n\n"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Successful HTTP status\", () => pm.expect(pm.response.code).to.be.within(200, 299));",
+              "pm.test(\"JSON response\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+              "pm.test(\"No reported operation failure\", () => { const b = pm.response.json(); if (b.exitCode !== undefined) pm.expect(b.exitCode).to.equal(0); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "metrics_history",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/v1/metrics/history",
+        "description": "Bounded recent container metric history.\n\n"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Successful HTTP status\", () => pm.expect(pm.response.code).to.be.within(200, 299));",
+              "pm.test(\"JSON response\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+              "pm.test(\"No reported operation failure\", () => { const b = pm.response.json(); if (b.exitCode !== undefined) pm.expect(b.exitCode).to.equal(0); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "metrics_list",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/v1/metrics",
+        "description": "Latest live container metrics.\n\n"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Successful HTTP status\", () => pm.expect(pm.response.code).to.be.within(200, 299));",
+              "pm.test(\"JSON response\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+              "pm.test(\"No reported operation failure\", () => { const b = pm.response.json(); if (b.exitCode !== undefined) pm.expect(b.exitCode).to.equal(0); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "history_list",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/v1/history",
+        "description": "Recent API requests without credentials.\n\n"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Successful HTTP status\", () => pm.expect(pm.response.code).to.be.within(200, 299));",
+              "pm.test(\"JSON response\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+              "pm.test(\"No reported operation failure\", () => { const b = pm.response.json(); if (b.exitCode !== undefined) pm.expect(b.exitCode).to.equal(0); });"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

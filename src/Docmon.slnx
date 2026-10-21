@@ -7,4 +7,5 @@
     <Project Path="Test.Shared/Test.Shared.csproj" />
     <Project Path="Test.Xunit/Test.Xunit.csproj" />
   </Folder>
+  <Project Path="Docmon.Server/Docmon.Server.csproj" />
 </Solution>

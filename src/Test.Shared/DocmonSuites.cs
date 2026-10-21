@@ -19,6 +19,8 @@ namespace Test.Shared
             {
                 return new List<TestSuiteDescriptor>
                 {
+                    ServerSuites.ApiSuite(),
+                    ServerLiveSuites.ApiSuite(),
                     HelperSuites.ByteFormatterSuite(),
                     HelperSuites.CpuCalculatorSuite(),
                     HelperSuites.ImageReferenceParserSuite(),

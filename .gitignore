@@ -51,3 +51,21 @@ crash-logs/
 
 # User configuration written at runtime
 docmon.local.json
+
+# Dashboard and deployment artifacts
+**/node_modules/
+**/dist/
+**/.env
+**/.env.*
+!**/.env.example
+**/test-results/
+**/playwright-report/
+
+# Durable local request history
+data/
+
+# Generated from repository assets during dashboard build
+dashboard/public/assets/
+
+# Default Docker deployment configuration.
+!docker/.env

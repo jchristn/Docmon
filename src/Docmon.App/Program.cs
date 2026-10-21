@@ -5,7 +5,6 @@ namespace Docmon.App
     using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
-    using Docmon.Core.Registries;
     using Docmon.Core.Services;
     using Docmon.Core.Services.Implementations;
     using TUIKit.Hosting;
@@ -42,45 +41,43 @@ namespace Docmon.App
 
             bool showSplash = !HasFlag(args, "--no-splash");
 
-            DockerClientProvider provider;
+            int serverFlag = Array.IndexOf(args, "--server");
+            if (serverFlag >= 0)
+            {
+                if (serverFlag + 1 >= args.Length || !Uri.TryCreate(args[serverFlag + 1], UriKind.Absolute, out Uri? endpoint))
+                {
+                    Console.Error.WriteLine("--server requires an HTTP(S) Docmon server URL."); return 1;
+                }
+                string token = Environment.GetEnvironmentVariable("DOCMON_BEARER_TOKEN") ?? string.Empty;
+                try
+                {
+                    using RemoteDocmonClient remote = new RemoteDocmonClient(endpoint, token);
+                    await remote.VerifyAsync(CancellationToken.None).ConfigureAwait(false);
+                    DocmonController remoteController = new DocmonController(remote, remote, remote, remote, remote,
+                        new RemoteShellLauncher(endpoint, token), remote, remote, endpoint.ToString(), Version(), showSplash);
+                    return await RunAsync(remoteController).ConfigureAwait(false);
+                }
+                catch (Exception ex) when (ex is ArgumentException || ex is System.Net.Http.HttpRequestException)
+                {
+                    Console.Error.WriteLine("Could not connect to remote Docmon: " + ex.Message); return 1;
+                }
+            }
+            // Local mode is deliberately pinned to the local socket. It never needs a bearer token.
+            string localEndpoint = OperatingSystem.IsWindows() ? "npipe://./pipe/docker_engine" : "unix:///var/run/docker.sock";
+            using DocmonRuntime runtime = new DocmonRuntime(localEndpoint);
             try
             {
-                provider = new DockerClientProvider();
-                await provider.VerifyConnectionAsync(CancellationToken.None).ConfigureAwait(false);
+                await runtime.Provider.VerifyConnectionAsync(CancellationToken.None).ConfigureAwait(false);
             }
-            catch (Exception ex)
+            catch (DockerConnectionException ex)
             {
                 Console.Error.WriteLine("Docmon could not connect to Docker: " + ex.Message);
-                Console.Error.WriteLine("Endpoint tried: " + DockerClientProvider.ResolveEndpoint());
-                Console.Error.WriteLine("Make sure Docker is running and that you have permission to access it.");
                 return 1;
             }
-
-            RegistryProviderFactory factory = new RegistryProviderFactory();
-            try
-            {
-                DocmonController controller = BuildController(provider, factory, showSplash);
-                return await RunAsync(controller).ConfigureAwait(false);
-            }
-            finally
-            {
-                factory.Dispose();
-                provider.Dispose();
-            }
-        }
-
-        private static DocmonController BuildController(DockerClientProvider provider, RegistryProviderFactory factory, bool showSplash)
-        {
-            DockerService docker = new DockerService(provider.Client);
-            StatsStreamer stats = new StatsStreamer(provider.Client);
-            EventsMonitor events = new EventsMonitor(provider.Client);
-            ExecService exec = new ExecService(provider.Client);
-            TransferService transfer = new TransferService(provider.Client);
-            ShellLauncher shell = new ShellLauncher();
-            ComposeService compose = new ComposeService(provider.Client);
-            RegistryService registry = new RegistryService(factory);
-
-            return new DocmonController(docker, stats, events, exec, transfer, shell, compose, registry, provider.Endpoint, Version(), showSplash);
+            DocmonController controller = new DocmonController(runtime.Docker, runtime.Stats, runtime.Events,
+                runtime.Exec, runtime.Transfer, new ShellLauncher(), runtime.Compose, runtime.Registry,
+                runtime.Provider.Endpoint, Version(), showSplash);
+            return await RunAsync(controller).ConfigureAwait(false);
         }
 
         private static async Task<int> RunAsync(DocmonController controller)
@@ -135,6 +132,7 @@ namespace Docmon.App
         {
             Console.WriteLine("docmon " + Version() + " - a terminal UI for managing and monitoring your Docker stack.");
             Console.WriteLine();
+            Console.WriteLine("Remote: docmon --server https://your-host (DOCMON_BEARER_TOKEN required)");
             Console.WriteLine("Usage:");
             Console.WriteLine("  docmon               Connect to the local Docker daemon and open the TUI.");
             Console.WriteLine("  docmon --no-splash   Skip the startup splash screen.");

@@ -6,6 +6,20 @@ All notable changes to Docmon are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+- Watson 7 REST server with bearer authentication, typed route metadata, OpenAPI and Swagger.
+- Colocated Voltaic MCP gateway with the same Docker operations and authentication.
+- React operator dashboard with token login, resource control, live metrics, logs,
+  interactive shells, transfers, request history, API explorer, themes and locale support.
+- Shared runtime/application operations and opt-in authenticated remote TUI access.
+- Docker Compose packaging with named server/dashboard images and cross-platform build/push helpers for amd64 and arm64.
+- REST/MCP documentation, OpenAPI snapshot, Postman collections, backend and browser tests.
+
+### Changed
+- Local TUI composition now reuses the core runtime and pins its default connection to
+  the local socket/named pipe. Remote access requires the explicit `--server` option.
+- Docker image-pull progress reports synchronously so final progress messages are retained.
+
 ## [0.1.1] - 2026-10-03
 
 ### Changed

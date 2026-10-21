@@ -28,7 +28,7 @@
     <Company>Joel Christner</Company>
     <Product>Docmon</Product>
     <Copyright>Copyright (c) 2026 Joel Christner</Copyright>
-    <Description>Docmon core library: Docker Engine services (list, inspect, lifecycle, streaming stats, events, exec, archive transfer, compose discovery), an extensible registry-provider abstraction with a Docker Hub provider, and the shared models and helpers that power the Docmon TUI.</Description>
+    <Description>Docmon core library: Docker Engine services (list, inspect, lifecycle, streaming stats, events, exec, archive transfer, compose discovery), an extensible registry-provider abstraction with a Docker Hub provider, and the shared runtime, application operations, authenticated remote adapter, and models that power the Docmon TUI, REST server, and MCP tools.</Description>
     <RepositoryUrl>https://github.com/jchristn/Docmon</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
   </PropertyGroup>

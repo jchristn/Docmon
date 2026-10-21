@@ -1,0 +1,436 @@
+[
+  {
+    "name": "containers_list",
+    "method": "GET",
+    "path": "/api/v1/containers",
+    "summary": "List all containers",
+    "required": [],
+    "properties": {}
+  },
+  {
+    "name": "images_list",
+    "method": "GET",
+    "path": "/api/v1/images",
+    "summary": "List local images",
+    "required": [],
+    "properties": {}
+  },
+  {
+    "name": "images_pull",
+    "method": "POST",
+    "path": "/api/v1/images/pull",
+    "summary": "Pull an image by name/tag or existing image ID",
+    "required": [],
+    "properties": {
+      "image": {
+        "type": "string"
+      },
+      "id": {
+        "type": "string"
+      }
+    }
+  },
+  {
+    "name": "images_prune",
+    "method": "POST",
+    "path": "/api/v1/images/prune",
+    "summary": "Prune dangling images",
+    "required": [],
+    "properties": {}
+  },
+  {
+    "name": "stacks_list",
+    "method": "GET",
+    "path": "/api/v1/stacks",
+    "summary": "Discover Compose projects",
+    "required": [],
+    "properties": {}
+  },
+  {
+    "name": "system_usage",
+    "method": "GET",
+    "path": "/api/v1/system/usage",
+    "summary": "Docker disk and resource usage",
+    "required": [],
+    "properties": {}
+  },
+  {
+    "name": "system_info",
+    "method": "GET",
+    "path": "/api/v1/system/info",
+    "summary": "Server connection and version",
+    "required": [],
+    "properties": {}
+  },
+  {
+    "name": "events_list",
+    "method": "GET",
+    "path": "/api/v1/events",
+    "summary": "Recent daemon events",
+    "required": [],
+    "properties": {}
+  },
+  {
+    "name": "metrics_history",
+    "method": "GET",
+    "path": "/api/v1/metrics/history",
+    "summary": "Bounded recent container metric history",
+    "required": [],
+    "properties": {}
+  },
+  {
+    "name": "metrics_list",
+    "method": "GET",
+    "path": "/api/v1/metrics",
+    "summary": "Latest live container metrics",
+    "required": [],
+    "properties": {}
+  },
+  {
+    "name": "history_list",
+    "method": "GET",
+    "path": "/api/v1/history",
+    "summary": "Recent API requests without credentials",
+    "required": [],
+    "properties": {}
+  },
+  {
+    "name": "containers_inspect",
+    "method": "GET",
+    "path": "/api/v1/containers/{id}",
+    "summary": "Inspect a container",
+    "required": [
+      "id"
+    ],
+    "properties": {
+      "id": {
+        "type": "string"
+      }
+    }
+  },
+  {
+    "name": "containers_logs",
+    "method": "GET",
+    "path": "/api/v1/containers/{id}/logs",
+    "summary": "Read container logs",
+    "required": [
+      "id"
+    ],
+    "properties": {
+      "id": {
+        "type": "string"
+      },
+      "tail": {
+        "type": "integer",
+        "format": "int32"
+      }
+    }
+  },
+  {
+    "name": "containers_start",
+    "method": "POST",
+    "path": "/api/v1/containers/{id}/start",
+    "summary": "Start container",
+    "required": [
+      "id"
+    ],
+    "properties": {
+      "id": {
+        "type": "string"
+      }
+    }
+  },
+  {
+    "name": "containers_stop",
+    "method": "POST",
+    "path": "/api/v1/containers/{id}/stop",
+    "summary": "Stop container",
+    "required": [
+      "id"
+    ],
+    "properties": {
+      "id": {
+        "type": "string"
+      }
+    }
+  },
+  {
+    "name": "containers_restart",
+    "method": "POST",
+    "path": "/api/v1/containers/{id}/restart",
+    "summary": "Restart container",
+    "required": [
+      "id"
+    ],
+    "properties": {
+      "id": {
+        "type": "string"
+      }
+    }
+  },
+  {
+    "name": "containers_kill",
+    "method": "POST",
+    "path": "/api/v1/containers/{id}/kill",
+    "summary": "Kill container",
+    "required": [
+      "id"
+    ],
+    "properties": {
+      "id": {
+        "type": "string"
+      }
+    }
+  },
+  {
+    "name": "containers_pause",
+    "method": "POST",
+    "path": "/api/v1/containers/{id}/pause",
+    "summary": "Pause container",
+    "required": [
+      "id"
+    ],
+    "properties": {
+      "id": {
+        "type": "string"
+      }
+    }
+  },
+  {
+    "name": "containers_unpause",
+    "method": "POST",
+    "path": "/api/v1/containers/{id}/unpause",
+    "summary": "Unpause container",
+    "required": [
+      "id"
+    ],
+    "properties": {
+      "id": {
+        "type": "string"
+      }
+    }
+  },
+  {
+    "name": "containers_remove",
+    "method": "POST",
+    "path": "/api/v1/containers/{id}/remove",
+    "summary": "Remove container",
+    "required": [
+      "id"
+    ],
+    "properties": {
+      "id": {
+        "type": "string"
+      },
+      "force": {
+        "type": "boolean"
+      }
+    }
+  },
+  {
+    "name": "containers_exec",
+    "method": "POST",
+    "path": "/api/v1/containers/{id}/exec",
+    "summary": "Exec container",
+    "required": [
+      "id",
+      "command"
+    ],
+    "properties": {
+      "id": {
+        "type": "string"
+      },
+      "command": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  {
+    "name": "containers_copy_in",
+    "method": "POST",
+    "path": "/api/v1/containers/{id}/copy-in",
+    "summary": "Copy in container",
+    "required": [
+      "id",
+      "hostPath",
+      "path"
+    ],
+    "properties": {
+      "id": {
+        "type": "string"
+      },
+      "hostPath": {
+        "type": "string"
+      },
+      "path": {
+        "type": "string"
+      }
+    }
+  },
+  {
+    "name": "containers_copy_out",
+    "method": "POST",
+    "path": "/api/v1/containers/{id}/copy-out",
+    "summary": "Copy out container",
+    "required": [
+      "id",
+      "hostPath",
+      "path"
+    ],
+    "properties": {
+      "id": {
+        "type": "string"
+      },
+      "hostPath": {
+        "type": "string"
+      },
+      "path": {
+        "type": "string"
+      }
+    }
+  },
+  {
+    "name": "containers_update",
+    "method": "POST",
+    "path": "/api/v1/containers/{id}/update",
+    "summary": "Update container",
+    "required": [
+      "id"
+    ],
+    "properties": {
+      "id": {
+        "type": "string"
+      }
+    }
+  },
+  {
+    "name": "images_remove",
+    "method": "POST",
+    "path": "/api/v1/images/{id}/remove",
+    "summary": "Remove image",
+    "required": [
+      "id"
+    ],
+    "properties": {
+      "id": {
+        "type": "string"
+      },
+      "force": {
+        "type": "boolean"
+      }
+    }
+  },
+  {
+    "name": "images_check",
+    "method": "POST",
+    "path": "/api/v1/images/{id}/check",
+    "summary": "Check image",
+    "required": [
+      "id"
+    ],
+    "properties": {
+      "id": {
+        "type": "string"
+      }
+    }
+  },
+  {
+    "name": "images_tags",
+    "method": "GET",
+    "path": "/api/v1/images/{id}/tags",
+    "summary": "Tags image",
+    "required": [
+      "id"
+    ],
+    "properties": {
+      "id": {
+        "type": "string"
+      }
+    }
+  },
+  {
+    "name": "stacks_up",
+    "method": "POST",
+    "path": "/api/v1/stacks/{project}/up",
+    "summary": "Up Compose project",
+    "required": [
+      "project"
+    ],
+    "properties": {
+      "project": {
+        "type": "string"
+      },
+      "service": {
+        "type": "string"
+      }
+    }
+  },
+  {
+    "name": "stacks_down",
+    "method": "POST",
+    "path": "/api/v1/stacks/{project}/down",
+    "summary": "Down Compose project",
+    "required": [
+      "project"
+    ],
+    "properties": {
+      "project": {
+        "type": "string"
+      },
+      "service": {
+        "type": "string"
+      }
+    }
+  },
+  {
+    "name": "stacks_restart",
+    "method": "POST",
+    "path": "/api/v1/stacks/{project}/restart",
+    "summary": "Restart Compose project",
+    "required": [
+      "project"
+    ],
+    "properties": {
+      "project": {
+        "type": "string"
+      },
+      "service": {
+        "type": "string"
+      }
+    }
+  },
+  {
+    "name": "stacks_pull",
+    "method": "POST",
+    "path": "/api/v1/stacks/{project}/pull",
+    "summary": "Pull Compose project",
+    "required": [
+      "project"
+    ],
+    "properties": {
+      "project": {
+        "type": "string"
+      },
+      "service": {
+        "type": "string"
+      }
+    }
+  },
+  {
+    "name": "history_inspect",
+    "method": "GET",
+    "path": "/api/v1/history/{id}",
+    "summary": "Inspect a redacted request record",
+    "required": [
+      "id"
+    ],
+    "properties": {
+      "id": {
+        "type": "string"
+      }
+    }
+  }
+]

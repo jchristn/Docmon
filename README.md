@@ -4,11 +4,12 @@
 
 # Docmon
 
-**A terminal UI for managing and monitoring your Docker stack.**
+**A terminal UI, web dashboard, REST API, and MCP server for your Docker machine.**
 
-Docmon is a keyboard-driven, multi-pane TUI that puts your containers, their
-live metrics, image freshness, and day-to-day operations one screen away — on
-Windows, Linux, and macOS.
+Docmon puts containers, live metrics, image freshness, and day-to-day operations
+one screen away on Windows, Linux, and macOS. Use the local TUI without
+authentication, or the authenticated React dashboard, REST API, and MCP tools
+for remote operators and agents.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE.md)
 
@@ -36,6 +37,71 @@ single console for the things you actually do all day:
 - **Get inside a container.** Run a one-shot command with output captured
   in-pane, transfer files in and out, or open a full interactive shell.
 
+## Web dashboard and agent access
+
+```bash
+# docker/.env is included; default bearer token: docmonadmin
+docker compose -f docker/compose.yaml up -d
+```
+
+Compose pulls `jchristn77/docmon-server:v0.1.0` and `jchristn77/docmon-dashboard:v0.1.0`. To build and publish both architectures, run `./build-all.sh v0.1.0` (or `build-all.bat v0.1.0`); see [image build instructions](docker/README.md#build-and-publish-images).
+
+Open **http://127.0.0.1:8088** and enter the configured token. The dashboard
+covers containers, images, Compose stacks, live metrics/history, Docker events,
+request history, logs, commands, interactive shells, host and browser file
+transfers, registry tags, and image update checks. It includes light/dark themes,
+locale persistence, sortable/filterable tables, and a live OpenAPI explorer.
+
+- REST: `http://127.0.0.1:8080/api/v1` or the dashboard origin `/api/v1`.
+- Swagger: `/swagger`; OpenAPI metadata: `/openapi.json`.
+- MCP: `/mcp` on the same public API/dashboard origin, powered by Voltaic.
+- Every control/read API and MCP request requires `Authorization: Bearer <token>`.
+  Health and OpenAPI/Swagger documentation are anonymous.
+- The token grants full control of the Docker machine. Use HTTPS for remote access.
+
+See [docker/README.md](docker/README.md) for networking, ports, token rotation,
+Compose file mounts, and persistence. The stack runs only the backend and dashboard.
+[REST_API.md](REST_API.md), [MCP_API.md](MCP_API.md), and the
+[root Postman collection](Docmon.postman_collection.json) document the full agent surface.
+
+### Run from source
+
+Requires the .NET 10 SDK and Node.js 22 or newer for the dashboard:
+
+```bash
+export DOCMON_BEARER_TOKEN="$(openssl rand -hex 32)"
+dotnet run --project src/Docmon.Server -f net10.0
+# In another terminal:
+cd dashboard
+npm ci
+npm run dev
+```
+
+The server binds `127.0.0.1:8080` by default and the dashboard dev server uses
+`http://127.0.0.1:5173`. Configure `DOCMON_HOST`, `DOCMON_PORT`,
+`DOCMON_MCP_PORT`, `DOCKER_HOST`, `DOCMON_DATA_DIRECTORY`, and optionally
+`DOCMON_ALLOWED_ORIGIN` for direct cross-origin clients. Docker and MCP connections
+are created once and shared. Docker may recover after a daemon restart without
+restarting Docmon. JSON REST operations have a 30-minute timeout.
+
+### Local and remote TUI
+
+Running `docmon` uses the local Docker socket or Windows named pipe, with no
+bearer token and no dependency on the web server. It deliberately ignores
+`DOCKER_HOST` in local TUI mode. Opt in to remote access explicitly:
+
+```bash
+export DOCMON_BEARER_TOKEN="your-remote-machine-token"
+docmon --server https://your-machine
+```
+
+Remote mode implements the same service interfaces through the authenticated
+API, including archive transfers and interactive WebSocket shells. Transfers use
+the TUI client's filesystem. Remote image pulls and exec report bounded output
+when the operation completes; monitoring polls the API every two seconds.
+Terminal resize negotiation is not implemented yet. Compose operations run on the
+server and resolve the server's discovered compose files.
+
 ## Screens
 
 Docmon is organized into sections you move between with `Tab` / `Shift+Tab` or
@@ -56,7 +122,7 @@ the number keys `1`–`6`:
   packaged tool). See [Installing the .NET SDK](#installing-the-net-sdk) below.
 - A reachable **Docker daemon** on the same host:
   - Windows: the `npipe://./pipe/docker_engine` named pipe (Docker Desktop).
-  - Linux/macOS: the `unix:///var/run/docker.sock` socket. Set `DOCKER_HOST` to
+  - Linux/macOS: the `unix:///var/run/docker.sock` socket. The backend honors `DOCKER_HOST` to
     override.
 - The `docker` CLI on `PATH` — used only for the interactive shell and TTY exec.
 
@@ -160,8 +226,13 @@ an `exec -it` session — shells out to the `docker` CLI, because a TUI pane can
 host a pseudo-terminal. For those, Docmon suspends its own UI, hands the terminal
 to the child process, and restores the dashboard when you exit.
 
-The code is split into a dependency-light `Docmon.Core` library (models,
-services, the registry abstraction) and a `Docmon.App` executable that hosts the
+Web and remote-TUI terminals use an authenticated Watson WebSocket bridge to a
+Docker exec connection with HTTP Upgrade.
+
+The code is split into a `Docmon.Core` library (models, shared runtime, Docker
+services, remote HTTP adapter, and registry abstraction), a `Docmon.Server`
+Watson 7 API/Voltaic MCP host, a React `dashboard/`, and a `Docmon.App` executable
+that hosts the
 [TUIKit](https://www.nuget.org/packages/TUIKit/) interface. Update checks go
 through an `IRegistryProvider` interface; Docker Hub ships first, and other
 registries slot in behind the same interface.

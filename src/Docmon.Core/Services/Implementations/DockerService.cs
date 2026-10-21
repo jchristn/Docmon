@@ -173,7 +173,7 @@ namespace Docmon.Core.Services.Implementations
             Channel<string> channel = Channel.CreateUnbounded<string>();
             ImagesCreateParameters parameters = BuildCreateParameters(image);
 
-            Progress<JSONMessage> progress = new Progress<JSONMessage>(message =>
+            InlineProgress<JSONMessage> progress = new InlineProgress<JSONMessage>(message =>
             {
                 string? line = FormatPullMessage(message);
                 if (line != null)
