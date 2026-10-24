@@ -198,6 +198,9 @@ for capture behavior and limits.
   gateway, with tools for container lifecycle, inspection, logs, exec, copies,
   image operations, Compose operations, metrics, events, system information,
   and request history. See the [MCP tool reference](MCP_API.md).
+- Install/remove scripts that connect Claude Code, Codex, Cursor, Gemini, and Mux
+  to the MCP server on Windows, macOS, and Linux. See
+  [Connecting AI agents](#connecting-ai-agents).
 - Shared `EnumerationQuery`/`EnumerationResult<T>` collection contracts with
   search, scalar-field filters, sorting, container/time filters, result counts,
   and continuation-token pagination. The dashboard and remote TUI follow pages
@@ -261,8 +264,7 @@ locale persistence, sortable/filterable tables, and a live OpenAPI explorer.
 - REST: `http://127.0.0.1:8080/api/v1` or the dashboard origin `/api/v1`.
 - Swagger: `/swagger`; OpenAPI metadata: `/openapi.json`.
 - MCP: `/mcp` on the same public API/dashboard origin, powered by Voltaic.
-  Connect Claude Code, Codex, Cursor, Gemini, or Mux with the scripts in
-  [scripts/](scripts/README.md).
+  Connect agents with the [install scripts](#connecting-ai-agents).
 - Every control/read API and MCP request requires `Authorization: Bearer <token>`.
   Health and OpenAPI/Swagger documentation are anonymous.
 - The token grants full control of the Docker machine. Use HTTPS for remote access.
@@ -271,6 +273,31 @@ See [docker/README.md](docker/README.md) for networking, ports, token rotation,
 Compose file mounts, and persistence. The stack runs only the backend and dashboard.
 [REST_API.md](REST_API.md), [MCP_API.md](MCP_API.md), and the
 [root Postman collection](Docmon.postman_collection.json) document the full agent surface.
+
+### Connecting AI agents
+
+[scripts/](scripts/README.md) has one-shot `install-<agent>` and `remove-<agent>`
+scripts for Claude Code, Codex, Cursor, Gemini, and Mux, in `windows/` (`.bat`),
+`macos/`, and `linux/` (`.sh`). Each one registers a `docmon` MCP server with the
+bearer token, replaces an existing `docmon` entry, and leaves other servers alone.
+
+```bash
+# macOS/Linux; defaults are http://127.0.0.1:8080/mcp and docmonadmin
+DOCMON_MCP_URL=http://docker-host:8080/mcp sh scripts/macos/install-claude.sh "$DOCMON_BEARER_TOKEN"
+DOCMON_MCP_URL=http://docker-host:8080/mcp sh scripts/macos/install-codex.sh "$DOCMON_BEARER_TOKEN"
+DOCMON_MCP_BASE_URL=http://docker-host:8080 sh scripts/macos/install-mux.sh "$DOCMON_BEARER_TOKEN"
+```
+
+```bat
+REM Windows
+set DOCMON_MCP_URL=http://docker-host:8080/mcp
+scripts\windows\install-claude.bat %DOCMON_BEARER_TOKEN%
+```
+
+Point agents at the public API port (`DOCMON_PORT`) or the dashboard origin, never
+`DOCMON_MCP_PORT`, which listens only on loopback inside the server. Restart the
+agent after installing. See [scripts/README.md](scripts/README.md) for each agent's
+config file and the available overrides.
 
 ### Run from source
 
