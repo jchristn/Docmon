@@ -261,6 +261,8 @@ locale persistence, sortable/filterable tables, and a live OpenAPI explorer.
 - REST: `http://127.0.0.1:8080/api/v1` or the dashboard origin `/api/v1`.
 - Swagger: `/swagger`; OpenAPI metadata: `/openapi.json`.
 - MCP: `/mcp` on the same public API/dashboard origin, powered by Voltaic.
+  Connect Claude Code, Codex, Cursor, Gemini, or Mux with the scripts in
+  [scripts/](scripts/README.md).
 - Every control/read API and MCP request requires `Authorization: Bearer <token>`.
   Health and OpenAPI/Swagger documentation are anonymous.
 - The token grants full control of the Docker machine. Use HTTPS for remote access.
