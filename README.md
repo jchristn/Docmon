@@ -276,10 +276,11 @@ Compose file mounts, and persistence. The stack runs only the backend and dashbo
 
 ### Connecting AI agents
 
-[scripts/](scripts/README.md) has one-shot `install-<agent>` and `remove-<agent>`
-scripts for Claude Code, Codex, Cursor, Gemini, and Mux, in `windows/` (`.bat`),
-`macos/`, and `linux/` (`.sh`). Each one registers a `docmon` MCP server with the
-bearer token, replaces an existing `docmon` entry, and leaves other servers alone.
+[scripts/](scripts/README.md) has one-shot `install-<agent>`, `remove-<agent>` and
+`reinstall-<agent>` scripts for Claude Code, Codex, Cursor, Gemini, and Mux, in
+`windows/` (`.bat`), `macos/`, `linux/`, `wsl/` (WSL 1) and `wsl2/` (WSL 2) (`.sh`).
+Each install registers a `docmon` MCP server with the bearer token, replaces an
+existing `docmon` entry, and leaves other servers alone.
 
 ```bash
 # macOS/Linux; defaults are http://127.0.0.1:8080/mcp and docmonadmin
